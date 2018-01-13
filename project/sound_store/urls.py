@@ -1,12 +1,17 @@
 from django.urls import path
 from . import views
 
-
 urlpatterns = [
-    path('', views.index, name="index"),
-    path("test/", views.test)
-    #path("sound/all/", views.get_all_sounds),
-    #path("sound/<int:user_id>/", views.get_sound),
-    #path("sound/create/", views.create_new_sound),
-    #path("sound/save/", views.get_file),
+    path('', views.index, name='index'),
+    path('user/all/', views.show_all_users),
+    path('user/sounds/<int:user_id>/', views.show_all_user_file),
+    path('user/create/', views.create_new_user),
+    path('user/sound/save/<int:user_id>/', views.save_user_file),
+
+    path('test/', views.test),
 ]
+
+
+
+
+

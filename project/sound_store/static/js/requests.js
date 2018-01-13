@@ -1,7 +1,7 @@
 $(document).ready(function(){
 
 	var context = new (window.AudioContext || window.webkitAudioContext)();
-	var audioSrc = 'static/sound_storehouse/audio/Hit_Hurt10.wav'
+	var audioSrc = 'static/audio/Hit_Hurt10.wav'
 
 	fetch(audioSrc, function(request) {
 		var audioData = request.response;
@@ -11,7 +11,7 @@ $(document).ready(function(){
 		formdata.append('useradio', blob, 'test.wav');
 
 		$.ajax({
-			url: "/sounds/file/",
+			url: "user/sound/save/2/",
 			type: "POST",
 			data: formdata,
 			mimeTypes: "multipart/form-data",
@@ -29,7 +29,7 @@ $(document).ready(function(){
 
 	$.ajax({
 		method: "GET",
-		url: "/sounds/all/",
+		url: "user/all/",
 		dataType: "json",
 		headers: {
 			'Content-Type':'application/json'
@@ -45,7 +45,7 @@ $(document).ready(function(){
 
 	$.ajax({
 		method: "GET",
-		url: "/sounds/2/",
+		url: "user/sounds/1/",
 		dataType: "json",
 		headers: {
 			'Content-Type':'application/json'
@@ -61,13 +61,16 @@ $(document).ready(function(){
 
 	$.ajax({
 		method: "POST",
-		url: "/sounds/create/",
+		url: "user/create/",
 		dataType: "json",
 		headers: {
 			'Content-Type':'application/json'
 		},
 		cache: false,
-		data: JSON.stringify({"path": "test222"}),
+		data: JSON.stringify({"name": "new",
+		                      "email": "email",
+		                      "gender": "male",
+		                      "birthday": "1992-02-28"}),
 		success: function(data){
 			console.log(data);
 		},

@@ -1,4 +1,5 @@
 import os
+from .utils.helper import is_key
 from .utils.Singleton import Singleton
 from .utils.FileManager import FileManager
 
@@ -6,17 +7,22 @@ from .utils.FileManager import FileManager
 class SoundStoreManager(metaclass=Singleton):
     def __init__(self, user_id, storehouse_path):
         """
-        :param user_id: str|int - user id which correspond name of his folder with sounds
+        :param user_id: int - user id which correspond name of his folder with sounds
         :param storehouse_path: str - general folder with users folders
         """
-        self.manager = FileManager()
-        self.__user_id = user_id
-        self.user_folder = None
-        if self.manager.is_valid_folder_path(storehouse_path):
-            self.storehouse_path = storehouse_path
-            self.update_user_path()
+        assert isinstance(user_id, int)
+        assert isinstance(storehouse_path, str)
+        if is_key(user_id):
+            self.manager = FileManager()
+            self.__user_id = str(user_id)
+            self.user_folder = None
+            if self.manager.is_valid_folder_path(storehouse_path):
+                self.storehouse_path = storehouse_path
+                self.update_user_path()
+            else:
+                raise ValueError("Invalid storehouse path")
         else:
-            raise ValueError("Invalid storehouse path")
+            raise ValueError("Invalid user id")
 
     def get_user_id(self):
         return self.__user_id
@@ -28,7 +34,7 @@ class SoundStoreManager(metaclass=Singleton):
     def update_user_path(self):
         self.user_folder = os.path.join(self.storehouse_path, self.__user_id)
 
-    def handle_uploaded_file(self, file_name, file_object):
+    def save_uploaded_file(self, file_name, file_object):
         path = os.path.join(self.user_folder, file_name)
         self.manager.create_file(path, file_object)
 

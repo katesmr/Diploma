@@ -61,9 +61,12 @@ class FileManager:
         :param file: - object
         :return: void
         """
-        with open(path, "wb+") as file_object:
-            for chunk in file.chunks():
-                file_object.write(chunk)
+        try:
+            with open(path, "wb+") as file_object:
+                for chunk in file.chunks():
+                    file_object.write(chunk)
+        except FileNotFoundError as error:
+            logging.error(error)
 
     @staticmethod
     def create_folder(path):

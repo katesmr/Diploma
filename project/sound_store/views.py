@@ -1,11 +1,24 @@
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.utils.six import BytesIO
+from rest_framework.parsers import JSONParser
+from django.views.decorators.csrf import csrf_exempt
 from json import dumps
 from .models import Users
 from .src.SoundStoreManager import SoundStoreManager
 
 
 STORE_PATH = "/home/kate/Public"
+
+
+def get_request_data(request):
+    """
+    :param request: HttpRequest
+    :return: dict
+    """
+    stream = BytesIO(request.body)
+    data = JSONParser().parse(stream)
+    return data
 
 
 def index(request):
@@ -27,32 +40,42 @@ def test(request):
 
 def show_all_users(request):
     users_list = Users.objects.all()
+    print(users_list)
     return HttpResponse(dumps(users_list), content_type='application/json')
 
 
+def show_all_user_file(request, user_id):
+    manager = SoundStoreManager(user_id, STORE_PATH)
+    result = manager.get_user_folder_content()
+    return HttpResponse(dumps(result), content_type='application/json')
+
+
+@csrf_exempt
 def create_new_user(request):
-    user = Users(name="new", email="email", gender="male", birthday="1992-02-28")
+    kwargs = get_request_data(request)
+    user = Users(**kwargs)
     user.save()
-    manager = SoundStoreManager(STORE_PATH, user.pk)
+    manager = SoundStoreManager(user.pk, STORE_PATH)
     manager.create_user_folder()
     return HttpResponse("user created")
 
 
+@csrf_exempt
 def delete_user(request, user_id):
-    manager = SoundStoreManager(STORE_PATH, user_id)
+    manager = SoundStoreManager(user_id, STORE_PATH)
     manager.delete_user()
     return HttpResponse("user deleted")
 
 
-def save_user_file(request):
+@csrf_exempt
+def save_user_file(request, user_id):
+    print(user_id)
+    manager = SoundStoreManager(user_id, STORE_PATH)
+    manager.save_uploaded_file("test.wav", request.FILES['useradio'])
+    return HttpResponse("user file saved")
+
+
+@csrf_exempt
+def delete_user_file(request, user_id):
+    # file name get from request
     pass
-
-
-def delete_user_file(request, user_id, file_name):
-    pass
-
-
-def show_all_user_file(request, user_id):
-    manager = SoundStoreManager(STORE_PATH, user_id)
-    result = manager.get_user_folder_content()
-    return HttpResponse(dumps(result), content_type='application/json')
