@@ -31,14 +31,14 @@ class SoundStoreManager(metaclass=Singleton):
         assert isinstance(user_id, int)
         if is_key(user_id):
             self.__user_id = str(user_id)
-            self.update_user_path()
+            self.update_user_path()  # set new path to new user folder
         else:
             raise ValueError("Invalid user id")
 
     def update_user_path(self):
         self.user_folder = os.path.join(self.storehouse_path, self.__user_id)
 
-    def save_uploaded_file(self, file_name, file_object):
+    def save_file(self, file_name, file_object):
         path = os.path.join(self.user_folder, file_name)
         self.manager.create_file(path, file_object)
 
@@ -50,3 +50,9 @@ class SoundStoreManager(metaclass=Singleton):
 
     def delete_user(self):
         self.manager.delete_folder(self.user_folder)
+
+    def delete_user_file(self, file_name):
+        path = os.path.join(self.user_folder, file_name)
+        self.manager.delete_file(path)
+
+

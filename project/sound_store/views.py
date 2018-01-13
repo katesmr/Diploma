@@ -12,13 +12,22 @@ from .serializers import UserSerializer
 STORE_PATH = "/home/kate/Public"
 
 
-def get_request_data(request):
+def get_request_json(request):
     """
     :param request: HttpRequest
     :return: dict
     """
     stream = BytesIO(request.body)
     data = JSONParser().parse(stream)
+    return data
+
+
+def get_request_text(request):
+    """
+    :param request: HttpRequest
+    :return: str
+    """
+    data = request.body.decode("utf-8")  # get text data
     return data
 
 
@@ -45,7 +54,7 @@ def show_all_users(request):
     return HttpResponse(dumps(serializer.data), content_type='application/json')
 
 
-def show_all_user_file(request, user_id):
+def show_user_files(request, user_id):
     manager = SoundStoreManager(user_id, STORE_PATH)
     manager.set_user_id(user_id)
     result = manager.get_user_folder_content()
@@ -54,7 +63,7 @@ def show_all_user_file(request, user_id):
 
 @csrf_exempt
 def create_new_user(request):
-    kwargs = get_request_data(request)
+    kwargs = get_request_json(request)
     print(kwargs)
     user = Users(**kwargs)
     user.save()
@@ -67,19 +76,29 @@ def create_new_user(request):
 @csrf_exempt
 def delete_user(request, user_id):
     manager = SoundStoreManager(user_id, STORE_PATH)
+    manager.set_user_id(user_id)
     manager.delete_user()
-    return HttpResponse("user deleted")
+    user = Users.objects.get(id=user_id)
+    user.delete()
+    return HttpResponse(dumps('user deleted'), content_type='application/json')
 
 
 @csrf_exempt
 def save_user_file(request, user_id):
     manager = SoundStoreManager(user_id, STORE_PATH)
     manager.set_user_id(user_id)
-    manager.save_uploaded_file("audio.wav", request.FILES['useradio'])
+    manager.save_file("audio.wav", request.FILES['useradio'])
     return HttpResponse("user file saved")
 
 
 @csrf_exempt
-def delete_user_file(request, user_id):
-    # file name get from request
-    pass
+def remove_user_file(request, user_id):
+    file_name = get_request_text(request)
+    manager = SoundStoreManager(user_id, STORE_PATH)
+    manager.set_user_id(user_id)
+    manager.delete_user_file(file_name)
+    return HttpResponse("user file removed")
+
+
+def upload_user_file(request, user_id):
+    file_name = get_request_text(request)

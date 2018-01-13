@@ -27,7 +27,7 @@ $(document).ready(function(){
 		});
 	});
 
-	$.ajax({
+	/*$.ajax({
 		method: "GET",
 		url: "user/all/",
 		dataType: "json",
@@ -59,7 +59,7 @@ $(document).ready(function(){
 		}
 	});
 
-	/*$.ajax({
+	$.ajax({
 		method: "POST",
 		url: "user/create/",
 		dataType: "json",
@@ -67,10 +67,10 @@ $(document).ready(function(){
 			'Content-Type':'application/json'
 		},
 		cache: false,
-		data: JSON.stringify({"name": "new",
+		data: JSON.stringify({"name": "name",
 		                      "email": "email",
-		                      "gender": "male",
-		                      "birthday": "1992-02-28"}),
+		                      "gender": "female",
+		                      "birthday": "1987-12-06"}),
 		success: function(data){
 			console.log(data);
 		},
@@ -79,9 +79,39 @@ $(document).ready(function(){
 		}
 	});
 
-	console.log("test");*/
-});
+	$.ajax({
+		method: "POST",
+		url: "/user/delete/4/",
+		dataType: "json",
+		headers: {
+			'Content-Type':'application/json'
+		},
+		cache: false,
+		success: function(data){
+			console.log(data);
+		},
+		error: function(status){
+			console.error(status);
+		}
+	});*/
 
+    $.ajax({
+		method: "POST",
+		url: "user/sound/remove/2/",
+		dataType: "text",
+		headers: {
+			'Content-Type':'text'
+		},
+		cache: false,
+		data: "audio.wav",
+		success: function(data){
+			console.log(data);
+		},
+		error: function(status){
+			console.error(status);
+		}
+	});
+});
 
 function fetch (url, resolve){
 	var request = new XMLHttpRequest();
