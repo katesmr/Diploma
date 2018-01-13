@@ -28,8 +28,12 @@ class SoundStoreManager(metaclass=Singleton):
         return self.__user_id
 
     def set_user_id(self, user_id):
-        self.__user_id = user_id
-        self.update_user_path()
+        assert isinstance(user_id, int)
+        if is_key(user_id):
+            self.__user_id = str(user_id)
+            self.update_user_path()
+        else:
+            raise ValueError("Invalid user id")
 
     def update_user_path(self):
         self.user_folder = os.path.join(self.storehouse_path, self.__user_id)

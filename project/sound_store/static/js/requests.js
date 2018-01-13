@@ -45,7 +45,7 @@ $(document).ready(function(){
 
 	$.ajax({
 		method: "GET",
-		url: "user/sounds/1/",
+		url: "/user/sounds/1/",
 		dataType: "json",
 		headers: {
 			'Content-Type':'application/json'
@@ -59,7 +59,7 @@ $(document).ready(function(){
 		}
 	});
 
-	$.ajax({
+	/*$.ajax({
 		method: "POST",
 		url: "user/create/",
 		dataType: "json",
@@ -79,7 +79,7 @@ $(document).ready(function(){
 		}
 	});
 
-	console.log("test");
+	console.log("test");*/
 });
 
 

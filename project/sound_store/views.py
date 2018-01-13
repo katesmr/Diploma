@@ -6,6 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from json import dumps
 from .models import Users
 from .src.SoundStoreManager import SoundStoreManager
+from .serializers import UserSerializer
 
 
 STORE_PATH = "/home/kate/Public"
@@ -40,12 +41,13 @@ def test(request):
 
 def show_all_users(request):
     users_list = Users.objects.all()
-    print(users_list)
-    return HttpResponse(dumps(users_list), content_type='application/json')
+    serializer = UserSerializer(users_list, many=True)
+    return HttpResponse(dumps(serializer.data), content_type='application/json')
 
 
 def show_all_user_file(request, user_id):
     manager = SoundStoreManager(user_id, STORE_PATH)
+    manager.set_user_id(user_id)
     result = manager.get_user_folder_content()
     return HttpResponse(dumps(result), content_type='application/json')
 
@@ -53,9 +55,11 @@ def show_all_user_file(request, user_id):
 @csrf_exempt
 def create_new_user(request):
     kwargs = get_request_data(request)
+    print(kwargs)
     user = Users(**kwargs)
     user.save()
     manager = SoundStoreManager(user.pk, STORE_PATH)
+    manager.set_user_id(user.pk)
     manager.create_user_folder()
     return HttpResponse("user created")
 
@@ -69,9 +73,9 @@ def delete_user(request, user_id):
 
 @csrf_exempt
 def save_user_file(request, user_id):
-    print(user_id)
     manager = SoundStoreManager(user_id, STORE_PATH)
-    manager.save_uploaded_file("test.wav", request.FILES['useradio'])
+    manager.set_user_id(user_id)
+    manager.save_uploaded_file("audio.wav", request.FILES['useradio'])
     return HttpResponse("user file saved")
 
 
