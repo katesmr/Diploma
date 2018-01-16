@@ -7,8 +7,8 @@ from .validators import clean_primary_key
 class Users(models.Model):
     name = models.CharField(max_length=128)
     email = models.CharField(max_length=128)
-    gender = models.CharField(max_length=8)
-    birthday = models.DateField()
+    gender = models.CharField(max_length=8, null=True, blank=True)
+    birthday = models.DateField(null=True, blank=True)
 
     def __str__(self):
         return self.name

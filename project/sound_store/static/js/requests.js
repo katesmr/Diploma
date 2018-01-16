@@ -93,11 +93,28 @@ $(document).ready(function(){
 		error: function(status){
 			console.error(status);
 		}
-	});*/
+	});
 
     $.ajax({
 		method: "POST",
 		url: "user/sound/remove/2/",
+		dataType: "text",
+		headers: {
+			'Content-Type':'text'
+		},
+		cache: false,
+		data: "audio.wav",
+		success: function(data){
+			console.log(data);
+		},
+		error: function(status){
+			console.error(status);
+		}
+	});*/
+
+	$.ajax({
+		method: "POST",
+		url: "user/sound/upload/1/",
 		dataType: "text",
 		headers: {
 			'Content-Type':'text'

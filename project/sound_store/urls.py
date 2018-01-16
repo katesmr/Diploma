@@ -9,9 +9,9 @@ urlpatterns = [
     # path('user/delete/<int:user_id>/', views.delete_user),
     # path('user/sound/save/<int:user_id>/', views.save_user_file),
     # path('user/sound/remove/<int:user_id>/', views.remove_user_file),
-    path('user/sound/upload/<int:user_id>/'),
+    # path('user/sound/upload/<int:user_id>/'),
 
-    # path('test/', views.test),
+    path('test/', views.test),
 ]
 
 

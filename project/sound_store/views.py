@@ -8,6 +8,8 @@ from .models import Users
 from .src.SoundStoreManager import SoundStoreManager
 from .serializers import UserSerializer
 
+from django.core.exceptions import ValidationError
+
 
 STORE_PATH = "/home/kate/Public"
 
@@ -43,7 +45,10 @@ def test(request):
     user.gender = "aa"
     user.birthday = "1988-07-12"
     print(user.pk)
-    user.save()
+    try:
+        user.save()
+    except ValidationError as err:
+        print(err)
     print(user.pk)
     return HttpResponse("test")
 
