@@ -85,7 +85,7 @@ def delete_user(request, user_id):
     manager.delete_user()
     user = Users.objects.get(id=user_id)
     user.delete()
-    return HttpResponse(dumps('user deleted'), content_type='application/json')
+    return HttpResponse('user deleted', content_type='text/plain')
 
 
 @csrf_exempt
@@ -93,7 +93,7 @@ def save_user_file(request, user_id):
     manager = SoundStoreManager(user_id, STORE_PATH)
     manager.set_user_id(user_id)
     manager.save_file("audio.wav", request.FILES['useradio'])
-    return HttpResponse("user file saved")
+    return HttpResponse('user file saved', content_type='text/plain')
 
 
 @csrf_exempt
@@ -102,8 +102,13 @@ def remove_user_file(request, user_id):
     manager = SoundStoreManager(user_id, STORE_PATH)
     manager.set_user_id(user_id)
     manager.delete_user_file(file_name)
-    return HttpResponse("user file removed")
+    return HttpResponse('user file removed', content_type='text/plain')
 
 
+@csrf_exempt
 def upload_user_file(request, user_id):
     file_name = get_request_text(request)
+    manager = SoundStoreManager(user_id, STORE_PATH)
+    manager.set_user_id(user_id)
+    print(manager.get_full_file_path(file_name))
+    return HttpResponse(manager.get_full_file_path(file_name), content_type='text/plain')

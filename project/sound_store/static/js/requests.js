@@ -10,7 +10,7 @@ $(document).ready(function(){
 		var formdata = new FormData();
 		formdata.append('useradio', blob, 'test.wav');
 
-		$.ajax({
+		/*$.ajax({
 			url: "user/sound/save/2/",
 			type: "POST",
 			data: formdata,
@@ -24,7 +24,7 @@ $(document).ready(function(){
 			error: function(err){
 				console.error(err);
 			}
-		});
+		});*/
 	});
 
 	/*$.ajax({
@@ -116,11 +116,9 @@ $(document).ready(function(){
 		method: "POST",
 		url: "user/sound/upload/1/",
 		dataType: "text",
-		headers: {
-			'Content-Type':'text'
-		},
 		cache: false,
-		data: "audio.wav",
+		// async: false,
+		data: "test.wav",
 		success: function(data){
 			console.log(data);
 		},
@@ -130,7 +128,7 @@ $(document).ready(function(){
 	});
 });
 
-function fetch (url, resolve){
+function fetch(url, resolve){
 	var request = new XMLHttpRequest();
 	request.open('GET', url, true);
 	request.responseType = 'arraybuffer';

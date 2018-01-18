@@ -19,7 +19,7 @@ class FileManager:
                 result = True
             else:
                 raise ValueError("Invalid path of file '{}'".format(path))
-        except (TypeError, ValueError) as error:
+        except (TypeError, ValueError, FileExistsError) as error:
             logging.error(error)
         finally:
             return result
@@ -36,7 +36,7 @@ class FileManager:
                 result = True
             else:
                 raise ValueError("Invalid path of folder '{}'".format(path))
-        except (TypeError, ValueError) as error:
+        except (TypeError, ValueError, FileExistsError) as error:
             logging.error(error)
         finally:
             return result
