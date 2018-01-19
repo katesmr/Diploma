@@ -1,12 +1,14 @@
+from django.core.files import File
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.utils.six import BytesIO
 from rest_framework.parsers import JSONParser
 from django.views.decorators.csrf import csrf_exempt
 from json import dumps
+
 from .models import Users
-from .src.SoundStoreManager import SoundStoreManager
 from .serializers import UserSerializer
+from .src.SoundStoreManager import SoundStoreManager
 
 from django.core.exceptions import ValidationError
 
@@ -107,8 +109,14 @@ def remove_user_file(request, user_id):
 
 @csrf_exempt
 def upload_user_file(request, user_id):
-    file_name = get_request_text(request)
+    response = get_request_text(request)  # expect file name from client
     manager = SoundStoreManager(user_id, STORE_PATH)
     manager.set_user_id(user_id)
-    print(manager.get_full_file_path(file_name))
-    return HttpResponse(manager.get_full_file_path(file_name), content_type='text/plain')
+    file_name = manager.get_full_file_path(response)
+    file_object = open(file_name, 'rb')
+    file = File(file_object)
+    response = HttpResponse(file, content_type='audio/x-wav')
+    response['Content-Disposition'] = 'attachment; filename={}'.format(response)
+    response['Content-Length'] = file.size
+    # file.seek(0)
+    return response

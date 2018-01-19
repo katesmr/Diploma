@@ -1,6 +1,6 @@
 $(document).ready(function(){
 
-	var context = new (window.AudioContext || window.webkitAudioContext)();
+	// var context = new (window.AudioContext || window.webkitAudioContext)();
 	var audioSrc = 'static/audio/Hit_Hurt10.wav'
 
 	fetch(audioSrc, function(request) {
@@ -62,7 +62,7 @@ $(document).ready(function(){
 	$.ajax({
 		method: "POST",
 		url: "user/create/",
-		dataType: "json",
+		// dataType: "json",
 		headers: {
 			'Content-Type':'application/json'
 		},
@@ -82,7 +82,7 @@ $(document).ready(function(){
 	$.ajax({
 		method: "POST",
 		url: "/user/delete/4/",
-		dataType: "json",
+		// dataType: "json",
 		headers: {
 			'Content-Type':'application/json'
 		},
@@ -115,12 +115,19 @@ $(document).ready(function(){
 	$.ajax({
 		method: "POST",
 		url: "user/sound/upload/1/",
-		dataType: "text",
+		// dataType: 'audio/x-wav',
 		cache: false,
 		// async: false,
 		data: "test.wav",
 		success: function(data){
 			console.log(data);
+			//var res = saveData(data, "name.wav");
+			//res();
+			saveData(data, "name.wav");
+
+			/*var blob = new Blob([data], {type: 'audio/x-wav'});
+			var url = window.URL.createObjectURL(blob);
+			var file = new File([blob], "/home/kate/Public/name.wav");*/
 		},
 		error: function(status){
 			console.error(status);
@@ -137,3 +144,35 @@ function fetch(url, resolve){
 	}
 	request.send()
 }
+
+/*function saveData(data, fileName){
+    console.log("test1");
+    var download_object = document.createElement("download");
+    document.body.appendChild(download_object);
+    download_object.style = "display: none";
+    return function (data, fileName){
+        var blob = new Blob([data], {type: "audio/x-wav"});
+        var url = window.URL.createObjectURL(blob);
+        download_object.href = url;
+        download_object.download = fileName;
+        download_object.click();
+        window.URL.revokeObjectURL(url);
+        console.log("test2");
+    };
+};*/
+
+
+var saveData = (function () {
+    var a = document.createElement("a");
+    document.body.appendChild(a);
+    a.style = "display: none";
+    return function (data, fileName) {
+        var json = JSON.stringify(data),
+            blob = new Blob([json], {type: "octet/stream"}),
+            url = window.URL.createObjectURL(blob);
+        a.href = url;
+        a.download = fileName;
+        a.click();
+        window.URL.revokeObjectURL(url);
+    };
+}());
