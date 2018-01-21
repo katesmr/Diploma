@@ -3,8 +3,10 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.utils.six import BytesIO
 from rest_framework.parsers import JSONParser
+from django.core.files.base import ContentFile
 from django.views.decorators.csrf import csrf_exempt
 from json import dumps
+import os
 
 from .models import Users
 from .serializers import UserSerializer
@@ -115,8 +117,20 @@ def upload_user_file(request, user_id):
     file_name = manager.get_full_file_path(response)
     file_object = open(file_name, 'rb')
     file = File(file_object)
-    response = HttpResponse(file, content_type='audio/x-wav')
-    response['Content-Disposition'] = 'attachment; filename={}'.format(response)
+    response = HttpResponse(file, content_type="audio/x-wav")
+    response['Content-Disposition'] = 'attachment; filename={}'.format(file_name)
+    response['Content-Length'] = file.size
+    file_object.close()
+    return response
+
+
+def download_file(request):
+    file_object = open('/home/kate/Public/1/test.wav', 'rb')
+    file = File(file_object)
+    response = HttpResponse(file, content_type="audio/x-wav")
+    response['Content-Disposition'] = 'attachment; filename={}'.format("test123.wav")
     response['Content-Length'] = file.size
     # file.seek(0)
+    file_object.close()
     return response
+
