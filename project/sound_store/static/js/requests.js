@@ -1,53 +1,12 @@
 // http://middleearmedia.com/web-audio-api-audio-buffer/
 
-$(document).ready(function(){
+//$(document).ready(function(){
 
 	// var context = new (window.AudioContext || window.webkitAudioContext)();
-	var audioSrc = 'static/audio/Hit_Hurt10.wav'
-
-	fetch(audioSrc, function(request) {
-		var audioData = request.response;
-		var blob = new Blob([audioData], {type: 'audio/x-wav'});
-
-		var formdata = new FormData();
-		formdata.append('useradio', blob, 'test.wav');
-
-		$.ajax({
-			url: "user/sound/save/2/",
-			type: "POST",
-			data: formdata,
-			mimeTypes: "multipart/form-data",
-			contentType: false,
-			cache: false,
-			processData: false,
-			success: function(){
-				console.log("successfully submitted");
-			},
-			error: function(err){
-				console.error(err);
-			}
-		});
-	});
 
 	/*$.ajax({
 		method: "GET",
-		url: "user/all/",
-		dataType: "json",
-		headers: {
-			'Content-Type':'application/json'
-		},
-		cache: false,
-		success: function(data){
-			console.log(data);
-		},
-		error: function(status){
-			console.error(status);
-		}
-	});
-
-	$.ajax({
-		method: "GET",
-		url: "/user/sounds/1/",
+		url: "users/",
 		dataType: "json",
 		headers: {
 			'Content-Type':'application/json'
@@ -63,8 +22,8 @@ $(document).ready(function(){
 
 	$.ajax({
 		method: "POST",
-		url: "user/create/",
-		// dataType: "json",
+		url: "users/create/",
+		dataType: "text",
 		headers: {
 			'Content-Type':'application/json'
 		},
@@ -83,8 +42,8 @@ $(document).ready(function(){
 
 	$.ajax({
 		method: "POST",
-		url: "/user/delete/4/",
-		// dataType: "json",
+		url: "/users/delete/3/",
+		dataType: "text",
 		headers: {
 			'Content-Type':'application/json'
 		},
@@ -97,15 +56,16 @@ $(document).ready(function(){
 		}
 	});
 
-    $.ajax({
+	$.ajax({
 		method: "POST",
-		url: "user/sound/remove/2/",
+		url: "/users/update/2/",
 		dataType: "text",
 		headers: {
-			'Content-Type':'text'
+			'Content-Type':'application/json'
 		},
 		cache: false,
-		data: "audio.wav",
+		data: JSON.stringify({"name": "name",
+		                      "email": "email",}),
 		success: function(data){
 			console.log(data);
 		},
@@ -114,21 +74,93 @@ $(document).ready(function(){
 		}
 	});*/
 
-    /*$.ajaxSetup({
+    $.ajax({
+		method: "GET",
+		url: "sounds/",
+		dataType: "json",
+		data: "2",
+		cache: false,
+		success: function(data){
+			console.log(data);
+		},
+		error: function(status){
+			console.error(status);
+		}
+	});
+
+	/*$.ajax({
+		method: "GET",
+		url: "sounds/test.wav/",
+		dataType: "json",
+		headers: {
+			'Content-Type':'application/json'
+		},
+		cache: false,
+		success: function(data){
+			console.log(data);
+		},
+		error: function(status){
+			console.error(status);
+		}
+	});*/
+
+	var audioSrc = 'static/audio/Hit_Hurt10.wav'
+
+	fetch(audioSrc, function(request) {
+		var audioData = request.response;
+		var blob = new Blob([audioData], {type: 'audio/x-wav'});
+
+		var formdata = new FormData();
+		formdata.append('useradio', blob, 'test.wav');
+
+		$.ajax({
+			url: "sounds/create/new.wav",
+			type: "POST",
+			data: [formdata, 2],
+			mimeTypes: "multipart/form-data",
+			contentType: false,
+			cache: false,
+			processData: false,
+			success: function(){
+				console.log("successfully submitted");
+			},
+			error: function(err){
+				console.error(err);
+			}
+		});
+	});
+
+    $.ajax({
+		method: "POST",
+		url: "sounds/delete/test.wav/",
+		dataType: "text",
+		headers: {
+			'Content-Type':'text'
+		},
+		cache: false,
+		data: 2,
+		success: function(data){
+			console.log(data);
+		},
+		error: function(status){
+			console.error(status);
+		}
+	});
+
+    $.ajaxSetup({
         beforeSend:function(jqXHR,settings){
             if (settings.dataType === 'binary'){
                 settings.xhr().responseType='arraybuffer';
                 settings.processData=false;
             }
         }
-    })*/
+    })
 
 	$.ajax({
 		method: "POST",
-		url: "user/sound/upload/1/",
+		url: "sounds/download/test.wav",
 		cache: false,
-		// async: false,
-		data: "test.wav",
+		data: 1,
 		dataType: "binary",
         processData: false,
 		success: function(data){
@@ -138,7 +170,7 @@ $(document).ready(function(){
 			console.error(status);
 		}
 	});
-});
+//});
 
 function fetch(url, resolve){
 	var request = new XMLHttpRequest();

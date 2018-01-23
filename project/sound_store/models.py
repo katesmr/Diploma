@@ -13,15 +13,23 @@ class Users(models.Model):
     def __str__(self):
         return self.name
 
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+    """def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         try:
-            clean_primary_key(self, force_insert)
+            clean_primary_key(self, force_insert, force_update)
             super().save()
         except (ValidationError, ValueError) as error:
-            logging.error(error)
+            logging.error(error)"""
 
     def create_new(self):
         pass
+
+    @staticmethod
+    def get_user(user_id):
+        try:
+            user = Users.objects.get(id=user_id)
+            return user
+        except Users.DoesNotExist as error:
+            logging.error(error)
 
 
 class Connection(models.Model):
@@ -31,9 +39,9 @@ class Connection(models.Model):
     def __str__(self):
         return self.provider
 
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+    """def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         try:
             clean_primary_key(self, force_insert)
             super().save()
         except (ValidationError, ValueError) as error:
-            logging.error(error)
+            logging.error(error)"""

@@ -6,7 +6,7 @@ def validate_provider_field(instance):
     pass
 
 
-def clean_primary_key(instance, force_insert):
+def clean_primary_key(instance, force_insert, force_update):
     _id = instance.pk
     if _id is None:
         # INSERT operation - autoincrement primary key
@@ -14,7 +14,7 @@ def clean_primary_key(instance, force_insert):
         pass
     else:
         if is_key(_id):
-            if instance.objects.filter(pk=_id).exists() or force_insert:
+            if not force_update and (instance.objects.filter(id=_id).exists() or force_insert):
                 raise ValidationError("User already exist")
             else:
                 pass
