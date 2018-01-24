@@ -20,44 +20,33 @@ from django.core.exceptions import ValidationError
 STORE_PATH = "/home/kate/Public"
 
 
+def get_user_id(request):
+    key = 'user_id'
+    user_id = None
+    try:
+        if request.method == 'GET':
+            user_id = request.GET.get(key)
+        elif request.method == 'POST':
+            user_id = request.body.decode("utf-8")
+        if user_id:
+            user_id = int(user_id)
+    except ValueError as error:
+        logging.error(error)
+        raise ValueError('Invalid user id number')
+    return user_id
+
+
 def get_request_json(request):
-    """
-    :param request: HttpRequest
-    :return: dict
-    """
-    stream = BytesIO(request.body)
-    data = JSONParser().parse(stream)
-    return data
-
-
-def get_request_text(request):
-    """
-    :param request: HttpRequest
-    :return: str
-    """
+    data = None
     print(request.body)
-    data = request.body.decode("utf-8")  # get text data
+    if request.method == 'POST':
+        stream = BytesIO(request.body)
+        data = JSONParser().parse(stream)
     return data
 
 
 def index(request):
     return render(request, "index.html")
-
-
-def test(request):
-    user = Users()
-    user.pk = 'ooo'
-    user.name = "qq"
-    user.email = "www"
-    user.gender = "aa"
-    user.birthday = "1988-07-12"
-    print(user.pk)
-    try:
-        user.save()
-    except ValidationError as err:
-        print(err)
-    print(user.pk)
-    return HttpResponse("test")
 
 
 def get_all_users(request):
@@ -105,28 +94,47 @@ def update_user(request, user_id):
 
 
 def show_all_user_sounds(request):
-    user_id = int(get_request_text(request))
-    manager = SoundStoreManager(user_id, STORE_PATH)
-    manager.set_user_id(user_id)
-    result = manager.get_user_folder_content()
-    return HttpResponse(dumps(result), content_type='application/json')
+    try:
+        user_id = get_user_id(request)
+        manager = SoundStoreManager(user_id, STORE_PATH)
+        manager.set_user_id(user_id)
+        result = manager.get_user_folder_content()
+        content = dumps(result)
+    except ValueError as error:
+        content = dumps(str(error))
+        logging.error(error)
+    return HttpResponse(content, content_type='application/json')
 
 
 @csrf_exempt
-def save_user_sound(request, user_id):
-    manager = SoundStoreManager(user_id, STORE_PATH)
-    manager.set_user_id(user_id)
-    manager.save_file("audio.wav", request.FILES['useradio'])
-    return HttpResponse('user file saved', content_type='text/plain')
+def save_user_sound(request, sound_name):
+    try:
+        data = get_request_json(request)
+        user_id = data['user_id']
+        print(user_id)
+        manager = SoundStoreManager(user_id, STORE_PATH)
+        manager.set_user_id(user_id)
+        manager.save_file(sound_name, request.FILES['user_audio'])
+        content = 'user sound saved successfully'
+    except ValueError as error:
+        content = dumps(str(error))
+        logging.error(error)
+    return HttpResponse(content, content_type='text/plain')
 
 
 @csrf_exempt
-def remove_user_sound(request, user_id):
-    file_name = get_request_text(request)
-    manager = SoundStoreManager(user_id, STORE_PATH)
-    manager.set_user_id(user_id)
-    manager.delete_user_file(file_name)
-    return HttpResponse('user file removed', content_type='text/plain')
+def remove_user_sound(request, sound_name):
+    try:
+        user_id = get_user_id(request)
+        print(sound_name)
+        manager = SoundStoreManager(user_id, STORE_PATH)
+        manager.set_user_id(user_id)
+        manager.delete_user_file(sound_name)
+        content = 'user sound removed successfully'
+    except ValueError as error:
+        content = dumps(str(error))
+        logging.error(error)
+    return HttpResponse(content, content_type='text/plain')
 
 
 def upload_user_sound(request):

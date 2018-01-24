@@ -74,11 +74,11 @@
 		}
 	});*/
 
-    $.ajax({
+    /*$.ajax({
 		method: "GET",
 		url: "sounds/",
 		dataType: "json",
-		data: "2",
+		data: {"user_id": 2},
 		cache: false,
 		success: function(data){
 			console.log(data);
@@ -88,7 +88,7 @@
 		}
 	});
 
-	/*$.ajax({
+	$.ajax({
 		method: "GET",
 		url: "sounds/test.wav/",
 		dataType: "json",
@@ -106,17 +106,17 @@
 
 	var audioSrc = 'static/audio/Hit_Hurt10.wav'
 
-	fetch(audioSrc, function(request) {
+	fetch(audioSrc, function(request){
 		var audioData = request.response;
 		var blob = new Blob([audioData], {type: 'audio/x-wav'});
 
 		var formdata = new FormData();
-		formdata.append('useradio', blob, 'test.wav');
+		formdata.append('user_audio', blob, 'test.wav');
 
 		$.ajax({
-			url: "sounds/create/new.wav",
-			type: "POST",
-			data: [formdata, 2],
+			method: "POST",
+			url: "sounds/create/new.wav/",
+			data: {"user_audio": formdata, "user_id": 2},
 			mimeTypes: "multipart/form-data",
 			contentType: false,
 			cache: false,
@@ -130,22 +130,22 @@
 		});
 	});
 
-    $.ajax({
+    /*$.ajax({
 		method: "POST",
-		url: "sounds/delete/test.wav/",
+		url: "sounds/delete/test (copy).wav/",
 		dataType: "text",
 		headers: {
 			'Content-Type':'text'
 		},
 		cache: false,
-		data: 2,
+		data: "2",
 		success: function(data){
 			console.log(data);
 		},
 		error: function(status){
 			console.error(status);
 		}
-	});
+	});*/
 
     $.ajaxSetup({
         beforeSend:function(jqXHR,settings){
@@ -158,7 +158,7 @@
 
 	$.ajax({
 		method: "POST",
-		url: "sounds/download/test.wav",
+		url: "sounds/download/test.wav/",
 		cache: false,
 		data: 1,
 		dataType: "binary",
