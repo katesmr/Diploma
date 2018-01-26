@@ -2,6 +2,7 @@ from django.core.files import File
 from django.shortcuts import render
 from django.http import HttpResponse, Http404
 from django.utils.six import BytesIO
+from django.utils.datastructures import MultiValueDictKeyError
 from rest_framework.parsers import JSONParser
 from rest_framework.exceptions import ParseError
 from django.core.files.base import ContentFile
@@ -13,9 +14,7 @@ import logging
 
 from .models import Users
 from .serializers import UserSerializer
-from .src.SoundStoreManager import SoundStoreManager
-
-from django.core.exceptions import ValidationError
+from .src.DataManager import DataManager
 
 
 STORE_PATH = "/home/kate/Public"
@@ -49,6 +48,8 @@ def get_user_id(request):
     except (ValueError, TypeError) as error:
         logging.error(error)
         raise ValueError('Invalid user id number')
+    except MultiValueDictKeyError:
+        logging.error('Invalid id user')
     return user_id
 
 
@@ -67,24 +68,24 @@ def create_new_user(request):
     kwargs = parse_json_data(request)
     user = Users(**kwargs)
     user.save()
-    manager = SoundStoreManager(user.pk, STORE_PATH)
+    manager = DataManager(user.pk, STORE_PATH)
     manager.set_user_id(user.pk)
     manager.create_user_folder()
-    return HttpResponse("user created")
+    return HttpResponse('User created.', content_type='text/plain')
 
 
 @csrf_exempt
 def delete_user(request, user_id):
-    manager = SoundStoreManager(user_id, STORE_PATH)
+    manager = DataManager(user_id, STORE_PATH)
     manager.set_user_id(user_id)
     manager.delete_user()
     user = Users.get_user(user_id)
     if user is not None:
         user.delete()
-        message = 'user deleted'
+        message = 'User deleted.'
     else:
-        message = 'user doesn\'t exist'
-    return HttpResponse(message)
+        message = 'User doesn\'t exist.'
+    return HttpResponse(message, content_type='text/plain')
 
 
 @csrf_exempt
@@ -93,17 +94,17 @@ def update_user(request, user_id):
         kwargs = parse_json_data(request)
         user = Users(id=user_id, **kwargs)
         user.save()
-        message = 'user updated'
+        message = 'User updated.'
     else:
-        message = 'user doesn\'t exist'
+        message = 'User doesn\'t exist.'
         # raise ObjectDoesNotExist('User doesn\'t exist ')
-    return HttpResponse(message)
+    return HttpResponse(message, content_type='text/plain')
 
 
 def show_all_user_sounds(request):
     try:
         user_id = get_user_id(request)
-        manager = SoundStoreManager(user_id, STORE_PATH)
+        manager = DataManager(user_id, STORE_PATH)
         manager.set_user_id(user_id)
         result = manager.get_user_folder_content()
         content = dumps(result)
@@ -116,15 +117,17 @@ def show_all_user_sounds(request):
 @csrf_exempt
 def save_user_sound(request, sound_name):
     try:
-        user_id = get_user_id(request)
-        print(user_id)
-        manager = SoundStoreManager(user_id, STORE_PATH)
+        user_id = int(request.POST['user_id'])
+        manager = DataManager(user_id, STORE_PATH)
         manager.set_user_id(user_id)
         manager.save_file(sound_name, request.FILES['user_audio'])
-        content = 'user sound saved successfully'
+        content = 'User sound saved successfully.'
     except ValueError as error:
         content = str(error)
         logging.error(error)
+    except MultiValueDictKeyError:
+        content = 'Invalid id user.'
+        logging.error(content)
     return HttpResponse(content, content_type='text/plain')
 
 
@@ -132,10 +135,10 @@ def save_user_sound(request, sound_name):
 def remove_user_sound(request, sound_name):
     try:
         user_id = get_user_id(request)
-        manager = SoundStoreManager(user_id, STORE_PATH)
+        manager = DataManager(user_id, STORE_PATH)
         manager.set_user_id(user_id)
         manager.delete_user_file(sound_name)
-        content = 'user sound removed successfully'
+        content = 'User sound removed successfully.'
     except ValueError as error:
         content = str(error)
         logging.error(error)
@@ -150,7 +153,7 @@ def upload_user_sound(request):
 def download_user_sound(request, sound_name):
     try:
         user_id = get_user_id(request)
-        manager = SoundStoreManager(user_id, STORE_PATH)
+        manager = DataManager(user_id, STORE_PATH)
         manager.set_user_id(user_id)
         file_name = manager.get_full_file_path(sound_name)
         file_object = open(file_name, 'rb')

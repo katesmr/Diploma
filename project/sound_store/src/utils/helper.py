@@ -16,8 +16,7 @@ def parse_json(file_name):
                 logging.error("Invalid json file '{}'".format(file_name))
     except FileNotFoundError:
         logging.warning("File '{}' don't exist".format(file_name))
-    finally:
-        return result
+    return result
 
 
 def is_integer(number):
@@ -34,8 +33,7 @@ def is_integer(number):
                     res = True
     except ValueError:
             logging.warning("Number '{}' must be integer type".format(number))
-    finally:
-        return res
+    return res
 
 
 def is_key(number):

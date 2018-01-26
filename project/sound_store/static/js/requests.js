@@ -1,6 +1,6 @@
 // http://middleearmedia.com/web-audio-api-audio-buffer/
 
-//$(document).ready(function(){
+$(document).ready(function(){
 
 	// var context = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -104,7 +104,7 @@
 		}
 	});*/
 
-	/*var audioSrc = 'static/audio/Hit_Hurt10.wav'
+	var audioSrc = 'static/audio/Hit_Hurt10.wav'
 
 	fetch(audioSrc, function(request){
 		var audioData = request.response;
@@ -112,17 +112,18 @@
 
 		var formdata = new FormData();
 		formdata.append('user_audio', blob, 'test.wav');
+		formdata.append('user_id', 2);
 
 		$.ajax({
 			method: "POST",
 			url: "sounds/create/new.wav/",
-			data: JSON.stringify({"user_audio": formdata, "user_id": 2}),
+			data: formdata,
 			mimeTypes: "multipart/form-data",
 			contentType: false,
 			cache: false,
 			processData: false,
-			success: function(){
-				console.log("successfully submitted");
+			success: function(data){
+				console.log(data);
 			},
 			error: function(err){
 				console.error(err);
@@ -130,7 +131,7 @@
 		});
 	});
 
-    $.ajax({
+    /*$.ajax({
 		method: "POST",
 		url: "sounds/delete/test (copy).wav/",
 		dataType: "text",
@@ -145,16 +146,7 @@
 		error: function(status){
 			console.error(status);
 		}
-	});*/
-
-    /*$.ajaxSetup({
-        beforeSend:function(jqXHR,settings){
-            if (settings.dataType === 'binary'){
-                settings.xhr().responseType = 'arraybuffer';
-                settings.processData=false;
-            }
-        }
-    })*/
+	});
 
 	$.ajax({
 		method: "POST",
@@ -164,7 +156,6 @@
 		dataType: "binary",
         processData: false,
 		success: function(data){
-		    console.log("yyyy");
 			saveData(data, "name.wav");
 			console.log("user sound download successfully");
 		},
@@ -175,8 +166,8 @@
             }
 			console.error(status);
 		}
-	});
-//});
+	});*/
+});
 
 function fetch(url, resolve){
 	var request = new XMLHttpRequest();
@@ -188,27 +179,23 @@ function fetch(url, resolve){
 	request.send()
 }
 
-var saveData = (function () {
-    console.log("iiiiiiiii");
+var saveData = (function(){
     var a = document.createElement("a");
     document.body.appendChild(a);
     a.style = "display: none";
-    return function (data, fileName) {
-        console.log("+");
+    return function(data, fileName){
         var blob = new Blob([data], {"type": "audio/x-wav"});
         var url = window.URL.createObjectURL(blob);
         a.href = url;
         a.download = fileName;
         a.click();
         window.URL.revokeObjectURL(url);
-        console.log("+");
     };
 }());
 
 // use this transport for "binary" data type
 $.ajaxTransport("+binary", function(options, originalOptions, jqXHR){
     // check for conditions and support for blob / arraybuffer response type
-    console.log("1");
     if (window.FormData && ((options.dataType && (options.dataType == 'binary')) ||
        (options.data && ((window.ArrayBuffer && options.data instanceof ArrayBuffer) ||
        (window.Blob && options.data instanceof Blob)))))

@@ -5,14 +5,14 @@ from .utils.Singleton import Singleton
 from .utils.FileManager import FileManager
 
 
-class SoundStoreManager(metaclass=Singleton):
+class DataManager(metaclass=Singleton):
     def __init__(self, user_id, storehouse_path):
         """
         :param user_id: int - user id which correspond name of his folder with sounds
         :param storehouse_path: str - general folder with users folders
         """
         try:
-            assert isinstance(user_id, int)
+            # assert isinstance(user_id, int)
             assert isinstance(storehouse_path, str)
             if is_key(user_id):
                 self.manager = FileManager()
