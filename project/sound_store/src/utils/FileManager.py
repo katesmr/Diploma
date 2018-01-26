@@ -18,7 +18,7 @@ class FileManager:
             if os.path.isfile(path):
                 result = True
             else:
-                raise ValueError("Invalid path of file '{}'".format(path))
+                raise ValueError("Invalid file name. File '{}' doesn't exist".format(path))
         except (TypeError, ValueError, FileExistsError) as error:
             logging.error(error)
         finally:

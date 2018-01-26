@@ -104,7 +104,7 @@
 		}
 	});*/
 
-	var audioSrc = 'static/audio/Hit_Hurt10.wav'
+	/*var audioSrc = 'static/audio/Hit_Hurt10.wav'
 
 	fetch(audioSrc, function(request){
 		var audioData = request.response;
@@ -116,7 +116,7 @@
 		$.ajax({
 			method: "POST",
 			url: "sounds/create/new.wav/",
-			data: {"user_audio": formdata, "user_id": 2},
+			data: JSON.stringify({"user_audio": formdata, "user_id": 2}),
 			mimeTypes: "multipart/form-data",
 			contentType: false,
 			cache: false,
@@ -130,7 +130,7 @@
 		});
 	});
 
-    /*$.ajax({
+    $.ajax({
 		method: "POST",
 		url: "sounds/delete/test (copy).wav/",
 		dataType: "text",
@@ -138,7 +138,7 @@
 			'Content-Type':'text'
 		},
 		cache: false,
-		data: "2",
+		data: JSON.stringify({"user_id": 2}),
 		success: function(data){
 			console.log(data);
 		},
@@ -147,26 +147,32 @@
 		}
 	});*/
 
-    $.ajaxSetup({
+    /*$.ajaxSetup({
         beforeSend:function(jqXHR,settings){
             if (settings.dataType === 'binary'){
-                settings.xhr().responseType='arraybuffer';
+                settings.xhr().responseType = 'arraybuffer';
                 settings.processData=false;
             }
         }
-    })
+    })*/
 
 	$.ajax({
 		method: "POST",
 		url: "sounds/download/test.wav/",
 		cache: false,
-		data: 1,
+		data: JSON.stringify({"user_id": 1}),
 		dataType: "binary",
         processData: false,
 		success: function(data){
+		    console.log("yyyy");
 			saveData(data, "name.wav");
+			console.log("user sound download successfully");
 		},
 		error: function(status){
+		    // show message from server if status equal status from server
+            if(status.status === 403 || status.status != 200){
+                console.log(status.responseText);
+            }
 			console.error(status);
 		}
 	});
@@ -183,23 +189,26 @@ function fetch(url, resolve){
 }
 
 var saveData = (function () {
+    console.log("iiiiiiiii");
     var a = document.createElement("a");
     document.body.appendChild(a);
     a.style = "display: none";
     return function (data, fileName) {
-        //var blob = new Blob([data], {type: "audio/x-wav"});
+        console.log("+");
         var blob = new Blob([data], {"type": "audio/x-wav"});
         var url = window.URL.createObjectURL(blob);
         a.href = url;
         a.download = fileName;
         a.click();
         window.URL.revokeObjectURL(url);
+        console.log("+");
     };
 }());
 
 // use this transport for "binary" data type
 $.ajaxTransport("+binary", function(options, originalOptions, jqXHR){
     // check for conditions and support for blob / arraybuffer response type
+    console.log("1");
     if (window.FormData && ((options.dataType && (options.dataType == 'binary')) ||
        (options.data && ((window.ArrayBuffer && options.data instanceof ArrayBuffer) ||
        (window.Blob && options.data instanceof Blob)))))

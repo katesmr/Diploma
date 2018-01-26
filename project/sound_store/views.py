@@ -3,10 +3,11 @@ from django.shortcuts import render
 from django.http import HttpResponse, Http404
 from django.utils.six import BytesIO
 from rest_framework.parsers import JSONParser
+from rest_framework.exceptions import ParseError
 from django.core.files.base import ContentFile
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ObjectDoesNotExist
-from json import dumps
+from json import dumps, decoder
 import os
 import logging
 
@@ -20,6 +21,20 @@ from django.core.exceptions import ValidationError
 STORE_PATH = "/home/kate/Public"
 
 
+def parse_json_data(request):
+    """
+    :param request: HttpRequest
+    :return: dict
+    """
+    data = None
+    try:
+        stream = BytesIO(request.body)
+        data = JSONParser().parse(stream)
+    except (decoder.JSONDecodeError, ParseError) as error:
+        logging.error(error)
+    return data
+
+
 def get_user_id(request):
     key = 'user_id'
     user_id = None
@@ -27,22 +42,14 @@ def get_user_id(request):
         if request.method == 'GET':
             user_id = request.GET.get(key)
         elif request.method == 'POST':
-            user_id = request.body.decode("utf-8")
+            data = parse_json_data(request)
+            user_id = data[key]
         if user_id:
             user_id = int(user_id)
-    except ValueError as error:
+    except (ValueError, TypeError) as error:
         logging.error(error)
         raise ValueError('Invalid user id number')
     return user_id
-
-
-def get_request_json(request):
-    data = None
-    print(request.body)
-    if request.method == 'POST':
-        stream = BytesIO(request.body)
-        data = JSONParser().parse(stream)
-    return data
 
 
 def index(request):
@@ -57,7 +64,7 @@ def get_all_users(request):
 
 @csrf_exempt
 def create_new_user(request):
-    kwargs = get_request_json(request)
+    kwargs = parse_json_data(request)
     user = Users(**kwargs)
     user.save()
     manager = SoundStoreManager(user.pk, STORE_PATH)
@@ -83,7 +90,7 @@ def delete_user(request, user_id):
 @csrf_exempt
 def update_user(request, user_id):
     if Users.objects.filter(id=user_id).exists():
-        kwargs = get_request_json(request)
+        kwargs = parse_json_data(request)
         user = Users(id=user_id, **kwargs)
         user.save()
         message = 'user updated'
@@ -109,15 +116,14 @@ def show_all_user_sounds(request):
 @csrf_exempt
 def save_user_sound(request, sound_name):
     try:
-        data = get_request_json(request)
-        user_id = data['user_id']
+        user_id = get_user_id(request)
         print(user_id)
         manager = SoundStoreManager(user_id, STORE_PATH)
         manager.set_user_id(user_id)
         manager.save_file(sound_name, request.FILES['user_audio'])
         content = 'user sound saved successfully'
     except ValueError as error:
-        content = dumps(str(error))
+        content = str(error)
         logging.error(error)
     return HttpResponse(content, content_type='text/plain')
 
@@ -126,13 +132,12 @@ def save_user_sound(request, sound_name):
 def remove_user_sound(request, sound_name):
     try:
         user_id = get_user_id(request)
-        print(sound_name)
         manager = SoundStoreManager(user_id, STORE_PATH)
         manager.set_user_id(user_id)
         manager.delete_user_file(sound_name)
         content = 'user sound removed successfully'
     except ValueError as error:
-        content = dumps(str(error))
+        content = str(error)
         logging.error(error)
     return HttpResponse(content, content_type='text/plain')
 
@@ -142,27 +147,19 @@ def upload_user_sound(request):
 
 
 @csrf_exempt
-def download_user_sound(request, user_id):
-    response = get_request_text(request)  # expect file name from client
-    manager = SoundStoreManager(user_id, STORE_PATH)
-    manager.set_user_id(user_id)
-    file_name = manager.get_full_file_path(response)
-    file_object = open(file_name, 'rb')
-    file = File(file_object)
-    response_object = HttpResponse(file, content_type='audio/x-wav')
-    response_object['Content-Disposition'] = 'attachment; filename={}'.format(response)
-    response_object['Content-Length'] = file.size
-    file_object.close()
+def download_user_sound(request, sound_name):
+    try:
+        user_id = get_user_id(request)
+        manager = SoundStoreManager(user_id, STORE_PATH)
+        manager.set_user_id(user_id)
+        file_name = manager.get_full_file_path(sound_name)
+        file_object = open(file_name, 'rb')
+        file = File(file_object)
+        response_object = HttpResponse(file, content_type='audio/x-wav')
+        response_object['Content-Disposition'] = 'attachment; filename={}'.format(sound_name)
+        response_object['Content-Length'] = file.size
+        file_object.close()
+    except ValueError as error:
+        response_object = HttpResponse(str(error), content_type='text/plain', status=403)
+        logging.error(error)
     return response_object
-
-
-def download_file(request):
-    file_object = open('/home/kate/Public/1/test.wav', 'rb')
-    file = File(file_object)
-    response = HttpResponse(file, content_type="audio/x-wav")
-    response['Content-Disposition'] = 'attachment; filename={}'.format("test123.wav")
-    response['Content-Length'] = file.size
-    # file.seek(0)
-    file_object.close()
-    return response
-

@@ -63,8 +63,8 @@ class SoundStoreManager(metaclass=Singleton):
         self.manager.delete_file(path)
 
     def get_full_file_path(self, file_name):
+        result = None
         path = os.path.join(self.user_folder, file_name)
         if self.manager.is_valid_file_path(path):
-            return path
-        else:
-            raise FileExistsError("Invalid file name. File doesn't exist")
+            result = path
+        return result
