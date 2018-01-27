@@ -1,5 +1,5 @@
-from json import load
 import logging
+from json import load, dump
 
 
 def parse_json(file_name):
@@ -17,6 +17,23 @@ def parse_json(file_name):
     except FileNotFoundError:
         logging.warning("File '{}' don't exist".format(file_name))
     return result
+
+
+def to_json_file(file_name, data, mode):
+        """
+            @param file_name {String}
+            @param data {Dict}
+            @mode {String}
+            @return {void} - write data in json
+        """
+        try:
+            with open(file_name, mode) as file:
+                try:
+                    dump(data, file, indent=4)
+                except TypeError:
+                    logging.error("'{}' is not JSON serializable".format(data))
+        except OSError as err:
+            logging.error(err)
 
 
 def is_integer(number):

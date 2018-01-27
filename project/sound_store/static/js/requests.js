@@ -86,25 +86,24 @@ $(document).ready(function(){
 		error: function(status){
 			console.error(status);
 		}
-	});
+	});*/
 
-	$.ajax({
-		method: "GET",
+	/*$.ajax({
+		method: "POST",
 		url: "sounds/test.wav/",
-		dataType: "json",
-		headers: {
-			'Content-Type':'application/json'
-		},
+		data: JSON.stringify({"user_id": 1}),
+		dataType: "binary",
 		cache: false,
+		processData: false,
 		success: function(data){
-			console.log(data);
+			playSound(data);
 		},
 		error: function(status){
 			console.error(status);
 		}
 	});*/
 
-	var audioSrc = 'static/audio/Hit_Hurt10.wav'
+	/*var audioSrc = 'static/audio/Hit_Hurt10.wav'
 
 	fetch(audioSrc, function(request){
 		var audioData = request.response;
@@ -131,7 +130,7 @@ $(document).ready(function(){
 		});
 	});
 
-    /*$.ajax({
+    $.ajax({
 		method: "POST",
 		url: "sounds/delete/test (copy).wav/",
 		dataType: "text",
@@ -167,6 +166,81 @@ $(document).ready(function(){
 			console.error(status);
 		}
 	});*/
+
+	$.ajax({
+		method: "GET",
+		url: "projects/",
+		dataType: "json",
+		data: {"user_id": 2},
+		cache: false,
+		success: function(data){
+			console.log(data);
+		},
+		error: function(status){
+			console.error(status);
+		}
+	});
+
+	$.ajax({
+		method: "GET",
+		url: "projects/test.json/",
+		dataType: "json",
+		data: {"user_id": 2},
+		cache: false,
+		success: function(data){
+			console.log(data);
+		},
+		error: function(status){
+			console.error(status);
+		}
+	});
+
+	/*$.ajax({
+		method: "POST",
+		url: "/projects/create/project1.json/",
+		dataType: "text",
+		headers: {
+			'Content-Type':'application/json'
+		},
+		cache: false,
+		data: JSON.stringify({"project": {"stream": ["path", "path"], "name": "", "settings": {}},
+		                      "user_id": 2}),
+		success: function(data){
+			console.log(data);
+		},
+		error: function(status){
+			console.error(status);
+		}
+	});*/
+
+	$.ajax({
+		method: "POST",
+		url: "/projects/delete/test.json/",
+		dataType: "text",
+		cache: false,
+		data: JSON.stringify({"user_id": 2}),
+		success: function(data){
+			console.log(data);
+		},
+		error: function(status){
+			console.error(status);
+		}
+	});
+
+	$.ajax({
+		method: "POST",
+		url: "/projects/update/project1.json/",
+		dataType: "text",
+		cache: false,
+		data: JSON.stringify({"project": {"stream": ["test", "test"], "name": "", "settings": {}},
+		                      "user_id": 2}),
+		success: function(data){
+			console.log(data);
+		},
+		error: function(status){
+			console.error(status);
+		}
+	});
 });
 
 function fetch(url, resolve){
@@ -235,3 +309,21 @@ $.ajaxTransport("+binary", function(options, originalOptions, jqXHR){
         };
     }
 });
+
+function playSound(sound){
+	var context = new AudioContext(); // Create and Initialize the Audio Context
+
+	window.addEventListener("keydown",onKeyDown); // Create Event Listener for KeyDown
+
+	function onKeyDown(e){
+		switch (e.keyCode) {
+			// X
+			case 88:
+				var playSound = context.createBufferSource(); // Declare a New Sound
+				playSound.buffer = sound; // Attatch our Audio Data as it's Buffer
+				playSound.connect(context.destination);  // Link the Sound to the Output
+				playSound.start(0); // Play the Sound Immediately
+			break;
+		}
+ 	}
+}

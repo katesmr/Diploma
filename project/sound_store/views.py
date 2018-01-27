@@ -15,6 +15,7 @@ import logging
 from .models import Users
 from .serializers import UserSerializer
 from .src.DataManager import DataManager
+from .src.utils.helper import parse_json, to_json_file
 
 
 STORE_PATH = "/home/kate/Public"
@@ -101,7 +102,7 @@ def update_user(request, user_id):
     return HttpResponse(message, content_type='text/plain')
 
 
-def show_all_user_sounds(request):
+def get_all_user_sounds(request):
     try:
         user_id = get_user_id(request)
         manager = DataManager(user_id, STORE_PATH)
@@ -145,12 +146,8 @@ def remove_user_sound(request, sound_name):
     return HttpResponse(content, content_type='text/plain')
 
 
-def upload_user_sound(request):
-    pass
-
-
 @csrf_exempt
-def download_user_sound(request, sound_name):
+def load_user_sound(request, sound_name):
     try:
         user_id = get_user_id(request)
         manager = DataManager(user_id, STORE_PATH)
@@ -166,3 +163,84 @@ def download_user_sound(request, sound_name):
         response_object = HttpResponse(str(error), content_type='text/plain', status=403)
         logging.error(error)
     return response_object
+
+
+def get_all_user_projects(request):
+    try:
+        user_id = get_user_id(request)
+        manager = DataManager(user_id, STORE_PATH)
+        manager.set_user_id(user_id)
+        result = manager.get_user_folder_content(".json")
+        content = dumps(result)
+    except ValueError as error:
+        content = dumps(str(error))
+        logging.error(error)
+    return HttpResponse(content, content_type='application/json')
+
+
+def get_user_project(request, project_name):
+    try:
+        user_id = get_user_id(request)
+        manager = DataManager(user_id, STORE_PATH)
+        manager.set_user_id(user_id)
+        file_name = manager.get_full_file_path(project_name)
+        content = parse_json(file_name)
+        print(content)
+    except ValueError as error:
+        content = str(error)
+        logging.error(error)
+    return HttpResponse(dumps(content), content_type='application/json')
+
+
+@csrf_exempt
+def save_user_project(request, project_name):
+    try:
+        user_id = get_user_id(request)
+        manager = DataManager(user_id, STORE_PATH)
+        manager.set_user_id(user_id)
+        file_name = manager.join_file_path(project_name)
+        data = parse_json_data(request)
+        print(data)
+        to_json_file(file_name, data['project'], 'w')
+        content = 'Project saved successfully'
+    except ValueError as error:
+        content = dumps(str(error))
+        logging.error(error)
+    except MultiValueDictKeyError as error:
+        content = 'Data not received .'
+        logging.error(error)
+    return HttpResponse(content, content_type='text/plain')
+
+
+@csrf_exempt
+def delete_user_project(request, project_name):
+    try:
+        user_id = get_user_id(request)
+        manager = DataManager(user_id, STORE_PATH)
+        manager.set_user_id(user_id)
+        manager.delete_user_file(project_name)
+        content = 'User project removed successfully.'
+    except ValueError as error:
+        content = str(error)
+        logging.error(error)
+    return HttpResponse(content, content_type='text/plain')
+
+
+@csrf_exempt
+def update_user_project(request, project_name):
+    try:
+        user_id = get_user_id(request)
+        manager = DataManager(user_id, STORE_PATH)
+        manager.set_user_id(user_id)
+        file_name = manager.get_full_file_path(project_name)
+        data = parse_json_data(request)
+        print(data)
+        to_json_file(file_name, data['project'], 'w')  # or merge ?
+        content = 'Project updated successfully'
+    except ValueError as error:
+        content = dumps(str(error))
+        logging.error(error)
+    except MultiValueDictKeyError as error:
+        content = 'Data not received .'
+        logging.error(error)
+    return HttpResponse(content, content_type='text/plain')

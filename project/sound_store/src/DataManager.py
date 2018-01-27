@@ -52,8 +52,8 @@ class DataManager(metaclass=Singleton):
         except FileExistsError as error:
             logging.error(error)
 
-    def get_user_folder_content(self):
-        return self.manager.get_file_name_folder(self.user_folder)
+    def get_user_folder_content(self, extension=None):
+        return self.manager.get_file_name_folder(self.user_folder, extension)
 
     def delete_user(self):
         self.manager.delete_folder(self.user_folder)
@@ -68,3 +68,9 @@ class DataManager(metaclass=Singleton):
         if self.manager.is_valid_file_path(path):
             result = path
         return result
+
+    def join_file_path(self, file_name):
+        """
+        Join new file with path of user data storage
+        """
+        return os.path.join(self.user_folder, file_name)

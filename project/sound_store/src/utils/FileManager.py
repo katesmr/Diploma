@@ -40,7 +40,7 @@ class FileManager:
         return result
 
     @staticmethod
-    def get_file_name_folder(search_point):
+    def get_file_name_folder(search_point, extension=None):
         """
         :param search_point: str - path from searching will begin
         :return: list - list of folder content with paths of files
@@ -50,7 +50,11 @@ class FileManager:
             for root, dirs, files in os.walk(search_point):
                 for file in files:
                     child = os.path.join(root, file)
-                    result.append(child)
+                    if extension:
+                        if file.endswith(extension):
+                            result.append(child)  # add files only with determined extension
+                    else:
+                        result.append(child)  # add ny files
         except (IOError, OSError) as error:
             logging.error(error)
         return result
