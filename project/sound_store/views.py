@@ -7,13 +7,11 @@ from django.utils.six import BytesIO
 from django.utils.datastructures import MultiValueDictKeyError
 from rest_framework.parsers import JSONParser
 from rest_framework.exceptions import ParseError
-from django.core.files.base import ContentFile
 from django.views.decorators.csrf import csrf_exempt
-from django.core.exceptions import ObjectDoesNotExist
 
 from .UserManager import UserManager
-from .src.DataManager import DataManager
-from .src.utils.helper import parse_json, to_json_file
+from .SoundManager import SoundManager
+from .ProjectManager import ProjectManager
 
 
 def parse_json_data(request):
@@ -93,60 +91,61 @@ def update_user(request, user_id):
 def get_all_user_sounds(request):
     try:
         user_id = get_user_id(request)
-        manager = DataManager(user_id, STORE_PATH)
-        manager.set_user_id(user_id)
-        result = manager.get_user_folder_content()
-        content = dumps(result)
+        sound_manager = SoundManager()
+        content = sound_manager.get(user_id)
+        if content is None:
+            content = 'Impossible show user sound.'
     except ValueError as error:
-        content = dumps(str(error))
+        content = str(error)
         logging.error(error)
-    return HttpResponse(content, content_type='application/json')
+    return HttpResponse(dumps(content), content_type='application/json')
 
 
 @csrf_exempt
 def save_user_sound(request, sound_name):
     try:
         user_id = int(request.POST['user_id'])
-        manager = DataManager(user_id, STORE_PATH)
-        manager.set_user_id(user_id)
-        manager.save_file(sound_name, request.FILES['user_audio'])
-        content = 'User sound saved successfully.'
+        sound_file = request.FILES['user_audio']
+        sound_manager = SoundManager()
+        content = sound_manager.create(user_id, sound_name, sound_file)
+        if content is None:
+            content = 'User sound doesn\'t create.'
     except ValueError as error:
         content = str(error)
         logging.error(error)
     except MultiValueDictKeyError:
         content = 'Invalid id user.'
         logging.error(content)
-    return HttpResponse(content, content_type='text/plain')
+    return HttpResponse(dumps(content), content_type='application/json')
 
 
 @csrf_exempt
 def remove_user_sound(request, sound_name):
     try:
         user_id = get_user_id(request)
-        manager = DataManager(user_id, STORE_PATH)
-        manager.set_user_id(user_id)
-        manager.delete_user_file(sound_name)
-        content = 'User sound removed successfully.'
+        sound_manager = SoundManager()
+        content = sound_manager.delete(user_id, sound_name)
+        if content is None:
+            content = 'User sound doesn\'t delete.'
     except ValueError as error:
         content = str(error)
         logging.error(error)
-    return HttpResponse(content, content_type='text/plain')
+    return HttpResponse(dumps(content), content_type='application/json')
 
 
 @csrf_exempt
 def load_user_sound(request, sound_name):
     try:
         user_id = get_user_id(request)
-        manager = DataManager(user_id, STORE_PATH)
-        manager.set_user_id(user_id)
-        file_name = manager.get_full_file_path(sound_name)
-        file_object = open(file_name, 'rb')
-        file = File(file_object)
-        response_object = HttpResponse(file, content_type='audio/x-wav')
-        response_object['Content-Disposition'] = 'attachment; filename={}'.format(sound_name)
-        response_object['Content-Length'] = file.size
-        file_object.close()
+        sound_manager = SoundManager()
+        file_object = sound_manager.load(user_id, sound_name)
+        if file_object:
+            file = File(file_object)
+            response_object = HttpResponse(file, content_type='audio/x-wav')
+            response_object['Content-Disposition'] = 'attachment; filename={}'.format(sound_name)
+            response_object['Content-Length'] = file.size
+        else:
+            response_object = HttpResponse(status=403)
     except ValueError as error:
         response_object = HttpResponse(str(error), content_type='text/plain', status=403)
         logging.error(error)
@@ -156,24 +155,24 @@ def load_user_sound(request, sound_name):
 def get_all_user_projects(request):
     try:
         user_id = get_user_id(request)
-        manager = DataManager(user_id, STORE_PATH)
-        manager.set_user_id(user_id)
-        result = manager.get_user_folder_content(".json")
-        content = dumps(result)
+        project_manager = ProjectManager()
+        content = project_manager.get(user_id)
+        if content is None:
+            content = 'Impossible show user projects.'
     except ValueError as error:
-        content = dumps(str(error))
+        content = str(error)
         logging.error(error)
-    return HttpResponse(content, content_type='application/json')
+    return HttpResponse(dumps(content), content_type='application/json')
 
 
 def get_user_project(request, project_name):
     try:
         user_id = get_user_id(request)
-        manager = DataManager(user_id, STORE_PATH)
-        manager.set_user_id(user_id)
-        file_name = manager.get_full_file_path(project_name)
-        content = parse_json(file_name)
+        project_manager = ProjectManager()
+        content = project_manager.get_project(user_id, project_name)
         print(content)
+        if content is None:
+            content = 'Impossible show user project.'
     except ValueError as error:
         content = str(error)
         logging.error(error)
@@ -184,13 +183,12 @@ def get_user_project(request, project_name):
 def save_user_project(request, project_name):
     try:
         user_id = get_user_id(request)
-        manager = DataManager(user_id, STORE_PATH)
-        manager.set_user_id(user_id)
-        file_name = manager.join_file_path(project_name)
-        data = parse_json_data(request)
-        print(data)
-        to_json_file(file_name, data['project'], 'w')
-        content = 'Project saved successfully'
+        response = parse_json_data(request)
+        data = response['project']
+        project_manager = ProjectManager()
+        content = project_manager.create(user_id, project_name, data)
+        if content is None:
+            content = 'Project doesn\'t save.'
     except ValueError as error:
         content = dumps(str(error))
         logging.error(error)
@@ -204,10 +202,10 @@ def save_user_project(request, project_name):
 def delete_user_project(request, project_name):
     try:
         user_id = get_user_id(request)
-        manager = DataManager(user_id, STORE_PATH)
-        manager.set_user_id(user_id)
-        manager.delete_user_file(project_name)
-        content = 'User project removed successfully.'
+        project_manager = ProjectManager()
+        content = project_manager.delete(user_id, project_name)
+        if content is None:
+            content = 'Project doesn\'t remove.'
     except ValueError as error:
         content = str(error)
         logging.error(error)
@@ -218,13 +216,12 @@ def delete_user_project(request, project_name):
 def update_user_project(request, project_name):
     try:
         user_id = get_user_id(request)
-        manager = DataManager(user_id, STORE_PATH)
-        manager.set_user_id(user_id)
-        file_name = manager.get_full_file_path(project_name)
-        data = parse_json_data(request)
-        print(data)
-        to_json_file(file_name, data['project'], 'w')  # or merge ?
-        content = 'Project updated successfully'
+        response = parse_json_data(request)
+        data = response['project']
+        project_manager = ProjectManager()
+        content = project_manager.update(user_id, project_name, data)
+        if content is None:
+            content = 'Project doesn\'t update.'
     except ValueError as error:
         content = dumps(str(error))
         logging.error(error)

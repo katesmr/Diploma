@@ -25,11 +25,12 @@ class Users(models.Model):
 
     @staticmethod
     def get_user(user_id):
+        user = None
         try:
             user = Users.objects.get(id=user_id)
-            return user
         except Users.DoesNotExist as error:
             logging.error(error)
+        return user
 
     @staticmethod
     def user_data(user_id):

@@ -54,7 +54,7 @@ $(document).ready(function(){
             }
 			console.error(status);
 		}
-	});*/
+	});
 
 	$.ajax({
 		method: "POST",
@@ -76,13 +76,13 @@ $(document).ready(function(){
             }
 			console.error(status);
 		}
-	});
+	});*/
 
     /*$.ajax({
 		method: "GET",
 		url: "sounds/",
 		dataType: "json",
-		data: {"user_id": 2},
+		data: {"user_id": 4},
 		cache: false,
 		success: function(data){
 			console.log(data);
@@ -101,7 +101,7 @@ $(document).ready(function(){
 		processData: false,
 		success: function(data){
 			playSound(data);
-			console.log("user sound upload successfully");
+			console.log("User sound upload successfully.");
 		},
 		error: function(status){
 			if(status.status === 403 || status.status != 200){
@@ -118,12 +118,12 @@ $(document).ready(function(){
 		var blob = new Blob([audioData], {type: 'audio/x-wav'});
 
 		var formdata = new FormData();
-		formdata.append('user_audio', blob, 'test.wav');
-		formdata.append('user_id', 2);
+		formdata.append('user_audio', blob, 'blabla.wav');
+		formdata.append('user_id', 1);
 
 		$.ajax({
 			method: "POST",
-			url: "sounds/create/new.wav/",
+			url: "sounds/create/blabla.wav/",
 			data: formdata,
 			mimeTypes: "multipart/form-data",
 			contentType: false,
@@ -131,14 +131,15 @@ $(document).ready(function(){
 			processData: false,
 			success: function(data){
 				console.log(data);
+				console.log("Sound created.");
 			},
 			error: function(err){
 				console.error(err);
 			}
 		});
-	});
+	});*/
 
-    $.ajax({
+    /*$.ajax({
 		method: "POST",
 		url: "sounds/delete/test (copy).wav/",
 		dataType: "text",
@@ -149,27 +150,28 @@ $(document).ready(function(){
 		data: JSON.stringify({"user_id": 2}),
 		success: function(data){
 			console.log(data);
+			console.log("Sound deleted.");
 		},
 		error: function(status){
 			console.error(status);
 		}
-	});
+	});*/
 
-	$.ajax({
+	/*$.ajax({
 		method: "POST",
 		url: "sounds/download/test.wav/",
 		cache: false,
-		data: JSON.stringify({"user_id": 1}),
+		data: JSON.stringify({"user_id": 2}),
 		dataType: "binary",
         processData: false,
 		success: function(data){
 			saveData(data, "name.wav");
-			console.log("user sound download successfully");
+			console.log("User sound download successfully");
 		},
 		error: function(status){
 		    // show message from server if status equal status from server
             if(status.status === 403 || status.status != 200){
-                console.log(status.responseText);
+                console.log("Sound doesn't loaded.");
             }
 			console.error(status);
 		}
@@ -201,17 +203,17 @@ $(document).ready(function(){
 		error: function(status){
 			console.error(status);
 		}
-	});
+	});*/
 
-	$.ajax({
+	/*$.ajax({
 		method: "POST",
-		url: "/projects/create/project1.json/",
+		url: "/projects/create/project2.json/",
 		dataType: "text",
 		headers: {
 			'Content-Type':'application/json'
 		},
 		cache: false,
-		data: JSON.stringify({"project": {"stream": ["path", "path"], "name": "", "settings": {}},
+		data: JSON.stringify({"project": {"stream": ["path2", "path2"], "name": "", "settings": {}},
 		                      "user_id": 2}),
 		success: function(data){
 			console.log(data);
@@ -233,14 +235,14 @@ $(document).ready(function(){
 		error: function(status){
 			console.error(status);
 		}
-	});
+	});*/
 
 	$.ajax({
 		method: "POST",
 		url: "/projects/update/project1.json/",
 		dataType: "text",
 		cache: false,
-		data: JSON.stringify({"project": {"stream": ["test", "test"], "name": "", "settings": {}},
+		data: JSON.stringify({"project": {"stream": ["hhh", "dddd"], "name": "", "settings": {}},
 		                      "user_id": 2}),
 		success: function(data){
 			console.log(data);
@@ -248,7 +250,7 @@ $(document).ready(function(){
 		error: function(status){
 			console.error(status);
 		}
-	});*/
+	});
 });
 
 function fetch(url, resolve){

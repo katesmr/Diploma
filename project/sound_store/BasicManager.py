@@ -2,7 +2,7 @@ STORE_PATH = '/home/kate/Public'
 
 
 class BasicManager:
-    def get(self):
+    def get(self, *args):
         pass
 
     def create(self, *args):

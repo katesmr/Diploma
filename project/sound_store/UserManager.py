@@ -31,7 +31,8 @@ class UserManager(BasicManager):
 
     def update(self, user_id, data):
         result = None
-        if Users.objects.filter(id=user_id).exists():
+        user = Users.get_user(user_id)
+        if user is not None:
             user = Users(id=user_id, **data)
             user.save()
             result = Users.user_data(user_id)
