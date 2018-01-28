@@ -1,6 +1,8 @@
+import logging
+from json import dumps, decoder
 from django.core.files import File
 from django.shortcuts import render
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse
 from django.utils.six import BytesIO
 from django.utils.datastructures import MultiValueDictKeyError
 from rest_framework.parsers import JSONParser
@@ -8,17 +10,10 @@ from rest_framework.exceptions import ParseError
 from django.core.files.base import ContentFile
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ObjectDoesNotExist
-from json import dumps, decoder
-import os
-import logging
 
-from .models import Users
-from .serializers import UserSerializer
+from .UserManager import UserManager
 from .src.DataManager import DataManager
 from .src.utils.helper import parse_json, to_json_file
-
-
-STORE_PATH = "/home/kate/Public"
 
 
 def parse_json_data(request):
@@ -59,47 +54,40 @@ def index(request):
 
 
 def get_all_users(request):
-    users_list = Users.objects.all()
-    serializer = UserSerializer(users_list, many=True)
-    return HttpResponse(dumps(serializer.data), content_type='application/json')
+    user_manager = UserManager()
+    data = user_manager.get()
+    return HttpResponse(dumps(data), content_type='application/json')
 
 
 @csrf_exempt
 def create_new_user(request):
-    kwargs = parse_json_data(request)
-    user = Users(**kwargs)
-    user.save()
-    manager = DataManager(user.pk, STORE_PATH)
-    manager.set_user_id(user.pk)
-    manager.create_user_folder()
-    return HttpResponse('User created.', content_type='text/plain')
+    data = parse_json_data(request)
+    user_manager = UserManager()
+    user = user_manager.create(data)
+    return HttpResponse(dumps(user), content_type='application/json')
 
 
 @csrf_exempt
 def delete_user(request, user_id):
-    manager = DataManager(user_id, STORE_PATH)
-    manager.set_user_id(user_id)
-    manager.delete_user()
-    user = Users.get_user(user_id)
-    if user is not None:
-        user.delete()
-        message = 'User deleted.'
+    user_manager = UserManager()
+    user = user_manager.delete(user_id)
+    if user:
+        response = HttpResponse(dumps(user), content_type='application/json')
     else:
-        message = 'User doesn\'t exist.'
-    return HttpResponse(message, content_type='text/plain')
+        response = HttpResponse('Impossible delete user.', content_type='text/plain', status=403)
+    return response
 
 
 @csrf_exempt
 def update_user(request, user_id):
-    if Users.objects.filter(id=user_id).exists():
-        kwargs = parse_json_data(request)
-        user = Users(id=user_id, **kwargs)
-        user.save()
-        message = 'User updated.'
+    data = parse_json_data(request)
+    user_manager = UserManager()
+    user = user_manager.update(user_id, data)
+    if user:
+        response = HttpResponse(dumps(user), content_type='application/json')
     else:
-        message = 'User doesn\'t exist.'
-        # raise ObjectDoesNotExist('User doesn\'t exist ')
-    return HttpResponse(message, content_type='text/plain')
+        response = HttpResponse('Impossible update user.', content_type='text/plain', status=403)
+    return response
 
 
 def get_all_user_sounds(request):

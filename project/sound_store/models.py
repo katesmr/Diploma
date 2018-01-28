@@ -10,8 +10,8 @@ class Users(models.Model):
     gender = models.CharField(max_length=8, null=True, blank=True)
     birthday = models.DateField(null=True, blank=True)
 
-    def __str__(self):
-        return self.name
+    """def __str__(self):
+        return self.name"""
 
     """def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         try:
@@ -30,6 +30,20 @@ class Users(models.Model):
             return user
         except Users.DoesNotExist as error:
             logging.error(error)
+
+    @staticmethod
+    def user_data(user_id):
+        result = {}
+        user_object = Users.objects.get(id=user_id)
+        result['name'] = user_object.name
+        result['email'] = user_object.email
+        result['gender'] = user_object.gender
+        date = user_object.birthday
+        if date:
+            result['birthday'] = date.strftime('%d-%m-%Y')
+        else:
+            result['birthday'] = date
+        return result
 
 
 class Connection(models.Model):

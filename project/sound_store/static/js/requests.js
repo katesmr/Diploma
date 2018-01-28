@@ -23,56 +23,60 @@ $(document).ready(function(){
 	$.ajax({
 		method: "POST",
 		url: "users/create/",
-		dataType: "text",
-		headers: {
-			'Content-Type':'application/json'
-		},
+		dataType: "json",
 		cache: false,
-		data: JSON.stringify({"name": "name",
-		                      "email": "email",
-		                      "gender": "female",
-		                      "birthday": "1987-12-06"}),
+		data: JSON.stringify({"name": "test",
+		                      "email": "email"}),
 		success: function(data){
 			console.log(data);
-		},
-		error: function(status){
-			console.error(status);
-		}
-	});
-
-	$.ajax({
-		method: "POST",
-		url: "/users/delete/3/",
-		dataType: "text",
-		headers: {
-			'Content-Type':'application/json'
-		},
-		cache: false,
-		success: function(data){
-			console.log(data);
-		},
-		error: function(status){
-			console.error(status);
-		}
-	});
-
-	$.ajax({
-		method: "POST",
-		url: "/users/update/2/",
-		dataType: "text",
-		headers: {
-			'Content-Type':'application/json'
-		},
-		cache: false,
-		data: JSON.stringify({"name": "name",
-		                      "email": "email",}),
-		success: function(data){
-			console.log(data);
+			console.log("User created.");
 		},
 		error: function(status){
 			console.error(status);
 		}
 	});*/
+
+	/*$.ajax({
+		method: "POST",
+		url: "/users/delete/3/",
+		dataType: "json",
+		headers: {
+			'Content-Type':'application/json'
+		},
+		cache: false,
+		success: function(data){
+			console.log(data);
+			console.log("User deleted.");
+		},
+		error: function(status){
+		    if(status.status === 403 || status.status != 200){
+                console.log(status.responseText);
+            }
+			console.error(status);
+		}
+	});*/
+
+	$.ajax({
+		method: "POST",
+		url: "/users/update/6/",
+		dataType: "json",
+		headers: {
+			'Content-Type':'application/json'
+		},
+		cache: false,
+		data: JSON.stringify({"name": "new",
+		                      "email": "new",}),
+		success: function(data){
+			console.log(data);
+			console.log("User updated.");
+		},
+		error: function(status){
+            if(status.status === 403 || status.status != 200){
+                console.log(status.responseText);
+            }
+			console.error(status);
+		}
+	});
 
     /*$.ajax({
 		method: "GET",
@@ -97,8 +101,12 @@ $(document).ready(function(){
 		processData: false,
 		success: function(data){
 			playSound(data);
+			console.log("user sound upload successfully");
 		},
 		error: function(status){
+			if(status.status === 403 || status.status != 200){
+                console.log(status.responseText);
+            }
 			console.error(status);
 		}
 	});*/
@@ -167,7 +175,7 @@ $(document).ready(function(){
 		}
 	});*/
 
-	$.ajax({
+	/*$.ajax({
 		method: "GET",
 		url: "projects/",
 		dataType: "json",
@@ -195,7 +203,7 @@ $(document).ready(function(){
 		}
 	});
 
-	/*$.ajax({
+	$.ajax({
 		method: "POST",
 		url: "/projects/create/project1.json/",
 		dataType: "text",
@@ -211,7 +219,7 @@ $(document).ready(function(){
 		error: function(status){
 			console.error(status);
 		}
-	});*/
+	});
 
 	$.ajax({
 		method: "POST",
@@ -240,7 +248,7 @@ $(document).ready(function(){
 		error: function(status){
 			console.error(status);
 		}
-	});
+	});*/
 });
 
 function fetch(url, resolve){
@@ -312,7 +320,7 @@ $.ajaxTransport("+binary", function(options, originalOptions, jqXHR){
 
 function playSound(sound){
 	var context = new AudioContext(); // Create and Initialize the Audio Context
-
+    console.log(sound);
 	window.addEventListener("keydown",onKeyDown); // Create Event Listener for KeyDown
 
 	function onKeyDown(e){
