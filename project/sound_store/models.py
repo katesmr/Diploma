@@ -47,6 +47,15 @@ class Users(models.Model):
         return result
 
 
+class Sounds(models.Model):
+    path = models.CharField(max_length=4096)
+    name = models.CharField(max_length=128)
+    user_id = models.ForeignKey(Users, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
+
+
 class Connection(models.Model):
     provider = models.CharField(max_length=16)
     user_id = models.ForeignKey(Users, on_delete=models.CASCADE)
