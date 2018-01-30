@@ -16,9 +16,11 @@ class UserManager(BasicManager):
         manager = DataManager(user.pk, STORE_PATH)
         manager.set_user_id(user.pk)
         manager.create_user_folder()
-        return Users.user_data(user.pk)
+        result = Users.user_data(user.pk)
+        return result
 
     def delete(self, user_id):
+        result = None
         manager = DataManager(user_id, STORE_PATH)
         manager.set_user_id(user_id)
         manager.delete_user()
@@ -26,16 +28,13 @@ class UserManager(BasicManager):
         if user is not None:
             result = Users.user_data(user_id)
             user.delete()
-        else:
-            raise ValueError('Impossible delete user. Invalid user id. User doesn\'t exist.')
         return result
 
     def update(self, user_id, data):
+        result = None
         user = Users.get_user_object(user_id)
         if user is not None:
             user = Users(id=user_id, **data)
             user.save()
             result = Users.user_data(user_id)
-        else:
-            raise ValueError('Impossible update user. Invalid user id. User doesn\'t exist.')
         return result

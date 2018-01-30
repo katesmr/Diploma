@@ -70,52 +70,48 @@ def create_new_user(request):
 
 @csrf_exempt
 def delete_user(request, user_id):
-    try:
-        user_manager = UserManager()
-        user = user_manager.delete(user_id)
+    user_manager = UserManager()
+    user = user_manager.delete(user_id)
+    if user:
         response = HttpResponse(dumps(user), content_type='application/json')
-    except ValueError as error:
+    else:
         response = BAD_RESPONSE
-        logging.error(error)
     return response
 
 
 @csrf_exempt
 def update_user(request, user_id):
-    try:
-        data = parse_json_data(request)
-        user_manager = UserManager()
-        user = user_manager.update(user_id, data)
+    data = parse_json_data(request)
+    user_manager = UserManager()
+    user = user_manager.update(user_id, data)
+    if user:
         response = HttpResponse(dumps(user), content_type='application/json')
-    except ValueError as error:
+    else:
         response = BAD_RESPONSE
-        logging.error(error)
     return response
 
 
 def get_all_user_sounds(request):
-    try:
-        user_id = get_user_id(request)
-        sound_manager = SoundManager()
-        sounds = sound_manager.get(user_id)
+    user_id = get_user_id(request)
+    sound_manager = SoundManager()
+    sounds = sound_manager.get(user_id)
+    if sounds:
         response = HttpResponse(dumps(sounds), content_type='application/json')
-    except ValueError as error:
+    else:
         response = BAD_RESPONSE
-        logging.error(error)
     return response
 
 
 @csrf_exempt
 def save_user_sound(request, sound_name):
-    try:
-        user_id = int(request.POST['user_id'])
-        sound_file = request.FILES['user_audio']
-        sound_manager = SoundManager()
-        sound = sound_manager.create(user_id, sound_name, sound_file)
+    user_id = int(request.POST['user_id'])
+    sound_file = request.FILES['user_audio']
+    sound_manager = SoundManager()
+    sound = sound_manager.create(user_id, sound_name, sound_file)
+    if sound:
         response = HttpResponse(dumps(sound), content_type='application/json')
-    except (ValueError, MultiValueDictKeyError) as error:
+    else:
         response = BAD_RESPONSE
-        logging.error(error)
     return response
 
 
@@ -134,85 +130,76 @@ def remove_user_sound(request, sound_name):
 
 @csrf_exempt
 def load_user_sound(request, sound_name):
-    try:
-        user_id = get_user_id(request)
-        sound_manager = SoundManager()
-        file_object = sound_manager.load(user_id, sound_name)
-        if file_object:
-            file = File(file_object)
-            response = HttpResponse(file, content_type='audio/x-wav')
-            response['Content-Disposition'] = 'attachment; filename={}'.format(sound_name)
-            response['Content-Length'] = file.size
-        else:
-            response = BAD_RESPONSE
-    except ValueError as error:
+    user_id = get_user_id(request)
+    sound_manager = SoundManager()
+    file_object = sound_manager.load(user_id, sound_name)
+    if file_object:
+        file = File(file_object)
+        response = HttpResponse(file, content_type='audio/x-wav')
+        response['Content-Disposition'] = 'attachment; filename={}'.format(sound_name)
+        response['Content-Length'] = file.size
+    else:
         response = BAD_RESPONSE
-        logging.error(error)
     return response
 
 
 def get_all_user_projects(request):
-    try:
-        user_id = get_user_id(request)
-        project_manager = ProjectManager()
-        projects = project_manager.get(user_id)
+    user_id = get_user_id(request)
+    project_manager = ProjectManager()
+    projects = project_manager.get(user_id)
+    if projects:
         response = HttpResponse(dumps(projects), content_type='application/json')
-    except ValueError as error:
+    else:
         response = BAD_RESPONSE
-        logging.error(error)
     return response
 
 
 def get_user_project(request, project_name):
-    try:
-        user_id = get_user_id(request)
-        project_manager = ProjectManager()
-        project = project_manager.get_project(user_id, project_name)
+    user_id = get_user_id(request)
+    project_manager = ProjectManager()
+    project = project_manager.get_project(user_id, project_name)
+    if project:
         response = HttpResponse(dumps(project), content_type='application/json')
-    except ValueError as error:
+    else:
         response = BAD_RESPONSE
-        logging.error(error)
     return response
 
 
 @csrf_exempt
 def save_user_project(request, project_name):
-    try:
-        user_id = get_user_id(request)
-        response = parse_json_data(request)
-        data = response['project']
-        project_manager = ProjectManager()
-        project = project_manager.create(user_id, project_name, data)
+    user_id = get_user_id(request)
+    response = parse_json_data(request)
+    data = response['project']
+    project_manager = ProjectManager()
+    project = project_manager.create(user_id, project_name, data)
+    if project:
         response = HttpResponse(dumps(project), content_type='application/json')
-    except (ValueError, MultiValueDictKeyError) as error:
+    else:
         response = BAD_RESPONSE
-        logging.error(error)
     return response
 
 
 @csrf_exempt
 def delete_user_project(request, project_name):
-    try:
-        user_id = get_user_id(request)
-        project_manager = ProjectManager()
-        project = project_manager.delete(user_id, project_name)
+    user_id = get_user_id(request)
+    project_manager = ProjectManager()
+    project = project_manager.delete(user_id, project_name)
+    if project:
         response = HttpResponse(dumps(project), content_type='application/json')
-    except ValueError as error:
+    else:
         response = BAD_RESPONSE
-        logging.error(error)
     return response
 
 
 @csrf_exempt
 def update_user_project(request, project_name):
-    try:
-        user_id = get_user_id(request)
-        response = parse_json_data(request)
-        data = response['project']
-        project_manager = ProjectManager()
-        project = project_manager.update(user_id, project_name, data)
+    user_id = get_user_id(request)
+    response = parse_json_data(request)
+    data = response['project']
+    project_manager = ProjectManager()
+    project = project_manager.update(user_id, project_name, data)
+    if project:
         response = HttpResponse(dumps(project), content_type='application/json')
-    except (ValueError, MultiValueDictKeyError) as error:
+    else:
         response = BAD_RESPONSE
-        logging.error(error)
     return response

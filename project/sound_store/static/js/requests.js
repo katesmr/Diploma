@@ -4,7 +4,7 @@ $(document).ready(function(){
 
 	// var context = new (window.AudioContext || window.webkitAudioContext)();
 
-	/*$.ajax({
+	$.ajax({
 		method: "GET",
 		url: "users/",
 		dataType: "json",
@@ -20,7 +20,7 @@ $(document).ready(function(){
 		}
 	});
 
-	$.ajax({
+	/*$.ajax({
 		method: "POST",
 		url: "users/create/",
 		dataType: "json",
@@ -70,7 +70,7 @@ $(document).ready(function(){
 		}
 	});*/
 
-    /*$.ajax({
+    $.ajax({
 		method: "GET",
 		url: "sounds/",
 		dataType: "json",
@@ -82,7 +82,7 @@ $(document).ready(function(){
 		error: function(status){
 			console.error(status);
 		}
-	});*/
+	});
 
 	/*$.ajax({
 		method: "POST",
@@ -144,7 +144,7 @@ $(document).ready(function(){
 		}
 	});*/
 
-	$.ajax({
+	/*$.ajax({
 		method: "POST",
 		url: "sounds/download/test.wav/",
 		cache: false,
@@ -157,9 +157,9 @@ $(document).ready(function(){
 		error: function(status){
 			console.error(status);
 		}
-	});
+	});*/
 
-	/*$.ajax({
+	$.ajax({
 		method: "GET",
 		url: "projects/",
 		dataType: "json",
@@ -185,7 +185,7 @@ $(document).ready(function(){
 		error: function(status){
 			console.error(status);
 		}
-	});*/
+	});
 
 	/*$.ajax({
 		method: "POST",
