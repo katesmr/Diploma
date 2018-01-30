@@ -1,4 +1,4 @@
-from .models import Users
+from .models import Users, Sounds
 from .src.DataManager import DataManager
 from .BasicManager import BasicManager, STORE_PATH
 
@@ -9,18 +9,22 @@ class SoundManager(BasicManager):
         if user is not None:
             manager = DataManager(user_id, STORE_PATH)
             manager.set_user_id(user_id)
-            result = manager.get_user_folder_content()
+            result = Sounds.sound_data(user_id)
         else:
             raise ValueError('Impossible show user sound. User doesn\'t exist.')
         return result
 
     def create(self, user_id, sound_name, file):
         user = Users.get_user(user_id)
+        print(user)
         if user is not None:
             manager = DataManager(user_id, STORE_PATH)
             manager.set_user_id(user_id)
             manager.save_file(sound_name, file)
-            result = sound_name
+            full_sound_path = manager.get_full_file_path(sound_name)
+            sound = Sounds(path=full_sound_path, name=sound_name, user_id=user)
+            sound.save()
+            result = Sounds.sound_data_by_id(sound.pk)
         else:
             raise ValueError('Impossible create user sound. User doesn\'t exist.')
         return result
@@ -48,7 +52,7 @@ class SoundManager(BasicManager):
             file_name = manager.get_full_file_path(sound_name)
             if file_name:
                 file_object = open(file_name, 'rb')
-                result = file_object
+                result = Sounds.sound_data_by_name(user_id, sound_name)
             else:
                 ValueError('Impossible update user sound. Sound doesn\'t exist.')
         else:

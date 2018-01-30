@@ -70,11 +70,11 @@ $(document).ready(function(){
 		}
 	});*/
 
-    /*$.ajax({
+    $.ajax({
 		method: "GET",
 		url: "sounds/",
 		dataType: "json",
-		data: {"user_id": 2},
+		data: {"user_id": 1},
 		cache: false,
 		success: function(data){
 			console.log(data);
@@ -82,7 +82,7 @@ $(document).ready(function(){
 		error: function(status){
 			console.error(status);
 		}
-	});*/
+	});
 
 	/*$.ajax({
 		method: "POST",
@@ -99,22 +99,23 @@ $(document).ready(function(){
 		}
 	});*/
 
-	/*var audioSrc = 'static/audio/Hit_Hurt10.wav'
+	var audioSrc = 'static/audio/Hit_Hurt10.wav'
 
 	fetch(audioSrc, function(request){
 		var audioData = request.response;
 		var blob = new Blob([audioData], {type: 'audio/x-wav'});
 
 		var formdata = new FormData();
-		formdata.append('user_audio', blob, 'blabla.wav');
+		formdata.append('user_audio', blob, 'test.wav');
 		formdata.append('user_id', 1);
 
 		$.ajax({
 			method: "POST",
-			url: "sounds/create/blabla.wav/",
+			url: "sounds/create/test.wav/",
 			data: formdata,
 			mimeTypes: "multipart/form-data",
 			contentType: false,
+			dataType: "json",
 			cache: false,
 			processData: false,
 			success: function(data){
@@ -126,7 +127,7 @@ $(document).ready(function(){
 		});
 	});
 
-    $.ajax({
+    /*$.ajax({
 		method: "POST",
 		url: "sounds/delete/test (copy).wav/",
 		dataType: "text",
@@ -186,7 +187,7 @@ $(document).ready(function(){
 		}
 	});*/
 
-	$.ajax({
+	/*$.ajax({
 		method: "POST",
 		url: "/projects/create/project2.json/",
 		dataType: "text",
@@ -231,7 +232,7 @@ $(document).ready(function(){
 		error: function(status){
 			console.error(status);
 		}
-	});
+	});*/
 });
 
 function fetch(url, resolve){
