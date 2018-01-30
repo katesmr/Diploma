@@ -22,7 +22,7 @@ class UserManager(BasicManager):
         manager = DataManager(user_id, STORE_PATH)
         manager.set_user_id(user_id)
         manager.delete_user()
-        user = Users.get_user(user_id)
+        user = Users.get_user_object(user_id)
         if user is not None:
             result = Users.user_data(user_id)
             user.delete()
@@ -31,7 +31,7 @@ class UserManager(BasicManager):
         return result
 
     def update(self, user_id, data):
-        user = Users.get_user(user_id)
+        user = Users.get_user_object(user_id)
         if user is not None:
             user = Users(id=user_id, **data)
             user.save()

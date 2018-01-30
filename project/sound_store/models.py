@@ -24,7 +24,7 @@ class Users(models.Model):
         pass
 
     @staticmethod
-    def get_user(user_id):
+    def get_user_object(user_id):
         user = None
         try:
             user = Users.objects.get(id=user_id)
@@ -34,16 +34,18 @@ class Users(models.Model):
 
     @staticmethod
     def user_data(user_id):
-        result = {}
-        user_object = Users.objects.get(id=user_id)
-        result['name'] = user_object.name
-        result['email'] = user_object.email
-        result['gender'] = user_object.gender
-        date = user_object.birthday
-        if date:
-            result['birthday'] = date.strftime('%d-%m-%Y')
-        else:
-            result['birthday'] = date
+        result = None
+        user_object = Users.get_user_object(user_id)
+        if user_object:
+            result = dict()
+            result['name'] = user_object.name
+            result['email'] = user_object.email
+            result['gender'] = user_object.gender
+            date = user_object.birthday
+            if date:
+                result['birthday'] = date.strftime('%d-%m-%Y')
+            else:
+                result['birthday'] = date
         return result
 
 
@@ -53,43 +55,45 @@ class Sounds(models.Model):
     user_id = models.ForeignKey(Users, on_delete=models.CASCADE)
 
     @staticmethod
-    def sound_data(user_id):
-        result = None
+    def get_sound_object(sound_id):
+        sound = None
         try:
-            user_sounds = Sounds.objects.filter(user_id=user_id)
-            result = dict()
-            for sound in user_sounds:
-                print(sound)
-                result[sound.id] = dict()
-                result[sound.id]['path'] = sound.path
-                result[sound.id]['name'] = sound.name
-                result[sound.id]['user_id'] = sound.user_id.id
-        except (TypeError, Sounds.DoesNotExist) as error:
+            sound = Sounds.objects.get(id=sound_id)
+        except Sounds.DoesNotExist as error:
             logging.error(error)
+        return sound
+
+    @staticmethod
+    def sound_data(user_id):
+        result = dict()
+        user_sounds = Sounds.objects.filter(user_id=user_id)
+        for sound in user_sounds:
+            result[sound.id] = dict()
+            result[sound.id]['path'] = sound.path
+            result[sound.id]['name'] = sound.name
+            result[sound.id]['user_id'] = sound.user_id.id
         return result
 
     @staticmethod
     def sound_data_by_name(user_id, name):
-        result = {}
-        user_sound = Sounds.objects.filter(user_id=user_id, name=name)
-        if user_sound:
-            result['path'] = user_sound.path
-            result['name'] = user_sound.name
-            result['user_id'] = user_sound.user_id.id
+        result = dict()
+        sound_object = Sounds.objects.filter(user_id=user_id, name=name)
+        for sound in sound_object:
+            result['id'] = sound.id
+            result['path'] = sound.path
+            result['name'] = sound.name
+            result['user_id'] = sound.user_id.id
         return result
 
     @staticmethod
     def sound_data_by_id(sound_id):
-        result = None
-        try:
-            sound_object = Sounds.objects.get(id=sound_id)
-            if sound_object:
-                result = dict()
-                result['path'] = sound_object.path
-                result['name'] = sound_object.name
-                result['user_id'] = sound_object.user_id.id
-        except (TypeError, Sounds.DoesNotExist) as error:
-            logging.error(error)
+        result = dict()
+        sound_object = Sounds.get_sound_object(sound_id)
+        if sound_object:
+            result['id'] = sound_object.id
+            result['path'] = sound_object.path
+            result['name'] = sound_object.name
+            result['user_id'] = sound_object.user_id.id
         return result
 
 

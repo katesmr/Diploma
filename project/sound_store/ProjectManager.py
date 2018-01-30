@@ -6,7 +6,7 @@ from .src.utils.helper import parse_json, to_json_file
 
 class ProjectManager(BasicManager):
     def get(self, user_id):
-        user = Users.get_user(user_id)
+        user = Users.get_user_object(user_id)
         if user is not None:
             manager = DataManager(user_id, STORE_PATH)
             manager.set_user_id(user_id)
@@ -16,7 +16,7 @@ class ProjectManager(BasicManager):
         return result
 
     def get_project(self, user_id, project_name):
-        user = Users.get_user(user_id)
+        user = Users.get_user_object(user_id)
         if user is not None:
             manager = DataManager(user_id, STORE_PATH)
             manager.set_user_id(user_id)
@@ -30,7 +30,7 @@ class ProjectManager(BasicManager):
         return result
 
     def create(self, user_id, project_name, data):
-        user = Users.get_user(user_id)
+        user = Users.get_user_object(user_id)
         if user is not None:
             manager = DataManager(user_id, STORE_PATH)
             manager.set_user_id(user_id)
@@ -42,7 +42,7 @@ class ProjectManager(BasicManager):
         return result
 
     def delete(self, user_id, project_name):
-        user = Users.get_user(user_id)
+        user = Users.get_user_object(user_id)
         if user is not None:
             manager = DataManager(user_id, STORE_PATH)
             manager.set_user_id(user_id)
@@ -53,7 +53,7 @@ class ProjectManager(BasicManager):
         return result
 
     def update(self, user_id, project_name, data):
-        user = Users.get_user(user_id)
+        user = Users.get_user_object(user_id)
         if user is not None:
             manager = DataManager(user_id, STORE_PATH)
             manager.set_user_id(user_id)
