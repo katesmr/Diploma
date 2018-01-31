@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path,include
 from . import views
 
 urlpatterns = [
@@ -17,6 +17,8 @@ urlpatterns = [
     path('projects/create/<str:project_name>/', views.save_user_project),
     path('projects/delete/<str:project_name>/', views.delete_user_project),
     path('projects/update/<str:project_name>/', views.update_user_project),
+
+    path('accounts/', include('allauth.urls')),
 ]
 
 
