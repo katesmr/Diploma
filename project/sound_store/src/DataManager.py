@@ -60,7 +60,8 @@ class DataManager(metaclass=Singleton):
 
     def delete_user_file(self, file_name):
         path = os.path.join(self.user_folder, file_name)
-        self.manager.delete_file(path)
+        is_deleted = self.manager.delete_file(path)
+        return is_deleted
 
     def get_full_file_path(self, file_name):
         result = None

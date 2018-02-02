@@ -93,14 +93,17 @@ class FileManager:
         :param path: str - path to file
         :return: void
         """
+        is_deleted = False
         try:
             if self.is_valid_file_path(path):
                 try:
                     os.remove(path)
+                    is_deleted = True
                 except OSError as error:
                     logging.error(error)
         except TypeError as error:
             logging.error(error)
+        return is_deleted
 
     def delete_folder(self, path):
         """

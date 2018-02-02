@@ -1,4 +1,4 @@
-from .models import Users
+from .models import UserData
 from .src.DataManager import DataManager
 from .BasicManager import BasicManager, STORE_PATH
 from .src.utils.helper import parse_json, to_json_file
@@ -7,7 +7,7 @@ from .src.utils.helper import parse_json, to_json_file
 class ProjectManager(BasicManager):
     def get(self, user_id):
         result = None
-        user = Users.get_user_object(user_id)
+        user = UserData.get_user_object(user_id)
         if user is not None:
             manager = DataManager(user_id, STORE_PATH)
             manager.set_user_id(user_id)
@@ -16,7 +16,7 @@ class ProjectManager(BasicManager):
 
     def get_project(self, user_id, project_name):
         result = None
-        user = Users.get_user_object(user_id)
+        user = UserData.get_user_object(user_id)
         if user is not None:
             manager = DataManager(user_id, STORE_PATH)
             manager.set_user_id(user_id)
@@ -27,7 +27,7 @@ class ProjectManager(BasicManager):
 
     def create(self, user_id, project_name, data):
         result = None
-        user = Users.get_user_object(user_id)
+        user = UserData.get_user_object(user_id)
         if user is not None:
             manager = DataManager(user_id, STORE_PATH)
             manager.set_user_id(user_id)
@@ -38,17 +38,18 @@ class ProjectManager(BasicManager):
 
     def delete(self, user_id, project_name):
         result = None
-        user = Users.get_user_object(user_id)
+        user = UserData.get_user_object(user_id)
         if user is not None:
             manager = DataManager(user_id, STORE_PATH)
             manager.set_user_id(user_id)
-            manager.delete_user_file(project_name)   # FIXME if sound already deleted
-            result = project_name
+            is_deleted = manager.delete_user_file(project_name)
+            if is_deleted is True:
+                result = project_name
         return result
 
     def update(self, user_id, project_name, data):
         result = None
-        user = Users.get_user_object(user_id)
+        user = UserData.get_user_object(user_id)
         if user is not None:
             manager = DataManager(user_id, STORE_PATH)
             manager.set_user_id(user_id)

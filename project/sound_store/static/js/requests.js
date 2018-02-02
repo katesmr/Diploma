@@ -74,7 +74,7 @@ $(document).ready(function(){
 		method: "GET",
 		url: "sounds/",
 		dataType: "json",
-		data: {"user_id": 1},
+		data: {"user_id": 2},
 		cache: false,
 		success: function(data){
 			console.log(data);
@@ -159,7 +159,7 @@ $(document).ready(function(){
 		}
 	});*/
 
-	$.ajax({
+	/*$.ajax({
 		method: "GET",
 		url: "projects/",
 		dataType: "json",
@@ -185,7 +185,7 @@ $(document).ready(function(){
 		error: function(status){
 			console.error(status);
 		}
-	});
+	});*/
 
 	/*$.ajax({
 		method: "POST",
