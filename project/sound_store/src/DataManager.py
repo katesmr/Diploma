@@ -15,10 +15,10 @@ class DataManager(metaclass=Singleton):
             # assert isinstance(user_id, int)
             assert isinstance(storehouse_path, str)
             if is_key(user_id):
-                self.manager = FileManager()
+                self.file_manager = FileManager()
                 self.__user_id = str(user_id)
                 self.user_folder = None
-                if self.manager.is_valid_folder_path(storehouse_path):
+                if self.file_manager.is_valid_existing_folder_path(storehouse_path):
                     self.storehouse_path = storehouse_path
                     self.update_user_path()
                 else:
@@ -44,29 +44,29 @@ class DataManager(metaclass=Singleton):
 
     def save_file(self, file_name, file_object):
         path = os.path.join(self.user_folder, file_name)
-        self.manager.create_file(path, file_object)
+        self.file_manager.create_file(path, file_object)
 
     def create_user_folder(self):
         try:
-            self.manager.create_folder(self.user_folder)
+            self.file_manager.create_folder(self.user_folder)
         except FileExistsError as error:
             logging.error(error)
 
     def get_user_folder_content(self, extension=None):
-        return self.manager.get_file_name_folder(self.user_folder, extension)
+        return self.file_manager.get_file_name_folder(self.user_folder, extension)
 
     def delete_user(self):
-        self.manager.delete_folder(self.user_folder)
+        self.file_manager.delete_folder(self.user_folder)
 
     def delete_user_file(self, file_name):
         path = os.path.join(self.user_folder, file_name)
-        is_deleted = self.manager.delete_file(path)
+        is_deleted = self.file_manager.delete_file(path)
         return is_deleted
 
     def get_full_file_path(self, file_name):
         result = None
         path = os.path.join(self.user_folder, file_name)
-        if self.manager.is_valid_file_path(path):
+        if self.file_manager.is_valid_existing_file_path(path):
             result = path
         return result
 

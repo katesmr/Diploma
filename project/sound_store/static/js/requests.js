@@ -4,77 +4,10 @@ $(document).ready(function(){
 
 	// var context = new (window.AudioContext || window.webkitAudioContext)();
 
-	$.ajax({
-		method: "GET",
-		url: "users/",
-		dataType: "json",
-		headers: {
-			'Content-Type':'application/json'
-		},
-		cache: false,
-		success: function(data){
-			console.log(data);
-		},
-		error: function(status){
-			console.error(status);
-		}
-	});
-
-	/*$.ajax({
-		method: "POST",
-		url: "users/create/",
-		dataType: "json",
-		cache: false,
-		data: JSON.stringify({"name": "test",
-		                      "email": "email"}),
-		success: function(data){
-			console.log(data);
-			console.log("User created.");
-		},
-		error: function(status){
-			console.error(status);
-		}
-	});*/
-
-	/*$.ajax({
-		method: "POST",
-		url: "/users/delete/3/",
-		dataType: "json",
-		headers: {
-			'Content-Type':'application/json'
-		},
-		cache: false,
-		success: function(data){
-			console.log(data);
-		},
-		error: function(status){
-			console.error(status);
-		}
-	});
-
-	$.ajax({
-		method: "POST",
-		url: "/users/update/6/",
-		dataType: "json",
-		headers: {
-			'Content-Type':'application/json'
-		},
-		cache: false,
-		data: JSON.stringify({"name": "new",
-		                      "email": "new",}),
-		success: function(data){
-			console.log(data);
-		},
-		error: function(status){
-			console.error(status);
-		}
-	});*/
-
     $.ajax({
 		method: "GET",
 		url: "sounds/",
 		dataType: "json",
-		data: {"user_id": 2},
 		cache: false,
 		success: function(data){
 			console.log(data);
@@ -106,12 +39,11 @@ $(document).ready(function(){
 		var blob = new Blob([audioData], {type: 'audio/x-wav'});
 
 		var formdata = new FormData();
-		formdata.append('user_audio', blob, 'new.wav');
-		formdata.append('user_id', 1);
+		formdata.append('user_audio', blob, 'test.wav');
 
 		$.ajax({
 			method: "POST",
-			url: "sounds/create/new.wav/",
+			url: "sounds/create/test.wav/",
 			data: formdata,
 			mimeTypes: "multipart/form-data",
 			contentType: false,
@@ -159,11 +91,10 @@ $(document).ready(function(){
 		}
 	});*/
 
-	/*$.ajax({
+	$.ajax({
 		method: "GET",
 		url: "projects/",
 		dataType: "json",
-		data: {"user_id": 2},
 		cache: false,
 		success: function(data){
 			console.log(data);
@@ -177,26 +108,7 @@ $(document).ready(function(){
 		method: "GET",
 		url: "projects/test.json/",
 		dataType: "json",
-		data: {"user_id": 2},
 		cache: false,
-		success: function(data){
-			console.log(data);
-		},
-		error: function(status){
-			console.error(status);
-		}
-	});*/
-
-	/*$.ajax({
-		method: "POST",
-		url: "/projects/create/project2.json/",
-		dataType: "text",
-		headers: {
-			'Content-Type':'application/json'
-		},
-		cache: false,
-		data: JSON.stringify({"project": {"stream": ["path2", "path2"], "name": "", "settings": {}},
-		                      "user_id": 5}),
 		success: function(data){
 			console.log(data);
 		},
@@ -206,6 +118,23 @@ $(document).ready(function(){
 	});
 
 	$.ajax({
+		method: "POST",
+		url: "/projects/create/project2.json/",
+		dataType: "text",
+		headers: {
+			'Content-Type':'application/json'
+		},
+		cache: false,
+		data: JSON.stringify({"stream": ["path", "path"], "settings": {"key": "value"}}),
+		success: function(data){
+			console.log(data);
+		},
+		error: function(status){
+			console.error(status);
+		}
+	});
+
+	/*$.ajax({
 		method: "POST",
 		url: "/projects/delete/test.json/",
 		dataType: "text",
@@ -224,8 +153,7 @@ $(document).ready(function(){
 		url: "/projects/update/project1.json/",
 		dataType: "text",
 		cache: false,
-		data: JSON.stringify({"project": {"stream": ["hhh", "dddd"], "name": "", "settings": {}},
-		                      "user_id": 2}),
+		data: JSON.stringify({"stream": ["hhh", "dddd"], "settings": {}}),
 		success: function(data){
 			console.log(data);
 		},

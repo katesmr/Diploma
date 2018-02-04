@@ -8,7 +8,7 @@ class FileManager:
     File and folder
     """
     @staticmethod
-    def is_valid_file_path(path):
+    def is_valid_existing_file_path(path):
         """
         :param path: str - path of file which need to check
         :return: boolean
@@ -24,7 +24,7 @@ class FileManager:
         return result
 
     @staticmethod
-    def is_valid_folder_path(path):
+    def is_valid_existing_folder_path(path):
         """
         :param path: str - path of folder which need to check
         :return: boolean
@@ -95,7 +95,7 @@ class FileManager:
         """
         is_deleted = False
         try:
-            if self.is_valid_file_path(path):
+            if self.is_valid_existing_file_path(path):
                 try:
                     os.remove(path)
                     is_deleted = True
@@ -112,7 +112,7 @@ class FileManager:
         :return: void
         """
         try:
-            if self.is_valid_folder_path(path):
+            if self.is_valid_existing_folder_path(path):
                 shutil.rmtree(path)
         except TypeError as error:
             logging.error(error)
