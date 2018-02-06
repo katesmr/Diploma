@@ -49,8 +49,12 @@ def get_user_id(request):
     return user_id
 
 
-def index(request):
-    return render(request, "index.html")
+def authorization_page(request):
+    return render(request, 'authorization.html')
+
+
+def main_page(request):
+    return render(request, 'index.html')
 
 
 def get_all_user_sounds(request):

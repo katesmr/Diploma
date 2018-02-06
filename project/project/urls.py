@@ -15,8 +15,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from sound_store import views
 
 urlpatterns = [
-    path('', include('sound_store.urls')),
+    path('', views.authorization_page),
+    path('page/', include('sound_store.urls')),
     path('admin/', admin.site.urls),
+    path('accounts/', include('allauth.urls')),
 ]

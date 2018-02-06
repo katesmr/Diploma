@@ -34,7 +34,7 @@ class UserData(User):
 class Sounds(models.Model):
     path = models.CharField(max_length=4096)
     name = models.CharField(max_length=128)
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     @staticmethod
     def sound_object(sound_id):
@@ -53,7 +53,7 @@ class Sounds(models.Model):
             result[sound.id] = dict()
             result[sound.id]['path'] = sound.path
             result[sound.id]['name'] = sound.name
-            # result[sound.id]['user_id'] = sound.user_id.id
+            # result[sound.id]['user_id'] = sound.user.id
         return result
 
     @staticmethod
@@ -64,8 +64,8 @@ class Sounds(models.Model):
             result['id'] = sound.id
             result['path'] = sound.path
             result['name'] = sound.name
-            # sound.user_id - return object of corresponding user
-            result['user_id'] = sound.user_id.id
+            # sound.user - return object of corresponding user
+            result['user_id'] = sound.user.id
         return result
 
     @staticmethod
@@ -76,8 +76,8 @@ class Sounds(models.Model):
             result['id'] = sound_object.id
             result['path'] = sound_object.path
             result['name'] = sound_object.name
-            # sound_object.user_id - return object of corresponding user
-            result['user_id'] = sound_object.user_id.id
+            # sound_object.user - return object of corresponding user
+            result['user_id'] = sound_object.user.id
         return result
 
 
@@ -86,7 +86,7 @@ class Projects(models.Model):
     name = models.CharField(max_length=128)
     stream = ArrayField(models.CharField(max_length=200))
     settings = JSONField(max_length=128)
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     @staticmethod
     def project_object(project_id):
@@ -119,6 +119,6 @@ class Projects(models.Model):
             result['name'] = project.name
             result['stream'] = project.stream
             result['settings'] = project.settings
-            # project.user_id - return object of corresponding user
-            result['user_id'] = project.user_id.id
+            # project.user - return object of corresponding user
+            result['user_id'] = project.user.id
         return result

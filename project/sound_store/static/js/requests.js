@@ -117,9 +117,9 @@ $(document).ready(function(){
 		}
 	});
 
-	$.ajax({
+	/*$.ajax({
 		method: "POST",
-		url: "/projects/create/project2.json/",
+		url: "projects/create/project0.json/",
 		dataType: "text",
 		headers: {
 			'Content-Type':'application/json'
@@ -132,11 +132,11 @@ $(document).ready(function(){
 		error: function(status){
 			console.error(status);
 		}
-	});
+	});*/
 
 	/*$.ajax({
 		method: "POST",
-		url: "/projects/delete/test.json/",
+		url: "projects/delete/test.json/",
 		dataType: "text",
 		cache: false,
 		data: JSON.stringify({"user_id": 2}),
@@ -150,7 +150,7 @@ $(document).ready(function(){
 
 	$.ajax({
 		method: "POST",
-		url: "/projects/update/project1.json/",
+		url: "projects/update/project1.json/",
 		dataType: "text",
 		cache: false,
 		data: JSON.stringify({"stream": ["hhh", "dddd"], "settings": {}}),

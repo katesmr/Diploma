@@ -25,7 +25,7 @@ class SoundManager(BasicManager):
                 self.manager.create_user_folder()
             self.manager.save_file(sound_name, file)
             full_sound_path = self.manager.get_full_file_path(sound_name)
-            sound = Sounds(path=full_sound_path, name=sound_name, user_id=user)
+            sound = Sounds(path=full_sound_path, name=sound_name, user=user)
             sound.save()
             result = Sounds.sound_data_by_id(sound.pk)
         return result

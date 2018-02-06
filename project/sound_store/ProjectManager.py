@@ -28,7 +28,7 @@ class ProjectManager(BasicManager):
             self.manager.set_user_id(user_id)
             file_name = self.manager.join_file_path(project_name)
             to_json_file(file_name, data, 'w')  # check if invalid data
-            new_project = Projects(path=file_name, name=project_name, user_id=user, **data)
+            new_project = Projects(path=file_name, name=project_name, user=user, **data)
             new_project.save()
             result = project_name
         return result
@@ -57,7 +57,7 @@ class ProjectManager(BasicManager):
                 project_id = project_data['id']
                 if file_name:
                     to_json_file(file_name, data, 'w')  # move to FileManager
-                    updating_project = Projects(id=project_id, path=file_name, name=project_name, user_id=user, **data)
+                    updating_project = Projects(id=project_id, path=file_name, name=project_name, user=user, **data)
                     updating_project.save()
                     result = project_name
         return result
