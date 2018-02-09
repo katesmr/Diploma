@@ -4,11 +4,10 @@ from django.core.files import File
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.utils.six import BytesIO
-from django.utils.datastructures import MultiValueDictKeyError
 from rest_framework.parsers import JSONParser
 from rest_framework.exceptions import ParseError
 from django.views.decorators.csrf import csrf_exempt
-
+from django.utils.datastructures import MultiValueDictKeyError
 from .SoundManager import SoundManager
 from .ProjectManager import ProjectManager
 
@@ -97,6 +96,7 @@ def load_user_sound(request, sound_name):
     file_object = sound_manager.load(request.user.id, sound_name)
     if file_object is not None:
         file = File(file_object)
+        print(file)
         response = HttpResponse(file, content_type='audio/x-wav')
         response['Content-Disposition'] = 'attachment; filename={}'.format(sound_name)
         response['Content-Length'] = file.size

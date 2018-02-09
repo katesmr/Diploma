@@ -1,7 +1,6 @@
 from .models import UserData, Projects
 from .src.DataManager import DataManager
 from .BasicManager import BasicManager, STORE_PATH
-from .src.utils.helper import to_json_file
 
 
 class ProjectManager(BasicManager):
@@ -26,9 +25,9 @@ class ProjectManager(BasicManager):
         user = UserData.user_object(user_id)
         if user is not None:
             self.manager.set_user_id(user_id)
-            file_name = self.manager.join_file_path(project_name)
-            to_json_file(file_name, data, 'w')  # check if invalid data
-            new_project = Projects(path=file_name, name=project_name, user=user, **data)
+            self.manager.save_json_file(project_name, data)
+            project_path = self.manager.get_full_file_path(project_name)
+            new_project = Projects(path=project_path, name=project_name, user=user, **data)
             new_project.save()
             result = project_name
         return result
@@ -51,13 +50,12 @@ class ProjectManager(BasicManager):
         user = UserData.user_object(user_id)
         if user is not None:
             self.manager.set_user_id(user_id)
-            file_name = self.manager.get_full_file_path(project_name)
             project_data = Projects.project_data_by_name(user_id, project_name)
-            if project_data is not None:
+            if project_data and project_data is not None:
                 project_id = project_data['id']
-                if file_name:
-                    to_json_file(file_name, data, 'w')  # move to FileManager
-                    updating_project = Projects(id=project_id, path=file_name, name=project_name, user=user, **data)
-                    updating_project.save()
-                    result = project_name
+                self.manager.save_json_file(project_name, data)
+                project_path = self.manager.get_full_file_path(project_name)
+                updating_project = Projects(id=project_id, path=project_path, name=project_name, user=user, **data)
+                updating_project.save()
+                result = project_name
         return result

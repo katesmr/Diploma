@@ -1,39 +1,6 @@
+import os
+import time
 import logging
-from json import load, dump
-
-
-def parse_json(file_name):
-    """
-        @param file_name {String}
-        @return {Dict} - returns deserialized json object like dictionary, else returns empty dictionary
-    """
-    result = {}
-    try:
-        with open(file_name) as jsonData:
-            try:
-                result = load(jsonData)
-            except ValueError:
-                logging.error("Invalid json file '{}'".format(file_name))
-    except FileNotFoundError:
-        logging.warning("File '{}' don't exist".format(file_name))
-    return result
-
-
-def to_json_file(file_name, data, mode):
-        """
-            @param file_name {String}
-            @param data {Dict}
-            @mode {String}
-            @return {void} - write data in json
-        """
-        try:
-            with open(file_name, mode) as file:
-                try:
-                    dump(data, file, indent=4)
-                except TypeError:
-                    logging.error("'{}' is not JSON serializable".format(data))
-        except OSError as err:
-            logging.error(err)
 
 
 def is_integer(number):
@@ -62,3 +29,16 @@ def is_key(number):
         if int(number) > 0:
             res = True
     return res
+
+
+def create_unique_file_name(file_name):
+    """
+    :param file_name: str
+    :return: str - file name with
+    """
+    current_time = int(time.time())
+    splitting_file_name = os.path.splitext(file_name)
+    # os.path.splitext return cortege, where first value is file name, second value is file extension
+    new_file_name = splitting_file_name[0] + str(current_time) + splitting_file_name[1]
+    return new_file_name
+

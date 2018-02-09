@@ -1,6 +1,7 @@
 import os
 import shutil
 import logging
+from json import load, dump
 
 
 class FileManager:
@@ -73,15 +74,14 @@ class FileManager:
         except (IOError, OSError, FileNotFoundError) as error:
             logging.error(error)
 
-    @staticmethod
-    def create_folder(path):
+    def create_folder(self, path):
         """
         Create empty folder
         :param path: str - name of new folder
         :return: void
         """
         try:
-            if not os.path.exists(path):
+            if not self.is_valid_existing_file_path(path):
                 os.makedirs(path)
             else:
                 raise FileExistsError("This folder already exist.")
@@ -116,3 +116,37 @@ class FileManager:
                 shutil.rmtree(path)
         except TypeError as error:
             logging.error(error)
+
+    @staticmethod
+    def parse_json(file_name):
+        """
+            @param file_name {String}
+            @return {Dict} - returns deserialized json object like dictionary, else returns empty dictionary
+        """
+        result = {}
+        try:
+            with open(file_name) as jsonData:
+                try:
+                    result = load(jsonData)
+                except ValueError:
+                    logging.error("Invalid json file '{}'".format(file_name))
+        except FileNotFoundError:
+            logging.warning("File '{}' don't exist".format(file_name))
+        return result
+
+    @staticmethod
+    def to_json_file(file_name, data, mode):
+        """
+            @param file_name {String}
+            @param data {Dict}
+            @mode {String}
+            @return {void} - write data in json
+        """
+        try:
+            with open(file_name, mode) as file:
+                try:
+                    dump(data, file, indent=4)
+                except TypeError:
+                    logging.error("'{}' is not JSON serializable".format(data))
+        except OSError as err:
+            logging.error(err)
