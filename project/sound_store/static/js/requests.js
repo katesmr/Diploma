@@ -17,7 +17,7 @@ $(document).ready(function(){
 		}
 	});*/
 
-	/*$.ajax({
+	$.ajax({
 		method: "POST",
 		url: "sounds/test.wav/",
 		data: JSON.stringify({"user_id": 2}),
@@ -30,9 +30,9 @@ $(document).ready(function(){
 		error: function(status){
 			console.error(status);
 		}
-	});*/
+	});
 
-	var audioSrc = 'static/audio/Hit_Hurt10.wav'
+	/*var audioSrc = 'static/audio/Hit_Hurt10.wav'
 
 	fetch(audioSrc, function(request){
 		var audioData = request.response;
@@ -57,7 +57,7 @@ $(document).ready(function(){
 				console.error(err);
 			}
 		});
-	});
+	});*/
 
     /*$.ajax({
 		method: "POST",
@@ -229,20 +229,31 @@ $.ajaxTransport("+binary", function(options, originalOptions, jqXHR){
     }
 });
 
-function playSound(sound){
+function playSound(blobObject){
+	var audioData;
 	var context = new AudioContext(); // Create and Initialize the Audio Context
-    console.log(sound);
-	window.addEventListener("keydown",onKeyDown); // Create Event Listener for KeyDown
+    var reader = new FileReader();
+    // event handler executed when the load readAsArrayBuffer
+    reader.onload = function() {
+       // reader.result contains the contents of blob as a typed array
+       var arrayBuffer = reader.result;
+        context.decodeAudioData(arrayBuffer, function(buffer) {
+            audioData = buffer;
+        });
 
-	function onKeyDown(e){
-		switch (e.keyCode) {
-			// X
-			case 88:
-				var playSound = context.createBufferSource(); // Declare a New Sound
-				playSound.buffer = sound; // Attatch our Audio Data as it's Buffer
-				playSound.connect(context.destination);  // Link the Sound to the Output
-				playSound.start(0); // Play the Sound Immediately
-			break;
-		}
- 	}
+        window.addEventListener("keydown",onKeyDown); // Create Event Listener for KeyDown
+        function onKeyDown(e){
+            switch (e.keyCode) {
+                // X
+                case 88:
+                    var playSound = context.createBufferSource(); // Declare a New Sound
+                    playSound.buffer = audioData; // Attatch our Audio Data as it's Buffer
+                    playSound.connect(context.destination);  // Link the Sound to the Output
+                    playSound.start(0); // Play the Sound Immediately
+                break;
+            }
+        }
+    };
+    // convert blob to ArrayBuffer for playing on page
+    reader.readAsArrayBuffer(blobObject);
 }
