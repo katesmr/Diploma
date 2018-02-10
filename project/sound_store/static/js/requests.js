@@ -18,10 +18,9 @@ $(document).ready(function(){
 	});*/
 
 	$.ajax({
-		method: "POST",
+		method: "GET",
 		url: "sounds/test.wav/",
-		data: JSON.stringify({"user_id": 2}),
-		dataType: "binary",
+		dataType: "binary",  // blob????
 		cache: false,
 		processData: false,
 		success: function(data){
@@ -76,19 +75,19 @@ $(document).ready(function(){
 		}
 	});*/
 
-	/*$.ajax({
-		method: "POST",
+	$.ajax({
+		method: "GET",
 		url: "sounds/download/new.wav/",
 		cache: false,
 		dataType: "binary",
         processData: false,
 		success: function(data){
-			saveData(data, "nnn.wav");
+			saveData(data, "testt.wav");
 		},
 		error: function(status){
 			console.error(status);
 		}
-	});*/
+	});
 
 	/*$.ajax({
 		method: "GET",

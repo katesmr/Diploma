@@ -90,7 +90,6 @@ def remove_user_sound(request, sound_name):
     return response
 
 
-@csrf_exempt
 def load_user_sound(request, sound_name):
     sound_manager = SoundManager()
     file_object = sound_manager.load(request.user.id, sound_name)
