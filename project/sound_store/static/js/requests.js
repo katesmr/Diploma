@@ -75,7 +75,7 @@ $(document).ready(function(){
 		}
 	});*/
 
-	$.ajax({
+	/*$.ajax({
 		method: "GET",
 		url: "sounds/download/new.wav/",
 		cache: false,
@@ -87,7 +87,7 @@ $(document).ready(function(){
 		error: function(status){
 			console.error(status);
 		}
-	});
+	});*/
 
 	/*$.ajax({
 		method: "GET",
