@@ -17,7 +17,7 @@ $(document).ready(function(){
 		}
 	});*/
 
-	$.ajax({
+	/*$.ajax({
 		method: "GET",
 		url: "sounds/test.wav/",
 		dataType: "binary",  // blob????
@@ -29,7 +29,7 @@ $(document).ready(function(){
 		error: function(status){
 			console.error(status);
 		}
-	});
+	});*/
 
 	/*var audioSrc = 'static/audio/Hit_Hurt10.wav'
 

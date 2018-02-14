@@ -1,7 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import User
-from allauth.socialaccount.models import SocialAccount
-from django.contrib.postgres.fields import ArrayField, JSONField
 import logging
 
 
@@ -82,10 +80,7 @@ class Sounds(models.Model):
 
 
 class Projects(models.Model):
-    path = models.CharField(max_length=4096)
     name = models.CharField(max_length=128)
-    stream = ArrayField(models.CharField(max_length=200))
-    settings = JSONField(max_length=128)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     @staticmethod
@@ -103,10 +98,7 @@ class Projects(models.Model):
         user_projects = Projects.objects.filter(user_id=user_id)
         for project in user_projects:
             result[project.id] = dict()
-            result[project.id]['path'] = project.path
             result[project.id]['name'] = project.name
-            result[project.id]['stream'] = project.stream
-            result[project.id]['settings'] = project.settings
         return result
 
     @staticmethod
@@ -115,10 +107,13 @@ class Projects(models.Model):
         projects = Sounds.objects.filter(user_id=user_id, name=name)
         for project in projects:
             result['id'] = project.id
-            result['path'] = project.path
             result['name'] = project.name
-            result['stream'] = project.stream
-            result['settings'] = project.settings
             # project.user - return object of corresponding user
             result['user_id'] = project.user.id
         return result
+
+
+class Streams(models.Model):
+    path = models.CharField(max_length=4096)
+    name = models.CharField(max_length=128)
+    project = models.ForeignKey(Projects, on_delete=models.CASCADE)

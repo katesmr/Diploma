@@ -9,5 +9,8 @@
   "devDependencies": {
     "webpack": "^2.2.1",
     "strict-loader": "1.2.0"
+  },
+  "dependencies": {
+    "audiobuffer-to-wav": "^1.0.0"
   }
 }
