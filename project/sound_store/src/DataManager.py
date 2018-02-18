@@ -19,7 +19,7 @@ class DataManager(metaclass=Singleton):
             self.user_folder = None
             if self.file_manager.is_valid_existing_folder_path(storehouse_path):
                 self.storehouse_path = storehouse_path
-                self.update_user_path()
+                self.__update_user_path()
             else:
                 raise ValueError("Invalid storehouse path")
         else:
@@ -32,11 +32,11 @@ class DataManager(metaclass=Singleton):
         # assert isinstance(user_id, int)
         if is_key(user_id):
             self.__user_id = str(user_id)
-            self.update_user_path()  # set new path to new user folder
+            self.__update_user_path()  # set new path to new user folder
         else:
             raise ValueError("Invalid user id")
 
-    def update_user_path(self):
+    def __update_user_path(self):
         self.user_folder = os.path.join(self.storehouse_path, self.__user_id)
 
     def save_audio_file(self, file_name, file_object):
@@ -51,9 +51,6 @@ class DataManager(metaclass=Singleton):
             self.file_manager.create_folder(self.user_folder)
         except FileExistsError as error:
             logging.error(error)
-
-    def get_user_folder_content(self, extension=None):
-        return self.file_manager.get_file_name_folder(self.user_folder, extension)
 
     def delete_user_folder(self):
         self.file_manager.delete_folder(self.user_folder)
@@ -76,3 +73,7 @@ class DataManager(metaclass=Singleton):
             new_file_name = create_unique_file_name(file_name)
             path = os.path.join(self.user_folder, new_file_name)
         self.file_manager.to_json_file(path, data, 'w')
+
+    def json_file_data(self, path):
+        data = self.file_manager.parse_json(path)
+        return data

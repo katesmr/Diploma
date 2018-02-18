@@ -95,7 +95,6 @@ def load_user_sound(request, sound_name):
     file_object = sound_manager.load(request.user.id, sound_name)
     if file_object is not None:
         file = File(file_object)
-        print(file)
         response = HttpResponse(file, content_type='audio/x-wav')
         response['Content-Disposition'] = 'attachment; filename={}'.format(sound_name)
         response['Content-Length'] = file.size

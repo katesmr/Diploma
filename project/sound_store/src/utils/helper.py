@@ -31,14 +31,18 @@ def is_key(number):
     return res
 
 
+def timestamp_number():
+    current_time = int(time.time())
+    return current_time
+
+
 def create_unique_file_name(file_name):
     """
     :param file_name: str
     :return: str - file name with
     """
-    current_time = int(time.time())
+    current_time = timestamp_number()
     splitting_file_name = os.path.splitext(file_name)
     # os.path.splitext return cortege, where first value is file name, second value is file extension
     new_file_name = splitting_file_name[0] + str(current_time) + splitting_file_name[1]
     return new_file_name
-

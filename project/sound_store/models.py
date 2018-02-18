@@ -102,14 +102,11 @@ class Projects(models.Model):
         return result
 
     @staticmethod
-    def project_data_by_name(user_id, name):
-        result = dict()
-        projects = Sounds.objects.filter(user_id=user_id, name=name)
+    def project_id_by_name(user_id, name):
+        result = None
+        projects = Projects.objects.filter(user_id=user_id, name=name)
         for project in projects:
-            result['id'] = project.id
-            result['name'] = project.name
-            # project.user - return object of corresponding user
-            result['user_id'] = project.user.id
+            result = project.id
         return result
 
 
@@ -117,3 +114,22 @@ class Streams(models.Model):
     path = models.CharField(max_length=4096)
     name = models.CharField(max_length=128)
     project = models.ForeignKey(Projects, on_delete=models.CASCADE)
+
+    @staticmethod
+    def stream_object(stream_id):
+        result = None
+        try:
+            result = Streams.objects.get(id=stream_id)
+        except Sounds.DoesNotExist as error:
+            logging.error(error)
+        return result
+
+    @staticmethod
+    def project_streams_data(project_id):
+        result = dict()
+        project_streams = Streams.objects.filter(project_id=project_id)
+        for stream in project_streams:
+            result[stream.id] = dict()
+            result[stream.id]['path'] = stream.path
+            result[stream.id]['name'] = stream.name
+        return result
