@@ -80,13 +80,16 @@ class FileManager:
         :param path: str - name of new folder
         :return: void
         """
+        is_created = False
         try:
             if not self.is_valid_existing_file_path(path):
                 os.makedirs(path)
+                is_created = True
             else:
                 raise FileExistsError("This folder already exist.")
         except TypeError as error:
             logging.error(error)
+        return is_created
 
     def delete_file(self, path):
         """
@@ -120,8 +123,8 @@ class FileManager:
     @staticmethod
     def parse_json(file_name):
         """
-            @param file_name {String}
-            @return {Dict} - returns deserialized json object like dictionary, else returns empty dictionary
+        :param file_name: str
+        :return deserialized json object like dictionary, else returns empty dictionary
         """
         result = {}
         try:
@@ -137,10 +140,10 @@ class FileManager:
     @staticmethod
     def to_json_file(file_name, data, mode):
         """
-            @param file_name {String}
-            @param data {Dict}
-            @mode {String}
-            @return {void} - write data in json
+        :param file_name: str
+        :param data: dict
+        :param mode: str
+        :return write data in json
         """
         try:
             with open(file_name, mode) as file:

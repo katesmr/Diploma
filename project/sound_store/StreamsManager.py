@@ -43,4 +43,10 @@ class StreamsManager(BasicManager):
             streams = Streams.project_streams_data(project_id)
             for key in streams:
                 stream_path = streams[key]['path']
-                is_deleted = self.manager.delete_user_file(stream_path)
+                self.manager.delete_user_file(stream_path)
+
+    def update(self, stream_id, data):
+        stream = Streams.stream_object(stream_id)
+        if stream is not None:
+            self.manager.set_user_id(stream.project.user.id)
+            self.manager.save_json_file(stream.name, data)

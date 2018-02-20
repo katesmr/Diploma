@@ -21,6 +21,7 @@ class SoundManager(BasicManager):
             self.manager.set_user_id(user_id)
             is_existing_user_folder = self.manager.file_manager.is_valid_existing_folder_path(self.manager.user_folder)
             if is_existing_user_folder is False:
+                # create user folder if user register in first time
                 self.manager.create_user_folder()
             self.manager.save_audio_file(sound_name, file)
             full_sound_path = self.manager.get_full_file_path(sound_name)
@@ -33,14 +34,13 @@ class SoundManager(BasicManager):
         result = None
         user = UserData.user_object(user_id)
         if user is not None:
-            self.manager.set_user_id(user_id)
-            is_deleted = self.manager.delete_user_file(sound_name)
-            if is_deleted is True:
-                result = Sounds.sound_data_by_name(user_id, sound_name)
-                if result and result is not None:
-                    sound = Sounds.sound_object(result['id'])
-                    if sound is not None:
-                        sound.delete()
+            result = Sounds.sound_data_by_name(user_id, sound_name)
+            if result and result is not None:
+                sound = Sounds.sound_object(result['id'])
+                if sound is not None:
+                    sound.delete()
+                    self.manager.set_user_id(user_id)
+                    self.manager.delete_user_file(sound_name)
         return result
 
     def update(self, *args):
