@@ -64,7 +64,7 @@ var test =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 7);
+/******/ 	return __webpack_require__(__webpack_require__.s = 4);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -74,184 +74,34 @@ var test =
 "use strict";
 
 
-var Track = __webpack_require__(9);
-var AudioGenerator = __webpack_require__(8);
+// connect with server
+var test_requests = __webpack_require__(2)
+var ProjectModel = __webpack_require__(7);
 
-module.exports = function(tracks){
-    var i;
-    var track;
-    var envelope;
-    var oscillator;
-    var audioGenerator;
-	var track_list = [];
-	for(i = 0; i < tracks.length; ++i){
-	    oscillator = tracks[i]["oscillator"];
-	    envelope = tracks[i]["envelope"];
-	    track = new Track(oscillator, envelope);
-	    console.log(track);
-        audioGenerator = new AudioGenerator(track);
-	    audioGenerator.generate("C4");
-	}
+module.exports = function(){
+    var model;
+    $.ajax({
+		method: "GET",
+		url: "projects/project0/",
+		dataType: "json",
+		cache: false,
+		success: function(data){
+		    console.log(data);
+			model = new ProjectModel();
+			model.createTrackDataList(data);
+	        test_requests(model);
+			console.log(model);
+		},
+		error: function(status){
+			console.error(status);
+		}
+	});
+	return model;
 };
 
 
 /***/ }),
 /* 1 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = function(){
-    $.ajax({
-		method: "POST",
-		url: "projects/create/project1.json/",
-		dataType: "text",
-		headers: {
-			'Content-Type':'application/json'
-		},
-		cache: false,
-		data: JSON.stringify({"oscillator": {"type" : "sine", "frequency" : 400, "volume": 5},
-                              "envelope": {"attack" : 0.02, "decay" : 0.1, "sustain" : 0.2, "release" : 0.9}}),
-		success: function(data){
-			console.log(data);
-		},
-		error: function(status){
-			console.error(status);
-		}
-	});
-};
-
-
-/***/ }),
-/* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = function(){
-    $.ajax({
-		method: "POST",
-		url: "projects/delete/project1.json/",
-		dataType: "text",
-		cache: false,
-		success: function(data){
-			console.log(data);
-		},
-		error: function(status){
-			console.error(status);
-		}
-	});
-};
-
-
-/***/ }),
-/* 3 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var toWav = __webpack_require__(6);
-
-module.exports = function(){
-    var s1 = new Tone.Synth({"oscillator": {"type": "square", "frequency": 800},
-                             "envelope": {"sustain": 0.5, "release": 0.9, "decay": 0.1, "attack": 0.05}}).toMaster();
-    var s2 = new Tone.Synth({"oscillator": {"type": "sine", "frequency": 400, "volume": 20}}).toMaster();
-    s1.triggerAttack("C4");
-    s1.triggerRelease("8n");
-    s2.triggerAttack("C4");
-    s2.triggerRelease("8n");
-
-    console.log(s1.context);
-    console.log(s2.context);
-
-    function getBuffer(context){
-        var context_constants = context._constants;
-        var audiobuffer_source_node = context_constants[1];
-        var buffer = audiobuffer_source_node.buffer;
-        console.log(buffer);
-        return buffer;
-    }
-
-    function concatenateAudioBuffers(context, buffer1, buffer2) {
-        if (!buffer1 || !buffer2) {
-            console.log("no buffers!");
-            return null;
-        }
-        if (buffer1.numberOfChannels != buffer2.numberOfChannels) {
-            console.log("number of channels is not the same!");
-            return null;
-        }
-        if (buffer1.sampleRate != buffer2.sampleRate) {
-            console.log("sample rates don't match!");
-            return null;
-        }
-        var tmp = context.createBuffer(buffer1.numberOfChannels, buffer1.length + buffer2.length, buffer1.sampleRate);
-        for (var i=0; i<tmp.numberOfChannels; ++i) {
-            var data = tmp.getChannelData(i);
-            data.set(buffer1.getChannelData(i));
-            data.set(buffer2.getChannelData(i), buffer1.length);
-        }
-        return tmp;
-    };
-
-    var buf1 = getBuffer(s1.context);
-    var buf2 = getBuffer(s2.context);
-    var new_audio = concatenateAudioBuffers(s1.context, buf1, buf2);
-    console.log(new_audio);
-
-    saveData(new_audio, "test.wav");
-};
-
-var saveData = (function(){
-    var a = document.createElement("a");
-    document.body.appendChild(a);
-    a.style = "display: none";
-    return function(audiobuffer, fileName){
-        console.log(audiobuffer);
-
-        var arrbuff = toWav(audiobuffer, {float32: true})
-        console.log(arrbuff);
-
-        var blob = new Blob([arrbuff], {"type": "audio/x-wav"});
-        var url = window.URL.createObjectURL(blob);
-        a.href = url;
-        a.download = fileName;
-        a.click();
-        window.URL.revokeObjectURL(url);
-    };
-}());
-
-
-/***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var create_track = __webpack_require__(0);
-
-module.exports = function(){
-    $.ajax({
-		method: "GET",
-		url: "projects/project0.json/",
-		dataType: "json",
-		cache: false,
-		success: function(data){
-			create_track(data);
-		},
-		error: function(status){
-			console.error(status);
-		}
-	});
-};
-
-
-/***/ }),
-/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -274,7 +124,55 @@ module.exports = function(){
 
 
 /***/ }),
-/* 6 */
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var AudioPlayer = __webpack_require__(5);
+
+module.exports = function(model){
+    var audioPlayer = new AudioPlayer(model);
+    audioPlayer.play("C5");
+    audioPlayer.save("save");
+    /*var i;
+    var track;
+    var envelope;
+    var oscillator;
+    var audioGenerator;
+	var track_list = [];
+	for(i = 0; i < tracks.length; ++i){
+	    oscillator = tracks[i]["oscillator"];
+	    envelope = tracks[i]["envelope"];
+	    track = new Track(oscillator, envelope);
+	    console.log("track");
+	    console.log(track);
+        audioGenerator = new AudioGenerator(track);
+	    track_list[i] = audioGenerator.generate("C4");
+	}
+
+    var next;
+    var buffer1;
+    var buffer2;
+    var currentTrack = track_list[0];
+    var context = currentTrack._context;
+    buffer1 = Helper.getAudioContextBuffer(currentTrack._context);
+	for(i = 0; i < track_list.length; ++i){
+	    next = i + 1;
+	    if(next !== track_list.length){
+            buffer2 = Helper.getAudioContextBuffer(track_list[next]._context);
+            currentTrack = TrackManager.merge(context, buffer1, buffer2);
+            buffer1 = currentTrack;  // put new audiobuffer was created from past track
+        }
+	}
+	console.log("-------");
+	console.log(currentTrack);*/
+};
+
+
+/***/ }),
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -377,27 +275,150 @@ function writeString (view, offset, string) {
 
 
 /***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var test_requests = __webpack_require__(2);
+var upload_sound_test = __webpack_require__(11);
+var getProjectData = __webpack_require__(0);
+var getProjectsData = __webpack_require__(1);
+
+module.exports = {
+    "upload_sound_test": upload_sound_test
+	//"getProjectData": getProjectData
+    //"test_requests": test_requests
+	//"getProjectsData": getProjectsData
+};
+
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var AudioGenerator = __webpack_require__(6);
+var TrackManager = __webpack_require__(10);
+
+module.exports = AudioPlayer;
+
+function AudioPlayer(projectModel){
+    this.projectModel = projectModel;
+    this.audioGeneratorList = [];
+    this.trackList = [];
+
+    this.trackDataToTrack = function(){
+        var i;
+        var generator;
+        var trackData = this.projectModel.trackDataList;
+        for(i=0; i < trackData.length; ++i){
+            generator = new AudioGenerator();
+            generator.generate(trackData[i]);
+            this.audioGeneratorList[i] = generator;
+            this.trackList[i] = generator.trackObject;
+        }
+    };
+
+    this.trackDataToTrack();
+}
+
+AudioPlayer.prototype.play = function(note){
+    var i;
+    for(i = 0; i < this.audioGeneratorList.length; ++i){
+        this.audioGeneratorList[i].play(note);
+    }
+}
+
+AudioPlayer.prototype.pause = function(){}
+
+AudioPlayer.prototype.stop = function(){}
+
+AudioPlayer.prototype.save = function(fileName){
+    var resultAudioBuffer;
+    if(this.trackList.length === 1){
+        resultAudioBuffer = this.trackList[0];
+    } else if(this.trackList.length > 1){
+        resultAudioBuffer = TrackManager.mergeTracks(this.trackList);
+    }
+    TrackManager.save(resultAudioBuffer, fileName);
+    // call request of saving Project !!!!
+}
+
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = AudioGenerator;
+
+function AudioGenerator(){
+    this.trackObject;
+}
+
+AudioGenerator.prototype.generate = function(trackData){
+    try{
+        console.log(typeof trackData);
+        console.log(trackData);
+        var param = trackData.getObject();
+        var synthesizer = new Tone.Synth(param).toMaster();
+        this.trackObject = synthesizer;
+    }catch(error){
+        console.error(error);
+    }
+}
+
+AudioGenerator.prototype.play = function(note){
+    try{
+        this.trackObject.triggerAttack(note);
+        this.trackObject.triggerRelease(3);
+    }catch(error){
+        console.error(error);
+    }
+}
+
+
+/***/ }),
 /* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var test_requests = __webpack_require__(0);
-var project_data = __webpack_require__(4);
-var projects_data = __webpack_require__(5);
-var project_creation = __webpack_require__(1);
-var project_deletion = __webpack_require__(2);
-var merger = __webpack_require__(3);
+var TrackData = __webpack_require__(8);
 
-module.exports = {
-	//"test_requests": test_requests,
-	//"project_data": project_data,
-	"merger": merger,
-	//"projects_data": projects_data,
-	//"project_creation": project_creation,
-	//"project_deletion": project_deletion
-};
+module.exports = ProjectModel;
+
+function ProjectModel(){
+    this.name = name;
+    this.trackDataList = [];
+}
+
+/*ProjectModel.prototype.setName(name){
+    this.name = name;
+}
+
+ProjectModel.prototype.setTracks(trackDataList){
+    this.trackDataList = trackDataList;
+}*/
+
+ProjectModel.prototype.createTrackDataList = function(streamList){
+    var i;
+    var envelope;
+    var oscillator;
+    this.trackDataList.length = 0;
+	for(i = 0; i < streamList.length; ++i){
+	    oscillator = streamList[i]["oscillator"];
+	    envelope = streamList[i]["envelope"];
+	    this.trackDataList[i] = new TrackData(oscillator, envelope);
+	}
+}
 
 
 /***/ }),
@@ -407,23 +428,34 @@ module.exports = {
 "use strict";
 
 
-module.exports = AudioGenerator;
+module.exports = TrackData;
 
-function AudioGenerator(track){
-    this.track = track;
+function TrackData(oscillator, envelope){
+    this.oscillator = oscillator;
+    this.envelope = envelope;
 }
 
-AudioGenerator.prototype.generate = function(note){
-    try{
-        var param = this.track.getObject();
-        console.log("param");
-        console.log(param);
-        var synthesizer = new Tone.Synth(param).toMaster();
-        synthesizer.triggerAttack(note);
-        synthesizer.triggerRelease("2n");
-    } catch(error){
-        console.error(error);
-    }
+TrackData.prototype.getOscillatorData = function(){
+    return this.oscillator;
+}
+
+TrackData.prototype.getEnvelopeData = function(){
+    return this.envelope;
+}
+
+TrackData.prototype.setOscillatorData = function(object){
+    this.oscillator = object;
+}
+
+TrackData.prototype.setEnvelopeData = function(object){
+    this.envelope = object;
+}
+
+TrackData.prototype.getObject = function(){
+    var result = {};
+    result["oscillator"] = this.oscillator;
+    result["envelope"] = this.envelope;
+    return result;
 }
 
 
@@ -434,34 +466,137 @@ AudioGenerator.prototype.generate = function(note){
 "use strict";
 
 
-module.exports = Track;
+module.exports = AudioHelper;
 
-function Track(oscillator, envelope){
-    this.oscillator = oscillator;
-    this.envelope = envelope;
+function AudioHelper(){}
+
+AudioHelper.getAudioContextBuffer = function(context){
+    var contextConstants = context._constants;
+    var audioBufferSourceNode = contextConstants[1];
+    var buffer = audioBufferSourceNode.buffer;
+    return buffer;
 }
 
-Track.prototype.getOscillatorData = function(){
-    return this.oscillator;
+AudioHelper.merge = function(context, buffer1, buffer2){
+    // add comparison channel numbers
+    var i;
+    var newLength = buffer1.length + buffer2.length;
+    var track = context.createBuffer(buffer1.numberOfChannels, newLength, buffer1.sampleRate);
+    for(i = 0; i < track.numberOfChannels; ++i){
+        var data = track.getChannelData(i);
+        data.set(buffer1.getChannelData(i));
+        data.set(buffer2.getChannelData(i), buffer1.length);
+    }
+    return track;
 }
 
-Track.prototype.getEnvelopeData = function(){
-    return this.envelope;
+
+/***/ }),
+/* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var toWav = __webpack_require__(3);
+var AudioHelper = __webpack_require__(9);
+
+module.exports = TrackManager;
+
+function TrackManager(){}
+
+// get array with Tone.Synth
+TrackManager.mergeTracks = function(trackList){
+    var i;
+    var nextIndex;
+    var currentBuffer;
+    var nextBuffer;
+    var currentTrack = trackList[0];
+    var currentTrackContext = currentTrack._context;
+    console.log(currentTrackContext);
+    var nextTrackContext;
+    currentBuffer = AudioHelper.getAudioContextBuffer(currentTrackContext);
+	for(i = 0; i < trackList.length; ++i){
+	    nextIndex = i + 1;
+	    if(nextIndex !== trackList.length){
+	        nextTrackContext = trackList[nextIndex]._context;
+            nextBuffer = AudioHelper.getAudioContextBuffer(nextTrackContext);
+            // put new AudioBuffer where created from merging of past tracks
+            currentBuffer = AudioHelper.merge(currentTrackContext, currentBuffer, nextBuffer);
+        }
+	}
+	return currentBuffer;
 }
 
-Track.prototype.setOscillatorData = function(object){
-    this.oscillator = object;
-}
+TrackManager.save = (function(){
+    var a = document.createElement("a");
+    document.body.appendChild(a);
+    a.style = "display: none";
+    return function(audioBuffer, fileName){
+        var buffer;
+        if(audioBuffer instanceof AudioBuffer){
+            buffer = toWav(audioBuffer, {float32: true});
+        } else{
+            buffer = AudioHelper.getAudioContextBuffer(audioBuffer._context);
+        }
+        var blob = new Blob([buffer], {"type": "audio/x-wav"});
+        var url = window.URL.createObjectURL(blob);
+        a.href = url;
+        a.download = fileName;
+        a.click();
+        window.URL.revokeObjectURL(url);
+    };
+}());
 
-Track.prototype.setEnvelopeData = function(object){
-    this.envelope = object;
-}
 
-Track.prototype.getObject = function(){
-    var result = {};
-    result["oscillator"] = this.oscillator;
-    result["envelope"] = this.envelope;
-    return result;
+/***/ }),
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = function(){
+    $.ajax({
+		method: "GET",
+		url: "sounds/test.wav/",
+		dataType: "binary",  // blob????
+		cache: false,
+		processData: false,
+		success: function(data){
+		    console.log(data);
+			playSound(data);
+		},
+		error: function(status){
+			console.error(status);
+		}
+	});
+};
+
+function playSound(blobObject){
+    var audioData;
+	//var arrayBuffer;
+    var reader = new FileReader();
+    var context = new AudioContext();
+    reader.onload = function(){
+        var arrayBuffer = reader.result;
+        console.log(arrayBuffer);
+        context.decodeAudioData(arrayBuffer, function(buffer){
+            audioData = buffer;
+            console.log(audioData);
+            var freeverb = new Tone.Freeverb().toMaster();
+            freeverb.dampening.value = 1000;
+            var player = new Tone.Player(audioData).toMaster();
+            //routing synth through the reverb
+            player.connect(freeverb);
+            player.start();
+            var context = player.context;
+            // get audio data for change audio with Tone
+            var oscillator = context.createOscillator();
+            console.log(oscillator);
+        });
+    };
+    reader.readAsArrayBuffer(blobObject);
 }
 
 

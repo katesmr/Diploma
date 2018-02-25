@@ -1,15 +1,11 @@
 var test_requests = require("test_requests");
-var project_data = require("project_data_test");
-var projects_data = require("projects_data_test");
-var project_creation = require("create_project_test");
-var project_deletion = require("delete_project_test");
-var merger = require("merge_audio_test");
+var upload_sound_test = require("upload_sound_test");
+var getProjectData = require("requests/getProjectData");
+var getProjectsData = require("requests/getProjectsData");
 
 module.exports = {
-	//"test_requests": test_requests,
-	//"project_data": project_data,
-	"merger": merger,
-	//"projects_data": projects_data,
-	//"project_creation": project_creation,
-	//"project_deletion": project_deletion
+    "upload_sound_test": upload_sound_test
+	//"getProjectData": getProjectData
+    //"test_requests": test_requests
+	//"getProjectsData": getProjectsData
 };
