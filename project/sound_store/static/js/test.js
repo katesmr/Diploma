@@ -64,44 +64,43 @@ var test =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 4);
+/******/ 	return __webpack_require__(__webpack_require__.s = 5);
 /******/ })
 /************************************************************************/
 /******/ ([
-/* 0 */
+/* 0 */,
+/* 1 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 // connect with server
-var test_requests = __webpack_require__(2)
-var ProjectModel = __webpack_require__(7);
+var ProjectModel = __webpack_require__(8);
 
-module.exports = function(){
-    var model;
+// url "projects/project0/"
+module.exports = function(url, callback){
     $.ajax({
 		method: "GET",
-		url: "projects/project0/",
+		url: url,
 		dataType: "json",
 		cache: false,
 		success: function(data){
+		    var model;
 		    console.log(data);
 			model = new ProjectModel();
 			model.createTrackDataList(data);
-	        test_requests(model);
-			console.log(model);
+	        callback(model);
 		},
 		error: function(status){
-			console.error(status);
+			callback(new Error(status));
 		}
 	});
-	return model;
 };
 
 
 /***/ }),
-/* 1 */
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -124,55 +123,74 @@ module.exports = function(){
 
 
 /***/ }),
-/* 2 */
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var AudioPlayer = __webpack_require__(5);
-
-module.exports = function(model){
-    var audioPlayer = new AudioPlayer(model);
-    audioPlayer.play("C5");
-    audioPlayer.save("save");
-    /*var i;
-    var track;
-    var envelope;
-    var oscillator;
-    var audioGenerator;
-	var track_list = [];
-	for(i = 0; i < tracks.length; ++i){
-	    oscillator = tracks[i]["oscillator"];
-	    envelope = tracks[i]["envelope"];
-	    track = new Track(oscillator, envelope);
-	    console.log("track");
-	    console.log(track);
-        audioGenerator = new AudioGenerator(track);
-	    track_list[i] = audioGenerator.generate("C4");
-	}
-
-    var next;
-    var buffer1;
-    var buffer2;
-    var currentTrack = track_list[0];
-    var context = currentTrack._context;
-    buffer1 = Helper.getAudioContextBuffer(currentTrack._context);
-	for(i = 0; i < track_list.length; ++i){
-	    next = i + 1;
-	    if(next !== track_list.length){
-            buffer2 = Helper.getAudioContextBuffer(track_list[next]._context);
-            currentTrack = TrackManager.merge(context, buffer1, buffer2);
-            buffer1 = currentTrack;  // put new audiobuffer was created from past track
-        }
-	}
-	console.log("-------");
-	console.log(currentTrack);*/
+module.exports = function(){
+    $.ajax({
+		method: "GET",
+		url: "sounds/test.wav/",
+		dataType: "binary",  // blob????
+		cache: false,
+		processData: false,
+		success: function(data){
+			playSound(data);
+		},
+		error: function(status){
+			console.error(status);
+		}
+	});
 };
+
+function playSound(blobObject){
+    var audioData;
+	//var arrayBuffer;
+    var reader = new FileReader();
+    var context = new AudioContext();
+    reader.onload = function(){
+        var arrayBuffer = reader.result;
+        console.log(arrayBuffer);
+        context.decodeAudioData(arrayBuffer, function(buffer){
+            audioData = buffer;
+            var freeverb = new Tone.Freeverb().toMaster();
+            freeverb.dampening.value = 1000;
+            var player = new Tone.Player(audioData).toMaster();
+            //routing synth through the reverb
+            //player.connect(freeverb);
+            //player.start();
+            var context = player.context;
+            // https://developer.mozilla.org/en-US/docs/Web/API/OscillatorNode
+            // get audio data for change audio with Tone
+            var oscillator = context.createOscillator();
+            oscillator.type = 'square';
+            oscillator.connect(context.destination);
+            //oscillator.start();
+            console.log(oscillator);
+
+            /*var synth = new Tone.Synth({"oscillator" : {"type" : "sine", "frequency" : 400}}).toMaster();
+            //synth.frequency.value = 700;
+            synth.triggerAttack(synth.frequency.value);
+            console.log(synth.frequency);
+            synth.triggerRelease(1);*/
+
+            /*var synth = new Tone.Synth({"oscillator" : {"type" : "sine"}}).toMaster();
+            synth.oscillator.type = "triangle"; // set type
+            synth.oscillator.frequency.value = 200; // don't work
+            synth.oscillator.volume.value = 10;
+            synth.triggerAttack("C4");
+            synth.triggerRelease(1);
+            console.log(synth);*/
+        });
+    };
+    reader.readAsArrayBuffer(blobObject);
+}
 
 
 /***/ }),
-/* 3 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -275,34 +293,35 @@ function writeString (view, offset, string) {
 
 
 /***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var test_requests = __webpack_require__(2);
-var upload_sound_test = __webpack_require__(11);
-var getProjectData = __webpack_require__(0);
-var getProjectsData = __webpack_require__(1);
-
-module.exports = {
-    "upload_sound_test": upload_sound_test
-	//"getProjectData": getProjectData
-    //"test_requests": test_requests
-	//"getProjectsData": getProjectsData
-};
-
-
-/***/ }),
 /* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var AudioGenerator = __webpack_require__(6);
-var TrackManager = __webpack_require__(10);
+var audioplayer_test = __webpack_require__(12);
+var upload_sound_test = __webpack_require__(3);
+var getProjectData = __webpack_require__(1);
+var getProjectsData = __webpack_require__(2);
+
+
+module.exports = {
+    "audioplayer_test": audioplayer_test,
+	"getProjectData": getProjectData
+    //"test_requests": test_requests
+	//"getProjectsData": getProjectsData
+};
+
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var AudioGenerator = __webpack_require__(7);
+var TrackManager = __webpack_require__(11);
 
 module.exports = AudioPlayer;
 
@@ -350,7 +369,7 @@ AudioPlayer.prototype.save = function(fileName){
 
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -385,13 +404,13 @@ AudioGenerator.prototype.play = function(note){
 
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var TrackData = __webpack_require__(8);
+var TrackData = __webpack_require__(9);
 
 module.exports = ProjectModel;
 
@@ -422,7 +441,7 @@ ProjectModel.prototype.createTrackDataList = function(streamList){
 
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -460,7 +479,7 @@ TrackData.prototype.getObject = function(){
 
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -492,14 +511,14 @@ AudioHelper.merge = function(context, buffer1, buffer2){
 
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var toWav = __webpack_require__(3);
-var AudioHelper = __webpack_require__(9);
+var toWav = __webpack_require__(4);
+var AudioHelper = __webpack_require__(10);
 
 module.exports = TrackManager;
 
@@ -550,54 +569,55 @@ TrackManager.save = (function(){
 
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-module.exports = function(){
-    $.ajax({
-		method: "GET",
-		url: "sounds/test.wav/",
-		dataType: "binary",  // blob????
-		cache: false,
-		processData: false,
-		success: function(data){
-		    console.log(data);
-			playSound(data);
-		},
-		error: function(status){
-			console.error(status);
-		}
-	});
-};
+var AudioPlayer = __webpack_require__(6);
 
-function playSound(blobObject){
-    var audioData;
-	//var arrayBuffer;
-    var reader = new FileReader();
-    var context = new AudioContext();
-    reader.onload = function(){
-        var arrayBuffer = reader.result;
-        console.log(arrayBuffer);
-        context.decodeAudioData(arrayBuffer, function(buffer){
-            audioData = buffer;
-            console.log(audioData);
-            var freeverb = new Tone.Freeverb().toMaster();
-            freeverb.dampening.value = 1000;
-            var player = new Tone.Player(audioData).toMaster();
-            //routing synth through the reverb
-            player.connect(freeverb);
-            player.start();
-            var context = player.context;
-            // get audio data for change audio with Tone
-            var oscillator = context.createOscillator();
-            console.log(oscillator);
-        });
-    };
-    reader.readAsArrayBuffer(blobObject);
-}
+module.exports = function(result){
+    if(result instanceof Error){
+        console.error(result);
+    } else{
+        var audioPlayer = new AudioPlayer(result);
+        audioPlayer.play("C5");
+    }
+    //audioPlayer.save("save");
+    /*var i;
+    var track;
+    var envelope;
+    var oscillator;
+    var audioGenerator;
+	var track_list = [];
+	for(i = 0; i < tracks.length; ++i){
+	    oscillator = tracks[i]["oscillator"];
+	    envelope = tracks[i]["envelope"];
+	    track = new Track(oscillator, envelope);
+	    console.log("track");
+	    console.log(track);
+        audioGenerator = new AudioGenerator(track);
+	    track_list[i] = audioGenerator.generate("C4");
+	}
+
+    var next;
+    var buffer1;
+    var buffer2;
+    var currentTrack = track_list[0];
+    var context = currentTrack._context;
+    buffer1 = Helper.getAudioContextBuffer(currentTrack._context);
+	for(i = 0; i < track_list.length; ++i){
+	    next = i + 1;
+	    if(next !== track_list.length){
+            buffer2 = Helper.getAudioContextBuffer(track_list[next]._context);
+            currentTrack = TrackManager.merge(context, buffer1, buffer2);
+            buffer1 = currentTrack;  // put new audiobuffer was created from past track
+        }
+	}
+	console.log("-------");
+	console.log(currentTrack);*/
+};
 
 
 /***/ })
