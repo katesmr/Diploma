@@ -11,6 +11,8 @@
     "strict-loader": "1.2.0"
   },
   "dependencies": {
-    "audiobuffer-to-wav": "^1.0.0"
+    "audio-buffer-utils": "^5.1.1",
+    "audiobuffer-to-wav": "^1.0.0",
+    "semantic-ui": "^2.3.0"
   }
 }

@@ -15,7 +15,7 @@ class ProjectManager(BasicManager):
             projects = Projects.user_projects_data(user_id)
             result = []
             for project_id in projects:
-                result.append(self.stream_manager.get(project_id))
+                result.append(projects[project_id]["name"])
         return result
 
     def get_project(self, user_id, project_name):

@@ -1,3 +1,21 @@
 body {
-    background: yellow;
+    background-color: grey;
+}
+
+.container {
+    background-color: white;
+}
+
+.grid {
+    background-color: teal;
+}
+
+.project_bar {
+    float: left;
+    padding-top: 1%;
+    background-color: teal;
+}
+
+.content {
+    padding-top: 2%;
 }
