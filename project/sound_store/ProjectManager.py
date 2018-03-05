@@ -54,6 +54,8 @@ class ProjectManager(BasicManager):
             if project_id is not None:
                 self.stream_manager.delete(project_id)
                 result = project_name
+                project = Projects.project_object(project_id)
+                project.delete()
         return result
 
     def update(self, user_id, project_name, stream_id, data):

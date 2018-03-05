@@ -1,18 +1,29 @@
 body {
-    background-color: grey;
+}
+
+.ui.container {
+    width: 100%;
+    height: 100%;
 }
 
 .container {
-    background-color: white;
+    background-color: #252525;
 }
 
-.grid {
+.user-info {
+    height: 50px;
     background-color: teal;
 }
 
+.user-info p, .ui.button.join {
+    float: right;
+    padding: 1%;
+}
+
 .project_bar {
+    width: 15%;
     float: left;
-    padding-top: 1%;
+    padding: 1%;
     background-color: teal;
 }
 
