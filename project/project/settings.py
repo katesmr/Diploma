@@ -142,4 +142,4 @@ AUTHENTICATION_BACKENDS = (
 SITE_ID = 1
 
 # url of page after user login
-LOGIN_REDIRECT_URL = '/page/'
+LOGIN_REDIRECT_URL = '/'
