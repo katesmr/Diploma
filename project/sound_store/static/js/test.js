@@ -76,7 +76,7 @@ var test =
 
 module.exports = {
     "createButton": createButton,
-    "createFacebookButton": createFacebookButton,
+    "createIconButton": createIconButton,
     "createList": createList
 };
 
@@ -87,6 +87,11 @@ function createButton(name){
 function createFacebookButton(){
     return $("<button class='ui facebook button'>" +
              "<i class='facebook icon'></i>Facebook</button>");
+}
+
+function createIconButton(buttonClass, iconClass, name){
+    return $("<button class='ui " + buttonClass + "'>" +
+             "<i class='" + iconClass + "'></i>" + name + "</button>");
 }
 
 function createList(listData){
@@ -110,7 +115,9 @@ function createList(listData){
 var projectList = __webpack_require__(9);
 var deleteProject = __webpack_require__(7);
 var getUser = __webpack_require__(8);
+
 var MessageModal = __webpack_require__(10);
+var ProjectView = __webpack_require__(4);
 
 module.exports = RequestManager;
 
@@ -121,11 +128,15 @@ RequestManager.getProjectData = function(streamList){};
 RequestManager.deleteProject = function(projectName){
     var url = "projects/delete/";
     var fullUrl = url + projectName + '/';
-    deleteProject(fullUrl, MessageModal);
+    var messageModal = new MessageModal();
+    deleteProject(fullUrl, messageModal.show);
 };
 
-RequestManager.getUser = function(callback){
-    getUser("user/", callback);
+RequestManager.getUser = function(){
+    var projectView = new ProjectView();
+    getUser("user/", function(){
+        projectList("projects/", projectView.fullProjectList);
+    });
 };
 
 
@@ -186,45 +197,55 @@ BaseView.prototype.appendToBlock = function(blockName){
 
 
 // ProjectView
-var ButtonFactory = __webpack_require__(0);
+var inherit = __webpack_require__(2);
+var Factory = __webpack_require__(0);
+var BaseView = __webpack_require__(3);
 var ProjectListFactory = __webpack_require__(0);
 var RequestManager = __webpack_require__(1);
 
-var blockName = ".project-bar";
 
-module.exports = {
-    "fullProjectList": fullProjectList,
-    "initButton": initButton
+module.exports = ProjectView;
+
+function ProjectView(){
+    BaseView.call(this, "project-bar");
+    this.projectList = $("<div class='project-list'></div>");
+    this.projecManager = $("<div class='project-manager'></div>");
+
+    this.list = null;
+
+    this.addButton = Factory.createIconButton("ui button", "plus icon", "");
+    this.editButton = Factory.createIconButton("ui button", "disabled edit icon", "");
+    this.deleteButton = Factory.createIconButton("ui button", "disabled trash icon", "");
+
+    this.addButton.on("click", function(event){
+        console.log("add");
+    });
+
+    this.editButton.on("click", function(event){
+
+    });
+
+    this.deleteButton.on("click", function(event){
+        var projectName = "project_DELETE";  // test
+        //RequestManager.deleteProject(projectName);
+    });
+}
+
+inherit(ProjectView, BaseView);
+
+ProjectView.prototype.fullProjectList = function(data){
+    this.list = ProjectListFactory.createList(data);
+    this._build();
 };
 
-function fullProjectList(list){
-    console.log(1);
-    console.log(list);
-    var $projectList = ProjectListFactory.createList(list);
-    $(blockName).append($projectList);
-    //return $projectList;
-}
-
-function initButton(){
-    var $addButton = ButtonFactory.createButton("add");
-    var $editButton = ButtonFactory.createButton("edit");
-    var $deleteButton = ButtonFactory.createButton("delete");
-
-    $(blockName).append($deleteButton);
-
-    $addButton.on("click", function(event){
-
-    });
-
-    $editButton.on("click", function(event){
-
-    });
-
-    $deleteButton.on("click", function(event){
-        var projectName = "project_DELETE";  // test
-        RequestManager.deleteProject(projectName);
-    });
-}
+ProjectView.prototype._build = function(){
+    this.projectList.append(this.list);
+    this.projecManager.append(this.addButton);
+    this.projecManager.append(this.editButton);
+    this.projecManager.append(this.deleteButton);
+    this._container.append(this.projectList);
+    this._container.append(this.projecManager);
+};
 
 
 /***/ }),
@@ -243,7 +264,7 @@ module.exports = UserModal;
 function UserModal(){
     BaseView.call(this, "ui modal");
     this.isJoin = false;
-    this.facebookLogIn = Factory.createFacebookButton();
+    this.facebookLogIn = Factory.createIconButton("ui facebook button", "facebook icon", "Facebook");
     this.label = $("<div class='ui pointing below label'>Join without registration");
     this.button = Factory.createButton("join");
     this.buttonLogout = Factory.createButton("Logout");
@@ -286,7 +307,6 @@ UserModal.prototype.show = function(){
 var merger_test = __webpack_require__(12);
 
 var RequestManager = __webpack_require__(1);
-var ProjectView = __webpack_require__(4);
 
 var UserModal = __webpack_require__(5);
 
@@ -297,7 +317,7 @@ $(".ui.button.join").on("click", function(event){
     // check with request if user registered
 });
 
-RequestManager.getUser(ProjectView.fullProjectList);
+RequestManager.getUser();
 
 
 module.exports = {
@@ -312,18 +332,19 @@ module.exports = {
 "use strict";
 
 
-module.exports = function(url, messageModalObject){
+module.exports = function(url, callback){
     $.ajax({
 		method: "POST",
 		url: url,
 		dataType: "text",
 		cache: false,
 		success: function(data){
-            new messageModalObject(data);
+            callback(data);
 		},
 		error: function(status){
 			console.error(status);
-            new messageModalObject("Project doesn't exist.");
+            //callback("Project doesn't exist.");
+            callback(new Error(status));
 		}
 	});
 };
@@ -336,8 +357,6 @@ module.exports = function(url, messageModalObject){
 "use strict";
 
 
-var projectList = __webpack_require__(9);
-
 module.exports = function(url, callback){
     $.ajax({
         method: "GET",
@@ -346,10 +365,10 @@ module.exports = function(url, callback){
         cache: false,
         success: function(data){
             console.log(data);
-            projectList("projects/", callback);
+            callback();
         },
         error: function(status){
-            console.error(status);
+            callback(new Error(status));
         }
     });
 };
@@ -372,7 +391,7 @@ module.exports = function(url, callback){
 			callback(data);
 		},
 		error: function(status){
-			console.error(status);
+            callback(new Error(status));
 		}
 	});
 };
@@ -389,18 +408,18 @@ module.exports = function(url, callback){
 var inherit = __webpack_require__(2);
 var BaseView = __webpack_require__(3);
 
-function MessageModal(message){
+function MessageModal() {
     BaseView.call(this, "ui basic modal");
-    this.text = $("<p>" + message + "</p>");
+    this.text = $("<p class='message-modal'></p>");
     this.okButton = $("<i class='check circle outline'></i>");
 
     this._build();
-    this.show();
 }
 
 inherit(MessageModal, BaseView);
 
-MessageModal.prototype.show = function(){
+MessageModal.prototype.show = function(message){
+    $(".p.message-modal").text(message);
     this._container.modal("show");
 };
 
