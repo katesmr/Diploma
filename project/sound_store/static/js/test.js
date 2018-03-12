@@ -64,7 +64,7 @@ var test =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 6);
+/******/ 	return __webpack_require__(__webpack_require__.s = 9);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -74,34 +74,18 @@ var test =
 "use strict";
 
 
-module.exports = {
-    "createButton": createButton,
-    "createIconButton": createIconButton,
-    "createList": createList
+module.exports = function(method, dataType, url, callback){
+    $.ajax({
+        method: method,
+        url: url,
+        dataType: dataType,
+        cache: false,
+        success: callback,
+        error: function(status){
+            callback(new Error(status));
+        }
+    });
 };
-
-function createButton(name){
-    return $("<button class='ui button'>" + name + "</button>");
-}
-
-function createFacebookButton(){
-    return $("<button class='ui facebook button'>" +
-             "<i class='facebook icon'></i>Facebook</button>");
-}
-
-function createIconButton(buttonClass, iconClass, name){
-    return $("<button class='ui " + buttonClass + "'>" +
-             "<i class='" + iconClass + "'></i>" + name + "</button>");
-}
-
-function createList(listData){
-    var i;
-    var $list = $("<div class='ui link list'>");
-    for(i = 0; i < listData.length; ++i){
-        $list.append("<a id=" + i + " class='item'>" + listData[i] + "</a>");
-    }
-    return $list;
-}
 
 
 /***/ }),
@@ -111,50 +95,14 @@ function createList(listData){
 "use strict";
 
 
-// var getProjectData = require("requests/getProjectData");
-var projectList = __webpack_require__(9);
-var deleteProject = __webpack_require__(7);
-var getUser = __webpack_require__(8);
-
-var MessageModal = __webpack_require__(10);
-var ProjectView = __webpack_require__(4);
-
-module.exports = RequestManager;
-
-function RequestManager(){}
-
-RequestManager.getProjectData = function(streamList){};
-
-RequestManager.deleteProject = function(projectName){
-    var url = "projects/delete/";
-    var fullUrl = url + projectName + '/';
-    var messageModal = new MessageModal();
-    deleteProject(fullUrl, messageModal.show);
-};
-
-RequestManager.getUser = function(){
-    var projectView = new ProjectView();
-    getUser("user/", function(){
-        projectList("projects/", projectView.fullProjectList);
-    });
+module.exports = function(child, parent){
+    child.prototype = Object.create(parent.prototype);
+    child.prototype.constructor = child;
 };
 
 
 /***/ }),
 /* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = function(child, parent){
-    child.prototype = Object.create(parent.prototype);
-    child.prototype.constructor = child;
-}
-
-
-/***/ }),
-/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -190,247 +138,78 @@ BaseView.prototype.appendToBlock = function(blockName){
 
 
 /***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+// var getProjectData = require("requests/getProjectData");
+var transportAudioFile = __webpack_require__(15);
+var TrackManager = __webpack_require__(14);
+
+var changeSound = __webpack_require__(10);
+var getSound = __webpack_require__(19);
+var projectList = __webpack_require__(13);
+var deleteProject = __webpack_require__(11);
+var getUser = __webpack_require__(12);
+
+var MessageModal = __webpack_require__(16);
+var ProjectView = __webpack_require__(17);
+
+module.exports = RequestManager;
+
+function RequestManager(){
+    this.messageModal = new MessageModal();
+}
+
+RequestManager.getUser = function(){
+    //console.log(projectView);
+    getUser(function(){
+        var projectView = new ProjectView();
+        //projectList("projects/", projectView.fullProjectList.bind(projectView));
+        projectList("projects/", function(data){
+            projectView.fullProjectList(data);
+        });
+    });
+};
+
+RequestManager.getProjectData = function(streamList){};
+
+RequestManager.deleteProject = function(projectName){
+    var url = "projects/delete/";
+    var fullUrl = url + projectName + '/';
+    deleteProject(fullUrl, this.messageModal.show);
+};
+
+RequestManager.prototype.getProject = function(){};
+
+RequestManager.prototype.createSound = function(soundName, audioSrc){
+    var url = "sound/create/";
+    // var url = "sound/update/";
+    var fullUrl = url + soundName + '/';
+    transportAudioFile(fullUrl, soundName, audioSrc, changeSound);
+};
+
+RequestManager.prototype.downloadSound = function(soundName){
+    var url = "sound/download/";
+    var fullUrl = url + soundName + '/';
+    getSound(fullUrl, function(data){
+        TrackManager.save(data, soundName);
+    });
+};
+
+RequestManager.prototype.uploadSound = function(soundName){
+    var url = "sound/download/";
+    var fullUrl = url + soundName + '/';
+    getSound(fullUrl, function(data){
+        // play sound
+    });
+};
+
+
+/***/ }),
 /* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-// ProjectView
-var inherit = __webpack_require__(2);
-var Factory = __webpack_require__(0);
-var BaseView = __webpack_require__(3);
-var ProjectListFactory = __webpack_require__(0);
-var RequestManager = __webpack_require__(1);
-
-
-module.exports = ProjectView;
-
-function ProjectView(){
-    BaseView.call(this, "project-bar");
-    this.projectList = $("<div class='project-list'></div>");
-    this.projecManager = $("<div class='project-manager'></div>");
-
-    this.list = null;
-
-    this.addButton = Factory.createIconButton("ui button", "plus icon", "");
-    this.editButton = Factory.createIconButton("ui button", "disabled edit icon", "");
-    this.deleteButton = Factory.createIconButton("ui button", "disabled trash icon", "");
-
-    this.addButton.on("click", function(event){
-        console.log("add");
-    });
-
-    this.editButton.on("click", function(event){
-
-    });
-
-    this.deleteButton.on("click", function(event){
-        var projectName = "project_DELETE";  // test
-        //RequestManager.deleteProject(projectName);
-    });
-}
-
-inherit(ProjectView, BaseView);
-
-ProjectView.prototype.fullProjectList = function(data){
-    this.list = ProjectListFactory.createList(data);
-    this._build();
-};
-
-ProjectView.prototype._build = function(){
-    this.projectList.append(this.list);
-    this.projecManager.append(this.addButton);
-    this.projecManager.append(this.editButton);
-    this.projecManager.append(this.deleteButton);
-    this._container.append(this.projectList);
-    this._container.append(this.projecManager);
-};
-
-
-/***/ }),
-/* 5 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var inherit = __webpack_require__(2);
-var Factory = __webpack_require__(0);
-var BaseView = __webpack_require__(3);
-
-module.exports = UserModal;
-
-function UserModal(){
-    BaseView.call(this, "ui modal");
-    this.isJoin = false;
-    this.facebookLogIn = Factory.createIconButton("ui facebook button", "facebook icon", "Facebook");
-    this.label = $("<div class='ui pointing below label'>Join without registration");
-    this.button = Factory.createButton("join");
-    this.buttonLogout = Factory.createButton("Logout");
-
-    this.facebookLogIn.on("click", function(event){
-        location.href = "/accounts/facebook/login/";
-        console.log("q");
-        //RequestManager.projectList(ProjectView.fullProjectList);
-    });
-
-    this.buttonLogout.on("click", function(event){
-        location.href = "/accounts/logout/";
-        console.log("logout");
-    });
-
-    this._build();
-}
-
-inherit(UserModal, BaseView);
-
-UserModal.prototype._build = function(){
-    this._container.append(this.facebookLogIn);
-    this._container.append(this.label);
-    this._container.append(this.button);
-    this._container.append(this.buttonLogout);
-};
-
-UserModal.prototype.show = function(){
-    this._container.modal("show");
-};
-
-
-/***/ }),
-/* 6 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var merger_test = __webpack_require__(12);
-
-var RequestManager = __webpack_require__(1);
-
-var UserModal = __webpack_require__(5);
-
-
-$(".ui.button.join").on("click", function(event){
-    var userModal = new UserModal();
-    userModal.show();
-    // check with request if user registered
-});
-
-RequestManager.getUser();
-
-
-module.exports = {
-    "merger_test": merger_test
-};
-
-
-/***/ }),
-/* 7 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = function(url, callback){
-    $.ajax({
-		method: "POST",
-		url: url,
-		dataType: "text",
-		cache: false,
-		success: function(data){
-            callback(data);
-		},
-		error: function(status){
-			console.error(status);
-            //callback("Project doesn't exist.");
-            callback(new Error(status));
-		}
-	});
-};
-
-
-/***/ }),
-/* 8 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = function(url, callback){
-    $.ajax({
-        method: "GET",
-        url: url,
-        dataType: "json",
-        cache: false,
-        success: function(data){
-            console.log(data);
-            callback();
-        },
-        error: function(status){
-            callback(new Error(status));
-        }
-    });
-};
-
-
-/***/ }),
-/* 9 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = function(url, callback){
-    $.ajax({
-		method: "GET",
-		url: url,
-		dataType: "json",
-		cache: false,
-		success: function(data){
-			callback(data);
-		},
-		error: function(status){
-            callback(new Error(status));
-		}
-	});
-};
-
-
-/***/ }),
-/* 10 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-//MessageModal
-var inherit = __webpack_require__(2);
-var BaseView = __webpack_require__(3);
-
-function MessageModal() {
-    BaseView.call(this, "ui basic modal");
-    this.text = $("<p class='message-modal'></p>");
-    this.okButton = $("<i class='check circle outline'></i>");
-
-    this._build();
-}
-
-inherit(MessageModal, BaseView);
-
-MessageModal.prototype.show = function(message){
-    $(".p.message-modal").text(message);
-    this._container.modal("show");
-};
-
-MessageModal.prototype._build = function(){
-    this._container.append(this.text);
-    this._container.append(this.okButton);
-};
-
-
-/***/ }),
-/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -465,14 +244,46 @@ function merge(context, buffer1, buffer2){
 
 
 /***/ }),
-/* 12 */
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = {
+    "createButton": createButton,
+    "createIconButton": createIconButton,
+    "createList": createList
+};
+
+function createButton(name){
+    return $("<button class='ui button'>" + name + "</button>");
+}
+
+function createIconButton(buttonClass, iconClass, name){
+    return $("<button class='ui " + buttonClass + "'>" +
+             "<i class='" + iconClass + "'></i>" + name + "</button>");
+}
+
+function createList(listData){
+    var i;
+    var $list = $("<div class='ui link list'>");
+    for(i = 0; i < listData.length; ++i){
+        $list.append("<a id=" + i + " class='item'>" + listData[i] + "</a>");
+    }
+    return $list;
+}
+
+
+/***/ }),
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 //var audioBufferUtils = require("audio-buffer-utils");
-var AudioHelper = __webpack_require__(11);
+var AudioHelper = __webpack_require__(4);
 var TrackManager = __webpack_require__(14);
 
 var sounds = [];
@@ -536,7 +347,55 @@ function toAudioBuffer(blob, getAudioBuffer){
 
 
 /***/ }),
-/* 13 */
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(1);
+var Factory = __webpack_require__(5);
+var BaseView = __webpack_require__(2);
+
+module.exports = UserModal;
+
+function UserModal(){
+    BaseView.call(this, "ui modal");
+    this.facebookLogIn = Factory.createIconButton("ui facebook button", "facebook icon", "Facebook");
+    this.label = $("<div class='ui pointing below label'>Join without registration");
+    this.button = Factory.createButton("join");
+    this.buttonLogout = Factory.createButton("Logout");
+
+    this.facebookLogIn.on("click", function(event){
+        location.href = "/accounts/facebook/login/";
+        console.log("q");
+        //RequestManager.projectListBlock(ProjectView.fullProjectList);
+    });
+
+    this.buttonLogout.on("click", function(event){
+        location.href = "/accounts/logout/";
+        console.log("logout");
+    });
+
+    this._build();
+}
+
+inherit(UserModal, BaseView);
+
+UserModal.prototype._build = function(){
+    this._container.append(this.facebookLogIn);
+    this._container.append(this.label);
+    this._container.append(this.button);
+    this._container.append(this.buttonLogout);
+};
+
+UserModal.prototype.show = function(){
+    this._container.modal("show");
+};
+
+
+/***/ }),
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -639,14 +498,103 @@ function writeString (view, offset, string) {
 
 
 /***/ }),
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var merger_test = __webpack_require__(6);
+
+var RequestManager = __webpack_require__(3);
+
+var UserModal = __webpack_require__(7);
+
+
+$(".ui.button.join").on("click", function(event){
+    var userModal = new UserModal();
+    userModal.show();
+    // check with request if user registered
+});
+
+RequestManager.getUser();
+
+
+module.exports = {
+    "merger_test": merger_test
+};
+
+
+/***/ }),
+/* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = function(url, formData){
+    $.ajax({
+        method: "POST",
+        url: url,
+        data: formData,
+        mimeTypes: "multipart/form-data",
+        contentType: false,
+        dataType: "json",
+        cache: false,
+        processData: false,
+        success: callback,
+        error: function (status) {
+            callback(new Error(status));
+        }
+    });
+};
+
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var baseRequest = __webpack_require__(0);
+
+module.exports = baseRequest.bind(null, "POST", "json");
+
+
+/***/ }),
+/* 12 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var baseRequest = __webpack_require__(0);
+
+module.exports = baseRequest.bind(null, "GET", "json", "user/");
+
+
+/***/ }),
+/* 13 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var baseRequest = __webpack_require__(0);
+
+module.exports = baseRequest.bind(null, "GET", "json");
+
+
+/***/ }),
 /* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var toWav = __webpack_require__(13);
-var AudioHelper = __webpack_require__(11);
+var toWav = __webpack_require__(8);
+var AudioHelper = __webpack_require__(4);
 
 module.exports = TrackManager;
 
@@ -672,7 +620,7 @@ TrackManager.mergeTracks = function(trackList){
         }
 	}
 	return currentBuffer;
-}
+};
 
 TrackManager.save = (function(){
     var a = document.createElement("a");
@@ -693,6 +641,141 @@ TrackManager.save = (function(){
         window.URL.revokeObjectURL(url);
     };
 }());
+
+
+/***/ }),
+/* 15 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = function(url, soundName, audioSrc, callback){
+    fetch(audioSrc, function(request){
+        var audioData = request.response;
+        var blob = new Blob([audioData], {type: 'audio/x-wav'});
+        var formData = new FormData();
+        formData.append('user_audio', blob, soundName);
+        callback(url, formData);
+    });
+};
+
+function fetch(url, resolve){
+    var request = new XMLHttpRequest();
+    request.open("GET", url, true);
+    request.responseType = "arraybuffer";
+    request.onload = function(){
+        resolve(request);
+    };
+    request.send();
+}
+
+
+/***/ }),
+/* 16 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+//MessageModal
+var inherit = __webpack_require__(1);
+var BaseView = __webpack_require__(2);
+
+function MessageModal() {
+    BaseView.call(this, "ui basic modal");
+    this.text = $("<p class='message-modal'></p>");
+    this.okButton = $("<i class='check circle outline'></i>");
+
+    this._build();
+}
+
+inherit(MessageModal, BaseView);
+
+MessageModal.prototype.show = function(message){
+    $(".p.message-modal").text(message);
+    this._container.modal("show");
+};
+
+MessageModal.prototype._build = function(){
+    this._container.append(this.text);
+    this._container.append(this.okButton);
+};
+
+
+/***/ }),
+/* 17 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(1);
+var Factory = __webpack_require__(5);
+var BaseView = __webpack_require__(2);
+var RequestManager = __webpack_require__(3);
+
+
+module.exports = ProjectView;
+
+function ProjectView(){
+    BaseView.call(this, "project-bar");
+    this.projectListBlock = $("<div class='project-list'></div>");
+    this.projecManager = $("<div class='project-manager'></div>");
+
+    this.projectList = null;
+
+    this.addButton = Factory.createIconButton("ui button", "plus icon", "");
+    this.editButton = Factory.createIconButton("ui button", "disabled edit icon", "");
+    this.deleteButton = Factory.createIconButton("ui button", "disabled trash icon", "");
+
+    this.addButton.on("click", function(event){
+        console.log("add");
+    });
+
+    this.editButton.on("click", function(event){
+
+    });
+
+    this.deleteButton.on("click", function(event){
+        var projectName = "project_DELETE";  // test
+        //RequestManager.deleteProject(projectName);
+    });
+
+    this._build();
+    this.appendToBlock(".ui.container");
+}
+
+inherit(ProjectView, BaseView);
+
+ProjectView.prototype._build = function(){
+    this.projectListBlock.append(this.projectList);
+    this.projecManager.append(this.addButton);
+    this.projecManager.append(this.editButton);
+    this.projecManager.append(this.deleteButton);
+    this._container.append(this.projectListBlock);
+    this._container.append(this.projecManager);
+};
+
+ProjectView.prototype.fullProjectList = function(data){
+    console.log(this);
+    this.projectList = Factory.createList(data);
+
+    this.projectListBlock.append(this.projectList);
+};
+
+
+/***/ }),
+/* 18 */,
+/* 19 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var baseRequest = __webpack_require__(0);
+
+module.exports = baseRequest.bind(null, "GET", "binary");
 
 
 /***/ })

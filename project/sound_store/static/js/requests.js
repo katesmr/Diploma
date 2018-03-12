@@ -167,8 +167,8 @@ function fetch(url, resolve){
 	request.responseType = 'arraybuffer';
 	request.onload = function(){
 	    resolve(request);
-	}
-	request.send()
+	};
+	request.send();
 }
 
 var saveData = (function(){
