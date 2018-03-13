@@ -249,7 +249,7 @@ function merge(context, buffer1, buffer2){
 module.exports = {
     "createButton": createButton,
     "createIconButton": createIconButton,
-    "createList": createList
+    "createGridData": createGridData
 };
 
 function createButton(text){
@@ -272,6 +272,23 @@ function createList(listData){
 
 function createDivBlock(className){
     return $("<div class='" + className + "'></div>");
+}
+
+function createGridData(dataList){
+    var i;
+    var $column;
+    var $row = $("<div class='row'></div>");
+    var columnCount = 4;
+    var $table = $("<div class='ui grid'>");
+    for(i = 0; i < dataList.length; ++i){
+        if(i === columnCount || i % columnCount === 0){
+            $table.append($row);
+            $row = $("<div class='row'></div>");
+        }
+        $column = $("<div class='column'><a>" + dataList[i] +"</a></div>");
+        $row.append($column);
+    }
+    return $table;
 }
 
 
@@ -365,6 +382,12 @@ function UserModal(){
     //this.label = $("<div class='ui pointing below label'>Join without registration");
     this.buttonLogout = Factory.createButton("Logout");
 
+    this._build();
+}
+
+inherit(UserModal, BaseView);
+
+UserModal.prototype._build = function(){
     this.facebookLogIn.on("click", function(event){
         location.href = "/accounts/facebook/login/";
     });
@@ -373,12 +396,6 @@ function UserModal(){
         location.href = "/accounts/logout/";
     });
 
-    this._build();
-}
-
-inherit(UserModal, BaseView);
-
-UserModal.prototype._build = function(){
     this._container.append(this.facebookLogIn);
     //this._container.append(this.label);
     this._container.append(this.buttonLogout);
@@ -501,7 +518,6 @@ function writeString (view, offset, string) {
 
 var merger_test = __webpack_require__(6);
 var RequestManager = __webpack_require__(3);
-var UserModal = __webpack_require__(7);
 var MenuBar = __webpack_require__(20);
 
 module.exports = {
@@ -717,6 +733,7 @@ var inherit = __webpack_require__(1);
 var Factory = __webpack_require__(5);
 var BaseView = __webpack_require__(2);
 var ProjectBar = __webpack_require__(21);
+var ProjectView = __webpack_require__(22);
 var UserModal = __webpack_require__(7);
 
 module.exports = MenuBar;
@@ -730,11 +747,6 @@ function MenuBar(){
     this.userName = null;
     this.joinButton = Factory.createButton("join");
 
-    this.joinButton.on("click", function(){
-        var userModal = new UserModal();
-        userModal.show();
-    });
-
     this._build();
     this.appendToBlock(".ui.container");
 }
@@ -742,6 +754,12 @@ function MenuBar(){
 inherit(MenuBar, BaseView);
 
 MenuBar.prototype._build = function(){
+    this.joinButton.on("click", function(){
+        var userModal = new UserModal();
+        userModal.show();
+    });
+
+
     this.userInfo.append(this.userName);  // empty
     this.userInfo.append(this.joinButton);
     this._container.append(this.projecrBar); // empty
@@ -770,6 +788,7 @@ MenuBar.prototype.showMenuComponents = function(userName){
 var inherit = __webpack_require__(1);
 var Factory = __webpack_require__(5);
 var BaseView = __webpack_require__(2);
+var ProjectList = __webpack_require__(22);
 
 module.exports = ProjectBar;
 
@@ -781,8 +800,17 @@ function ProjectBar(bottomContainer){
     this.editButton = Factory.createIconButton("ui button", "disabled edit icon", "");
     this.deleteButton = Factory.createIconButton("ui button", "disabled trash icon", "");
 
-    this.showProjectListButton.on("click", function(){
+    this._build(bottomContainer);
+}
 
+inherit(ProjectBar, BaseView);
+
+ProjectBar.prototype._build = function(bottomContainer){
+    this.showProjectListButton.on("click", function(){
+        var projectList = new ProjectList(["teeeeest1", "test2", "sibsneaepinb", "qqqqqq",
+            "rr", "rwythrjtejedbxd", "rrr", "wegrfgnh",
+            "aknv"]);
+        projectList.show($(".ui.container"));
     });
 
     this.addButton.on("click", function(event){
@@ -798,15 +826,45 @@ function ProjectBar(bottomContainer){
         //RequestManager.deleteProject(projectName);
     });
 
-    this._build(bottomContainer);
-}
-
-ProjectBar.prototype._build = function(bottomContainer){
     this._container.append(this.showProjectListButton);
     this._container.append(this.addButton);
     this._container.append(this.editButton);
     this._container.append(this.deleteButton);
     bottomContainer.append(this._container);
+};
+
+
+/***/ }),
+/* 22 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(1);
+var Factory = __webpack_require__(5);
+var BaseView = __webpack_require__(2);
+var RequestManager = __webpack_require__(3);
+
+
+module.exports = ProjectList;
+
+function ProjectList(data){
+    BaseView.call(this, "project-list");
+
+    this.projectList = Factory.createGridData(data);
+
+    this._build();
+}
+
+inherit(ProjectList, BaseView);
+
+ProjectList.prototype._build = function(){
+    this._container.append(this.projectList);
+};
+
+ProjectList.prototype.show = function(blockName){
+    blockName.append(this._container)
 };
 
 
