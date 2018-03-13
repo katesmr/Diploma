@@ -53,8 +53,13 @@ def main_page(request):
 
 
 def check_user_active(request):
-    user_id = request.user.id
-    return HttpResponse(dumps(user_id), content_type='application/json')
+    user = request.user
+    user_id = user.id
+    if user_id:
+        response = HttpResponse(dumps(user.username), content_type='application/json')
+    else:
+        response = BAD_RESPONSE
+    return response
 
 
 def get_all_user_sounds(request):

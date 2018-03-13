@@ -115,7 +115,7 @@ module.exports = BaseView;
  */
 function BaseView(classes){
     var classNames = (typeof classes === "string" ? classes : "");
-    this._container = $("<div class='base-container " + classNames + "'>");
+    this._container = $("<div class='base " + classNames + "'>");
 }
 
 BaseView.prototype.getContainer = function(){
@@ -155,7 +155,6 @@ var deleteProject = __webpack_require__(11);
 var getUser = __webpack_require__(12);
 
 var MessageModal = __webpack_require__(16);
-var ProjectView = __webpack_require__(17);
 
 module.exports = RequestManager;
 
@@ -163,18 +162,15 @@ function RequestManager(){
     this.messageModal = new MessageModal();
 }
 
-RequestManager.getUser = function(){
-    //console.log(projectView);
-    getUser(function(){
-        var projectView = new ProjectView();
+RequestManager.getUser = function(callback, context){
+    getUser(callback.bind(context));
+    /*getUser(function(){
         //projectList("projects/", projectView.fullProjectList.bind(projectView));
-        projectList("projects/", function(data){
-            projectView.fullProjectList(data);
-        });
-    });
+        projectList("projects/", callback.bind(context));
+    });*/
 };
 
-RequestManager.getProjectData = function(streamList){};
+RequestManager.getProjectData = function(){};
 
 RequestManager.deleteProject = function(projectName){
     var url = "projects/delete/";
@@ -256,8 +252,8 @@ module.exports = {
     "createList": createList
 };
 
-function createButton(name){
-    return $("<button class='ui button'>" + name + "</button>");
+function createButton(text){
+    return $("<button class='ui button'>" + text + "</button>");
 }
 
 function createIconButton(buttonClass, iconClass, name){
@@ -272,6 +268,10 @@ function createList(listData){
         $list.append("<a id=" + i + " class='item'>" + listData[i] + "</a>");
     }
     return $list;
+}
+
+function createDivBlock(className){
+    return $("<div class='" + className + "'></div>");
 }
 
 
@@ -362,19 +362,15 @@ module.exports = UserModal;
 function UserModal(){
     BaseView.call(this, "ui modal");
     this.facebookLogIn = Factory.createIconButton("ui facebook button", "facebook icon", "Facebook");
-    this.label = $("<div class='ui pointing below label'>Join without registration");
-    this.button = Factory.createButton("join");
+    //this.label = $("<div class='ui pointing below label'>Join without registration");
     this.buttonLogout = Factory.createButton("Logout");
 
     this.facebookLogIn.on("click", function(event){
         location.href = "/accounts/facebook/login/";
-        console.log("q");
-        //RequestManager.projectListBlock(ProjectView.fullProjectList);
     });
 
     this.buttonLogout.on("click", function(event){
         location.href = "/accounts/logout/";
-        console.log("logout");
     });
 
     this._build();
@@ -384,8 +380,7 @@ inherit(UserModal, BaseView);
 
 UserModal.prototype._build = function(){
     this._container.append(this.facebookLogIn);
-    this._container.append(this.label);
-    this._container.append(this.button);
+    //this._container.append(this.label);
     this._container.append(this.buttonLogout);
 };
 
@@ -505,24 +500,18 @@ function writeString (view, offset, string) {
 
 
 var merger_test = __webpack_require__(6);
-
 var RequestManager = __webpack_require__(3);
-
 var UserModal = __webpack_require__(7);
-
-
-$(".ui.button.join").on("click", function(event){
-    var userModal = new UserModal();
-    userModal.show();
-    // check with request if user registered
-});
-
-RequestManager.getUser();
-
+var MenuBar = __webpack_require__(20);
 
 module.exports = {
     "merger_test": merger_test
 };
+
+var menuBar = new MenuBar();
+
+RequestManager.getUser(menuBar.showMenuComponents, menuBar);
+
 
 
 /***/ }),
@@ -704,7 +693,21 @@ MessageModal.prototype._build = function(){
 
 
 /***/ }),
-/* 17 */
+/* 17 */,
+/* 18 */,
+/* 19 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var baseRequest = __webpack_require__(0);
+
+module.exports = baseRequest.bind(null, "GET", "binary");
+
+
+/***/ }),
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -713,21 +716,74 @@ MessageModal.prototype._build = function(){
 var inherit = __webpack_require__(1);
 var Factory = __webpack_require__(5);
 var BaseView = __webpack_require__(2);
-var RequestManager = __webpack_require__(3);
+var ProjectBar = __webpack_require__(21);
+var UserModal = __webpack_require__(7);
+
+module.exports = MenuBar;
+
+function MenuBar(){
+    BaseView.call(this, "menubar");
+
+    this.projecrBar = null;
+    this.userInfo = $("<div class='user-info'></div>");
+
+    this.userName = null;
+    this.joinButton = Factory.createButton("join");
+
+    this.joinButton.on("click", function(){
+        var userModal = new UserModal();
+        userModal.show();
+    });
+
+    this._build();
+    this.appendToBlock(".ui.container");
+}
+
+inherit(MenuBar, BaseView);
+
+MenuBar.prototype._build = function(){
+    this.userInfo.append(this.userName);  // empty
+    this.userInfo.append(this.joinButton);
+    this._container.append(this.projecrBar); // empty
+    this._container.append(this.userInfo);
+};
+
+MenuBar.prototype.showMenuComponents = function(userName){
+    if(userName instanceof Error){
+        this.userName = $("<p>anonym</p>");
+    } else{
+        this.projecrBar = new ProjectBar(this._container);
+        this.userName = $("<p>" + userName + "</p>");
+        this._container.append(this.projecrBar);
+    }
+    this.userInfo.append(this.userName);
+};
 
 
-module.exports = ProjectView;
+/***/ }),
+/* 21 */
+/***/ (function(module, exports, __webpack_require__) {
 
-function ProjectView(){
-    BaseView.call(this, "project-bar");
-    this.projectListBlock = $("<div class='project-list'></div>");
-    this.projecManager = $("<div class='project-manager'></div>");
+"use strict";
 
-    this.projectList = null;
 
+var inherit = __webpack_require__(1);
+var Factory = __webpack_require__(5);
+var BaseView = __webpack_require__(2);
+
+module.exports = ProjectBar;
+
+function ProjectBar(bottomContainer){
+    BaseView.call(this, "projectbar");
+
+    this.showProjectListButton = Factory.createIconButton("ui button", "book icon", "");
     this.addButton = Factory.createIconButton("ui button", "plus icon", "");
     this.editButton = Factory.createIconButton("ui button", "disabled edit icon", "");
     this.deleteButton = Factory.createIconButton("ui button", "disabled trash icon", "");
+
+    this.showProjectListButton.on("click", function(){
+
+    });
 
     this.addButton.on("click", function(event){
         console.log("add");
@@ -742,40 +798,16 @@ function ProjectView(){
         //RequestManager.deleteProject(projectName);
     });
 
-    this._build();
-    this.appendToBlock(".ui.container");
+    this._build(bottomContainer);
 }
 
-inherit(ProjectView, BaseView);
-
-ProjectView.prototype._build = function(){
-    this.projectListBlock.append(this.projectList);
-    this.projecManager.append(this.addButton);
-    this.projecManager.append(this.editButton);
-    this.projecManager.append(this.deleteButton);
-    this._container.append(this.projectListBlock);
-    this._container.append(this.projecManager);
+ProjectBar.prototype._build = function(bottomContainer){
+    this._container.append(this.showProjectListButton);
+    this._container.append(this.addButton);
+    this._container.append(this.editButton);
+    this._container.append(this.deleteButton);
+    bottomContainer.append(this._container);
 };
-
-ProjectView.prototype.fullProjectList = function(data){
-    console.log(this);
-    this.projectList = Factory.createList(data);
-
-    this.projectListBlock.append(this.projectList);
-};
-
-
-/***/ }),
-/* 18 */,
-/* 19 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var baseRequest = __webpack_require__(0);
-
-module.exports = baseRequest.bind(null, "GET", "binary");
 
 
 /***/ })

@@ -10,29 +10,34 @@ body {
     background-color: #252525;
 }
 
-.user-info {
+.menubar {
     height: 50px;
     background-color: teal;
 }
 
-.user-info p, .ui.button.join {
+.menubar .ui.button, p {
     float: right;
     padding: 1%;
 }
 
-.project-bar {
+.projectbar {
     width: 15%;
     float: left;
     padding: 1%;
-    background-color: teal;
 }
 
 .content {
     padding-top: 2%;
 }
 
-.ui.modal.base-container{
+.ui.modal.base {
     width: 300px;
     height: 200px;
     padding: 5%;
+}
+
+.ui.modal.base .button {
+    display: block;
+    margin: 0 2% auto;
+    width: auto;
 }
