@@ -64,32 +64,11 @@ var test =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 9);
+/******/ 	return __webpack_require__(__webpack_require__.s = 11);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = function(method, dataType, url, callback){
-    $.ajax({
-        method: method,
-        url: url,
-        dataType: dataType,
-        cache: false,
-        success: callback,
-        error: function(status){
-            callback(new Error(status));
-        }
-    });
-};
-
-
-/***/ }),
-/* 1 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -102,7 +81,7 @@ module.exports = function(child, parent){
 
 
 /***/ }),
-/* 2 */
+/* 1 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -127,6 +106,7 @@ BaseView.prototype.show = function(){
 };
 
 BaseView.prototype.hide = function(){
+    console.log(this);
     this._container.hide();
 };
 
@@ -138,23 +118,91 @@ BaseView.prototype.appendToBlock = function(blockName){
 
 
 /***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = function(method, dataType, url, callback){
+    $.ajax({
+        method: method,
+        url: url,
+        dataType: dataType,
+        cache: false,
+        success: callback,
+        error: function(status){
+            callback(new Error(status));
+        }
+    });
+};
+
+
+/***/ }),
 /* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+module.exports = {
+    "createButton": createButton,
+    "createIconButton": createIconButton,
+    "createGridData": createGridData
+};
+
+function createButton(text){
+    return $("<button class='ui button'>" + text + "</button>");
+}
+
+function createIconButton(buttonClass, iconClass, name){
+    return $("<button class='ui " + buttonClass + "'>" +
+             "<i class='" + iconClass + "'></i>" + name + "</button>");
+}
+
+function createList(listData){
+    var i;
+    var $list = $("<div class='ui link list'>");
+    for(i = 0; i < listData.length; ++i){
+        $list.append("<a id=" + i + " class='item'>" + listData[i] + "</a>");
+    }
+    return $list;
+}
+
+function createDivBlock(className){
+    return $("<div class='" + className + "'></div>");
+}
+
+function createGridData(dataList){
+    var i;
+    var $column;
+    var $table = $("<div class='five column stackable ui grid'>");
+    for(i = 0; i < dataList.length; ++i){
+        $column = $("<div class='column'><a>" + dataList[i] +"</a></div>");
+        $table.append($column);
+    }
+    return $table;
+}
+
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
 // var getProjectData = require("requests/getProjectData");
-var transportAudioFile = __webpack_require__(15);
-var TrackManager = __webpack_require__(14);
+var transportAudioFile = __webpack_require__(17);
+var TrackManager = __webpack_require__(6);
 
-var changeSound = __webpack_require__(10);
-var getSound = __webpack_require__(19);
-var projectList = __webpack_require__(13);
-var deleteProject = __webpack_require__(11);
-var getUser = __webpack_require__(12);
+var changeSound = __webpack_require__(12);
+var getSound = __webpack_require__(14);
+var projectList = __webpack_require__(16);
+var deleteProject = __webpack_require__(13);
+var getUser = __webpack_require__(15);
 
-var MessageModal = __webpack_require__(16);
+var MessageModal = __webpack_require__(18);
 
 module.exports = RequestManager;
 
@@ -205,7 +253,7 @@ RequestManager.prototype.uploadSound = function(soundName){
 
 
 /***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -240,68 +288,101 @@ function merge(context, buffer1, buffer2){
 
 
 /***/ }),
-/* 5 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = {
-    "createButton": createButton,
-    "createIconButton": createIconButton,
-    "createGridData": createGridData
-};
-
-function createButton(text){
-    return $("<button class='ui button'>" + text + "</button>");
-}
-
-function createIconButton(buttonClass, iconClass, name){
-    return $("<button class='ui " + buttonClass + "'>" +
-             "<i class='" + iconClass + "'></i>" + name + "</button>");
-}
-
-function createList(listData){
-    var i;
-    var $list = $("<div class='ui link list'>");
-    for(i = 0; i < listData.length; ++i){
-        $list.append("<a id=" + i + " class='item'>" + listData[i] + "</a>");
-    }
-    return $list;
-}
-
-function createDivBlock(className){
-    return $("<div class='" + className + "'></div>");
-}
-
-function createGridData(dataList){
-    var i;
-    var $column;
-    var $row = $("<div class='row'></div>");
-    var columnCount = 4;
-    var $table = $("<div class='ui grid'>");
-    for(i = 0; i < dataList.length; ++i){
-        if(i === columnCount || i % columnCount === 0){
-            $table.append($row);
-            $row = $("<div class='row'></div>");
-        }
-        $column = $("<div class='column'><a>" + dataList[i] +"</a></div>");
-        $row.append($column);
-    }
-    return $table;
-}
-
-
-/***/ }),
 /* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+var toWav = __webpack_require__(10);
+var AudioHelper = __webpack_require__(5);
+
+module.exports = TrackManager;
+
+function TrackManager(){}
+
+// get array with Tone.Synth
+TrackManager.mergeTracks = function(trackList){
+    var i;
+    var nextIndex;
+    var currentBuffer;
+    var nextBuffer;
+    var nextTrackContext;
+    var currentTrack = trackList[0];
+    var currentTrackContext = currentTrack._context;
+    currentBuffer = AudioHelper.getAudioContextBuffer(currentTrackContext);
+	for(i = 0; i < trackList.length; ++i){
+	    nextIndex = i + 1;
+	    if(nextIndex !== trackList.length){
+	        nextTrackContext = trackList[nextIndex]._context;
+            nextBuffer = AudioHelper.getAudioContextBuffer(nextTrackContext);
+            // put new AudioBuffer where created from merging of past tracks
+            currentBuffer = AudioHelper.merge(currentTrackContext, currentBuffer, nextBuffer);
+        }
+	}
+	return currentBuffer;
+};
+
+TrackManager.save = (function(){
+    var a = document.createElement("a");
+    document.body.appendChild(a);
+    a.style = "display: none";
+    return function(audioBuffer, fileName){
+        var buffer;
+        if(audioBuffer instanceof AudioBuffer){
+            buffer = toWav(audioBuffer, {float32: true});
+        } else{
+            buffer = AudioHelper.getAudioContextBuffer(audioBuffer._context);
+        }
+        var blob = new Blob([buffer], {"type": "audio/x-wav"});
+        var url = window.URL.createObjectURL(blob);
+        a.href = url;
+        a.download = fileName;
+        a.click();
+        window.URL.revokeObjectURL(url);
+    };
+}());
+
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var Factory = __webpack_require__(3);
+var BaseView = __webpack_require__(1);
+
+module.exports = ProjectList;
+
+function ProjectList(data){
+    BaseView.call(this, "project-list");
+
+    this.projectList = Factory.createGridData(data);
+
+    this._build();
+    this.appendToBlock($(".ui.container"));
+}
+
+inherit(ProjectList, BaseView);
+
+ProjectList.prototype._build = function(){
+    this._container.append(this.projectList);
+};
+
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
 //var audioBufferUtils = require("audio-buffer-utils");
-var AudioHelper = __webpack_require__(4);
-var TrackManager = __webpack_require__(14);
+var AudioHelper = __webpack_require__(5);
+var TrackManager = __webpack_require__(6);
 
 var sounds = [];
 
@@ -364,50 +445,63 @@ function toAudioBuffer(blob, getAudioBuffer){
 
 
 /***/ }),
-/* 7 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var inherit = __webpack_require__(1);
-var Factory = __webpack_require__(5);
-var BaseView = __webpack_require__(2);
+var inherit = __webpack_require__(0);
+var Factory = __webpack_require__(3);
+var BaseView = __webpack_require__(1);
+var ProjectBar = __webpack_require__(19);
+var ProjectView = __webpack_require__(7);
+var UserModal = __webpack_require__(20);
 
-module.exports = UserModal;
+module.exports = MenuBar;
 
-function UserModal(){
-    BaseView.call(this, "ui modal");
-    this.facebookLogIn = Factory.createIconButton("ui facebook button", "facebook icon", "Facebook");
-    //this.label = $("<div class='ui pointing below label'>Join without registration");
-    this.buttonLogout = Factory.createButton("Logout");
+function MenuBar(){
+    BaseView.call(this, "menubar");
+
+    this.projecrBar = null;
+    this.userInfo = $("<div class='user-info'></div>");
+
+    this.userName = null;
+    this.joinButton = Factory.createButton("join");
 
     this._build();
+    this.appendToBlock(".ui.container");
 }
 
-inherit(UserModal, BaseView);
+inherit(MenuBar, BaseView);
 
-UserModal.prototype._build = function(){
-    this.facebookLogIn.on("click", function(event){
-        location.href = "/accounts/facebook/login/";
+MenuBar.prototype._build = function(){
+    this.joinButton.on("click", function(){
+        var userModal = new UserModal();
+        userModal.show();
     });
 
-    this.buttonLogout.on("click", function(event){
-        location.href = "/accounts/logout/";
-    });
 
-    this._container.append(this.facebookLogIn);
-    //this._container.append(this.label);
-    this._container.append(this.buttonLogout);
+    this.userInfo.append(this.userName);  // empty
+    this.userInfo.append(this.joinButton);
+    this._container.append(this.projecrBar); // empty
+    this._container.append(this.userInfo);
 };
 
-UserModal.prototype.show = function(){
-    this._container.modal("show");
+MenuBar.prototype.showMenuComponents = function(userName){
+    if(userName instanceof Error){
+        this.userName = $("<p>anonym</p>");
+    } else{
+        this.projecrBar = new ProjectBar(this._container);
+        this.userName = $("<p>" + userName + "</p>");
+        this._container.append(this.projecrBar);
+    }
+    this.userInfo.append(this.userName);
 };
 
 
 /***/ }),
-/* 8 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -510,15 +604,15 @@ function writeString (view, offset, string) {
 
 
 /***/ }),
-/* 9 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var merger_test = __webpack_require__(6);
-var RequestManager = __webpack_require__(3);
-var MenuBar = __webpack_require__(20);
+var merger_test = __webpack_require__(8);
+var RequestManager = __webpack_require__(4);
+var MenuBar = __webpack_require__(9);
 
 module.exports = {
     "merger_test": merger_test
@@ -531,7 +625,7 @@ RequestManager.getUser(menuBar.showMenuComponents, menuBar);
 
 
 /***/ }),
-/* 10 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -556,39 +650,15 @@ module.exports = function(url, formData){
 
 
 /***/ }),
-/* 11 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var baseRequest = __webpack_require__(0);
-
-module.exports = baseRequest.bind(null, "POST", "json");
-
-
-/***/ }),
-/* 12 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var baseRequest = __webpack_require__(0);
-
-module.exports = baseRequest.bind(null, "GET", "json", "user/");
-
-
-/***/ }),
 /* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var baseRequest = __webpack_require__(0);
+var baseRequest = __webpack_require__(2);
 
-module.exports = baseRequest.bind(null, "GET", "json");
+module.exports = baseRequest.bind(null, "POST", "json");
 
 
 /***/ }),
@@ -598,58 +668,37 @@ module.exports = baseRequest.bind(null, "GET", "json");
 "use strict";
 
 
-var toWav = __webpack_require__(8);
-var AudioHelper = __webpack_require__(4);
+var baseRequest = __webpack_require__(2);
 
-module.exports = TrackManager;
-
-function TrackManager(){}
-
-// get array with Tone.Synth
-TrackManager.mergeTracks = function(trackList){
-    var i;
-    var nextIndex;
-    var currentBuffer;
-    var nextBuffer;
-    var nextTrackContext;
-    var currentTrack = trackList[0];
-    var currentTrackContext = currentTrack._context;
-    currentBuffer = AudioHelper.getAudioContextBuffer(currentTrackContext);
-	for(i = 0; i < trackList.length; ++i){
-	    nextIndex = i + 1;
-	    if(nextIndex !== trackList.length){
-	        nextTrackContext = trackList[nextIndex]._context;
-            nextBuffer = AudioHelper.getAudioContextBuffer(nextTrackContext);
-            // put new AudioBuffer where created from merging of past tracks
-            currentBuffer = AudioHelper.merge(currentTrackContext, currentBuffer, nextBuffer);
-        }
-	}
-	return currentBuffer;
-};
-
-TrackManager.save = (function(){
-    var a = document.createElement("a");
-    document.body.appendChild(a);
-    a.style = "display: none";
-    return function(audioBuffer, fileName){
-        var buffer;
-        if(audioBuffer instanceof AudioBuffer){
-            buffer = toWav(audioBuffer, {float32: true});
-        } else{
-            buffer = AudioHelper.getAudioContextBuffer(audioBuffer._context);
-        }
-        var blob = new Blob([buffer], {"type": "audio/x-wav"});
-        var url = window.URL.createObjectURL(blob);
-        a.href = url;
-        a.download = fileName;
-        a.click();
-        window.URL.revokeObjectURL(url);
-    };
-}());
+module.exports = baseRequest.bind(null, "GET", "binary");
 
 
 /***/ }),
 /* 15 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var baseRequest = __webpack_require__(2);
+
+module.exports = baseRequest.bind(null, "GET", "json", "user/");
+
+
+/***/ }),
+/* 16 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var baseRequest = __webpack_require__(2);
+
+module.exports = baseRequest.bind(null, "GET", "json");
+
+
+/***/ }),
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -677,15 +726,15 @@ function fetch(url, resolve){
 
 
 /***/ }),
-/* 16 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 //MessageModal
-var inherit = __webpack_require__(1);
-var BaseView = __webpack_require__(2);
+var inherit = __webpack_require__(0);
+var BaseView = __webpack_require__(1);
 
 function MessageModal() {
     BaseView.call(this, "ui basic modal");
@@ -709,86 +758,16 @@ MessageModal.prototype._build = function(){
 
 
 /***/ }),
-/* 17 */,
-/* 18 */,
 /* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var baseRequest = __webpack_require__(0);
-
-module.exports = baseRequest.bind(null, "GET", "binary");
-
-
-/***/ }),
-/* 20 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var inherit = __webpack_require__(1);
-var Factory = __webpack_require__(5);
-var BaseView = __webpack_require__(2);
-var ProjectBar = __webpack_require__(21);
-var ProjectView = __webpack_require__(22);
-var UserModal = __webpack_require__(7);
-
-module.exports = MenuBar;
-
-function MenuBar(){
-    BaseView.call(this, "menubar");
-
-    this.projecrBar = null;
-    this.userInfo = $("<div class='user-info'></div>");
-
-    this.userName = null;
-    this.joinButton = Factory.createButton("join");
-
-    this._build();
-    this.appendToBlock(".ui.container");
-}
-
-inherit(MenuBar, BaseView);
-
-MenuBar.prototype._build = function(){
-    this.joinButton.on("click", function(){
-        var userModal = new UserModal();
-        userModal.show();
-    });
-
-
-    this.userInfo.append(this.userName);  // empty
-    this.userInfo.append(this.joinButton);
-    this._container.append(this.projecrBar); // empty
-    this._container.append(this.userInfo);
-};
-
-MenuBar.prototype.showMenuComponents = function(userName){
-    if(userName instanceof Error){
-        this.userName = $("<p>anonym</p>");
-    } else{
-        this.projecrBar = new ProjectBar(this._container);
-        this.userName = $("<p>" + userName + "</p>");
-        this._container.append(this.projecrBar);
-    }
-    this.userInfo.append(this.userName);
-};
-
-
-/***/ }),
-/* 21 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var inherit = __webpack_require__(1);
-var Factory = __webpack_require__(5);
-var BaseView = __webpack_require__(2);
-var ProjectList = __webpack_require__(22);
+var inherit = __webpack_require__(0);
+var Factory = __webpack_require__(3);
+var BaseView = __webpack_require__(1);
+var ProjectList = __webpack_require__(7);
 
 module.exports = ProjectBar;
 
@@ -800,21 +779,36 @@ function ProjectBar(bottomContainer){
     this.editButton = Factory.createIconButton("ui button", "disabled edit icon", "");
     this.deleteButton = Factory.createIconButton("ui button", "disabled trash icon", "");
 
+    this.isPressedProjectList = true;
+    this.projectList = new ProjectList(["teeeeest1", "test2", "sibsneaepinb", "qqqqqq",
+        "rr", "rwythrjtejedbxd", "rrr", "wegrfgnh",
+        "aknv", "teeeeest1", "test2", "sibsneaepinb", "qqqqqq",
+        "rr", "rwythrjtejedbxd", "rrr", "wegrfgnh",
+        "aknv"]);
+
     this._build(bottomContainer);
+
+    this.projectList.hide();
 }
 
 inherit(ProjectBar, BaseView);
 
 ProjectBar.prototype._build = function(bottomContainer){
-    this.showProjectListButton.on("click", function(){
-        var projectList = new ProjectList(["teeeeest1", "test2", "sibsneaepinb", "qqqqqq",
-            "rr", "rwythrjtejedbxd", "rrr", "wegrfgnh",
-            "aknv"]);
-        projectList.show($(".ui.container"));
+    var self = this;
+
+    this.showProjectListButton.on("click", function(event){
+        if(self.isPressedProjectList) {
+            self.projectList.show();
+            self.isPressedProjectList = false;
+        } else{
+            self.projectList.hide();
+            self.isPressedProjectList = true;
+        }
     });
 
     this.addButton.on("click", function(event){
         console.log("add");
+        this.projectList.show();
     });
 
     this.editButton.on("click", function(event){
@@ -835,36 +829,45 @@ ProjectBar.prototype._build = function(bottomContainer){
 
 
 /***/ }),
-/* 22 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var inherit = __webpack_require__(1);
-var Factory = __webpack_require__(5);
-var BaseView = __webpack_require__(2);
-var RequestManager = __webpack_require__(3);
+var inherit = __webpack_require__(0);
+var Factory = __webpack_require__(3);
+var BaseView = __webpack_require__(1);
 
+module.exports = UserModal;
 
-module.exports = ProjectList;
-
-function ProjectList(data){
-    BaseView.call(this, "project-list");
-
-    this.projectList = Factory.createGridData(data);
+function UserModal(){
+    BaseView.call(this, "ui modal");
+    this.facebookLogIn = Factory.createIconButton("ui facebook button", "facebook icon", "Facebook");
+    //this.label = $("<div class='ui pointing below label'>Join without registration");
+    this.buttonLogout = Factory.createButton("Logout");
 
     this._build();
 }
 
-inherit(ProjectList, BaseView);
+inherit(UserModal, BaseView);
 
-ProjectList.prototype._build = function(){
-    this._container.append(this.projectList);
+UserModal.prototype._build = function(){
+    this.facebookLogIn.on("click", function(event){
+        location.href = "/accounts/facebook/login/";
+    });
+
+    this.buttonLogout.on("click", function(event){
+        location.href = "/accounts/logout/";
+    });
+
+    this._container.append(this.facebookLogIn);
+    //this._container.append(this.label);
+    this._container.append(this.buttonLogout);
 };
 
-ProjectList.prototype.show = function(blockName){
-    blockName.append(this._container)
+UserModal.prototype.show = function(){
+    this._container.modal("show");
 };
 
 
