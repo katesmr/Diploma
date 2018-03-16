@@ -106,7 +106,6 @@ BaseView.prototype.show = function(){
 };
 
 BaseView.prototype.hide = function(){
-    console.log(this);
     this._container.hide();
 };
 
@@ -156,7 +155,7 @@ function createButton(text){
 }
 
 function createIconButton(buttonClass, iconClass, name){
-    return $("<button class='ui " + buttonClass + "'>" +
+    return $("<button class='" + buttonClass + "'>" +
              "<i class='" + iconClass + "'></i>" + name + "</button>");
 }
 
@@ -173,12 +172,12 @@ function createDivBlock(className){
     return $("<div class='" + className + "'></div>");
 }
 
-function createGridData(dataList){
+function createGridData(titleList){
     var i;
     var $column;
     var $table = $("<div class='five column stackable ui grid'>");
-    for(i = 0; i < dataList.length; ++i){
-        $column = $("<div class='column'><a>" + dataList[i] +"</a></div>");
+    for(i = 0; i < titleList.length; ++i){
+        $column = $("<div class='column'><a>" + titleList[i] +"</a></div>");
         $table.append($column);
     }
     return $table;
@@ -210,7 +209,7 @@ function RequestManager(){
     this.messageModal = new MessageModal();
 }
 
-RequestManager.getUser = function(callback, context){
+RequestManager.prototype.getUser = function(context, callback){
     getUser(callback.bind(context));
     /*getUser(function(){
         //projectList("projects/", projectView.fullProjectList.bind(projectView));
@@ -218,9 +217,9 @@ RequestManager.getUser = function(callback, context){
     });*/
 };
 
-RequestManager.getProjectData = function(){};
+RequestManager.prototype.getProjectData = function(){};
 
-RequestManager.deleteProject = function(projectName){
+RequestManager.prototype.deleteProject = function(projectName){
     var url = "projects/delete/";
     var fullUrl = url + projectName + '/';
     deleteProject(fullUrl, this.messageModal.show);
@@ -229,26 +228,24 @@ RequestManager.deleteProject = function(projectName){
 RequestManager.prototype.getProject = function(){};
 
 RequestManager.prototype.createSound = function(soundName, audioSrc){
-    var url = "sound/create/";
+    var url = "sounds/create/";
     // var url = "sound/update/";
     var fullUrl = url + soundName + '/';
     transportAudioFile(fullUrl, soundName, audioSrc, changeSound);
 };
 
 RequestManager.prototype.downloadSound = function(soundName){
-    var url = "sound/download/";
+    var url = "sounds/download/";
     var fullUrl = url + soundName + '/';
     getSound(fullUrl, function(data){
         TrackManager.save(data, soundName);
     });
 };
 
-RequestManager.prototype.uploadSound = function(soundName){
-    var url = "sound/download/";
+RequestManager.prototype.uploadSound = function(soundName, callback){
+    var url = "sounds/";
     var fullUrl = url + soundName + '/';
-    getSound(fullUrl, function(data){
-        // play sound
-    });
+    getSound(fullUrl, callback);
 };
 
 
@@ -259,10 +256,10 @@ RequestManager.prototype.uploadSound = function(soundName){
 "use strict";
 
 
-//module.exports = AudioHelper;
 module.exports = {
     "getAudioContextBuffer": getAudioContextBuffer,
-    "merge": merge
+    "merge": merge,
+    "BlobToArrayBuffer": BlobToArrayBuffer
 };
 
 // return AudioBuffer
@@ -284,6 +281,16 @@ function merge(context, buffer1, buffer2){
         data.set(buffer2.getChannelData(i), buffer1.length);
     }
     return track;
+}
+
+function BlobToArrayBuffer(blob, callback){
+    var arrayBuffer;
+    var reader = new FileReader();
+    reader.onload = function(){
+        arrayBuffer = reader.result;
+        callback(arrayBuffer);
+    };
+    reader.readAsArrayBuffer(blob);
 }
 
 
@@ -451,12 +458,11 @@ function toAudioBuffer(blob, getAudioBuffer){
 "use strict";
 
 
-var inherit = __webpack_require__(0);
 var Factory = __webpack_require__(3);
 var BaseView = __webpack_require__(1);
-var ProjectBar = __webpack_require__(19);
-var ProjectView = __webpack_require__(7);
 var UserModal = __webpack_require__(20);
+var ProjectBar = __webpack_require__(19);
+var inherit = __webpack_require__(0);
 
 module.exports = MenuBar;
 
@@ -481,18 +487,18 @@ MenuBar.prototype._build = function(){
         userModal.show();
     });
 
-
     this.userInfo.append(this.userName);  // empty
     this.userInfo.append(this.joinButton);
     this._container.append(this.projecrBar); // empty
     this._container.append(this.userInfo);
 };
 
-MenuBar.prototype.showMenuComponents = function(userName){
+MenuBar.prototype.showMenuComponents = function(userName, contentContainer){
+    this.projecrBar = new ProjectBar(this._container, contentContainer);
     if(userName instanceof Error){
         this.userName = $("<p>anonym</p>");
+        this.projecrBar.hideEditingProjectButton();
     } else{
-        this.projecrBar = new ProjectBar(this._container);
         this.userName = $("<p>" + userName + "</p>");
         this._container.append(this.projecrBar);
     }
@@ -613,15 +619,27 @@ function writeString (view, offset, string) {
 var merger_test = __webpack_require__(8);
 var RequestManager = __webpack_require__(4);
 var MenuBar = __webpack_require__(9);
+var TrackView = __webpack_require__(21);
+var ContentView = __webpack_require__(22);
+var PlayerView = __webpack_require__(23);
 
 module.exports = {
     "merger_test": merger_test
 };
 
+var requestManager = new RequestManager();
+
 var menuBar = new MenuBar();
+var contentView = new ContentView();
+var contentContainer = contentView.getContainer();
+var trackView = new TrackView(contentContainer);
+var player = new PlayerView();
 
-RequestManager.getUser(menuBar.showMenuComponents, menuBar);
+requestManager.getUser(menuBar, function(userName){
+    menuBar.showMenuComponents(userName, contentContainer);
+});
 
+requestManager.uploadSound("test.wav", trackView.createWaveForm);
 
 
 /***/ }),
@@ -736,9 +754,11 @@ function fetch(url, resolve){
 var inherit = __webpack_require__(0);
 var BaseView = __webpack_require__(1);
 
+module.exports = MessageModal;
+
 function MessageModal() {
     BaseView.call(this, "ui basic modal");
-    this.text = $("<p class='message-modal'></p>");
+    this.text = null;
     this.okButton = $("<i class='check circle outline'></i>");
 
     this._build();
@@ -747,7 +767,7 @@ function MessageModal() {
 inherit(MessageModal, BaseView);
 
 MessageModal.prototype.show = function(message){
-    $(".p.message-modal").text(message);
+    this.text = $("<p class='message-modal'>" + message + "</p>");
     this._container.modal("show");
 };
 
@@ -768,11 +788,16 @@ var inherit = __webpack_require__(0);
 var Factory = __webpack_require__(3);
 var BaseView = __webpack_require__(1);
 var ProjectList = __webpack_require__(7);
+var TrackToolView = __webpack_require__(24);
 
 module.exports = ProjectBar;
 
-function ProjectBar(bottomContainer){
+function ProjectBar(bottomContainer, contentContainer, projectList){
     BaseView.call(this, "projectbar");
+
+    this.contentContainer = contentContainer;
+
+    this.editingProjectButton = $("<div class='editing-project-button'></div>");
 
     this.showProjectListButton = Factory.createIconButton("ui button", "book icon", "");
     this.addButton = Factory.createIconButton("ui button", "plus icon", "");
@@ -780,15 +805,20 @@ function ProjectBar(bottomContainer){
     this.deleteButton = Factory.createIconButton("ui button", "disabled trash icon", "");
 
     this.isPressedProjectList = true;
+    this.isPressedAddProject = true;
+
     this.projectList = new ProjectList(["teeeeest1", "test2", "sibsneaepinb", "qqqqqq",
         "rr", "rwythrjtejedbxd", "rrr", "wegrfgnh",
         "aknv", "teeeeest1", "test2", "sibsneaepinb", "qqqqqq",
         "rr", "rwythrjtejedbxd", "rrr", "wegrfgnh",
         "aknv"]);
 
+    this.trackToolView = new TrackToolView();
+
     this._build(bottomContainer);
 
     this.projectList.hide();
+    this.trackToolView.hide();
 }
 
 inherit(ProjectBar, BaseView);
@@ -799,16 +829,26 @@ ProjectBar.prototype._build = function(bottomContainer){
     this.showProjectListButton.on("click", function(event){
         if(self.isPressedProjectList) {
             self.projectList.show();
+            self.contentContainer.hide();
             self.isPressedProjectList = false;
         } else{
             self.projectList.hide();
+            self.contentContainer.show();
             self.isPressedProjectList = true;
         }
     });
 
     this.addButton.on("click", function(event){
+        if(self.isPressedAddProject){
+            self.trackToolView.show();
+            self.contentContainer.hide();
+            self.isPressedAddProject = false;
+        } else{
+            self.trackToolView.hide();
+            self.contentContainer.show();
+            self.isPressedAddProject = true;
+        }
         console.log("add");
-        this.projectList.show();
     });
 
     this.editButton.on("click", function(event){
@@ -820,11 +860,16 @@ ProjectBar.prototype._build = function(bottomContainer){
         //RequestManager.deleteProject(projectName);
     });
 
-    this._container.append(this.showProjectListButton);
     this._container.append(this.addButton);
-    this._container.append(this.editButton);
-    this._container.append(this.deleteButton);
+    this.editingProjectButton.append(this.editButton);
+    this.editingProjectButton.append(this.deleteButton);
+    this.editingProjectButton.append(this.showProjectListButton);
+    this._container.append(this.editingProjectButton);
     bottomContainer.append(this._container);
+};
+
+ProjectBar.prototype.hideEditingProjectButton = function(){
+    this.editingProjectButton.hide();
 };
 
 
@@ -868,6 +913,166 @@ UserModal.prototype._build = function(){
 
 UserModal.prototype.show = function(){
     this._container.modal("show");
+};
+
+
+/***/ }),
+/* 21 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var Factory = __webpack_require__(3);
+var BaseView = __webpack_require__(1);
+
+module.exports = TrackView;
+
+function TrackView(bottomContainer){
+    BaseView.call(this, "track-view");
+
+    this.waveContainer = $("<div id='waveform'></div>");
+    this.waveform = null;
+
+    this._build();
+    this.appendToBlock(bottomContainer);
+}
+
+inherit(TrackView, BaseView);
+
+TrackView.prototype._build = function(){
+    this._container.append(this.waveContainer);
+};
+
+TrackView.prototype.createWaveForm = function(blob){
+    this.waveform = WaveSurfer.create({
+        container: "#waveform",
+        waveColor: 'violet',
+        progressColor: 'purple'
+    });
+    this.waveform.loadBlob(blob);
+    var self = this;
+    this.waveform.on('ready', function () {
+        self.waveform.play();
+    });
+};
+
+
+/***/ }),
+/* 22 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var BaseView = __webpack_require__(1);
+var Factory = __webpack_require__(3);
+
+module.exports = ContentView;
+
+function ContentView(){
+    BaseView.call(this, "content-view");
+
+
+    this._build();
+    this.appendToBlock($(".ui.container"));
+}
+
+inherit(ContentView, BaseView);
+
+ContentView.prototype._build = function(){};
+
+
+/***/ }),
+/* 23 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var Factory = __webpack_require__(3);
+var BaseView = __webpack_require__(1);
+
+module.exports = PlayerView;
+
+function PlayerView(){
+    BaseView.call(this, "player");
+
+    this.playButtonContainer = $("<div class='play-button-container'></div>");
+    this.saveButtonContainer = $("<div class='save-button-container'></div>");
+
+    this.playButton = Factory.createIconButton("ui button", "play icon", "");
+    this.pauseButton = Factory.createIconButton("ui button", "pause icon", "");
+    this.stopButton = Factory.createIconButton("ui button", "stop icon", "");
+    this.prevButton = Factory.createIconButton("ui button", "step backward icon", "");
+    this.nextButton = Factory.createIconButton("ui button", "step forward icon", "");
+
+    this.addButton = Factory.createButton("add"); // save to store
+    this.saveButton = Factory.createButton("save"); // save only chosen track
+    this.saveAllButton = Factory.createButton("save all"); // separate of each other
+    this.mergeAllButton = Factory.createButton("merge all"); // merge all track in one and save it
+
+    this._build();
+    this.appendToBlock(".ui.container");
+
+}
+
+inherit(PlayerView, BaseView);
+
+PlayerView.prototype._build = function(){
+
+    this.playButtonContainer.append(this.prevButton);
+    this.playButtonContainer.append(this.playButton);
+    this.playButtonContainer.append(this.pauseButton);
+    this.playButtonContainer.append(this.stopButton);
+    this.playButtonContainer.append(this.nextButton);
+
+    this.saveButtonContainer.append(this.addButton);
+    this.saveButtonContainer.append(this.saveButton);
+    this.saveButtonContainer.append(this.saveAllButton);
+    this.saveButtonContainer.append(this.mergeAllButton);
+
+    this._container.append(this.playButtonContainer);
+    this._container.append(this.saveButtonContainer);
+};
+
+PlayerView.prototype.playButtonBind = function(){
+    var self = this;
+    this.playButton.on("click", function(event){
+
+    });
+};
+
+
+/***/ }),
+/* 24 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var BaseView = __webpack_require__(1);
+var Factory = __webpack_require__(3);
+
+module.exports = TrackToolView;
+
+function TrackToolView(){
+    BaseView.call(this, "track-tool");
+
+    this.button = Factory.createButton("TEST");
+
+    this._build();
+    this.appendToBlock($(".ui.container"));
+}
+
+inherit(TrackToolView, BaseView);
+
+TrackToolView.prototype._build = function(){
+    this._container.append(this.button);
 };
 
 
