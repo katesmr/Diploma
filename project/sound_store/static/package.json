@@ -13,6 +13,7 @@
   "dependencies": {
     "audio-buffer-utils": "^5.1.1",
     "audiobuffer-to-wav": "^1.0.0",
-    "semantic-ui": "^2.3.0"
+    "semantic-ui": "^2.3.0",
+    "observer": "https://github.com/kurzgame/Observer/tarball/master"
   }
 }

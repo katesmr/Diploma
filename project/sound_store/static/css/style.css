@@ -42,28 +42,28 @@ body {
     padding-top: 2%;
 }
 
-.base.ui.modal {
+.ui.modal {
     width: 300px;
     height: 200px;
     padding: 5%;
 }
 
-.base.ui.modal .button {
+.ui.modal .button {
     display: block;
     margin: 10% auto;
     width: auto;
 }
 
-.base.project-list {
+.project-list {
     margin: 5% 10%;
 }
 
-.base.track-view {
+.track-view {
     margin: 0 auto;
     width: 70%;
 }
 
-.base.player {
+.player {
     position: absolute;
     bottom: 0;
     width: 100%;
@@ -71,15 +71,15 @@ body {
     background-color: grey;
 }
 
-.player .play-button-container {
+.play-button-group {
     float: left;
 }
 
-.player .save-button-container {
+.save-button-group {
     float: right;
 }
 
-.base.track-tool {
+.track-tool {
     margin: 5% auto;
     background-color: white;
     width: 80%;
