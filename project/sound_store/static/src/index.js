@@ -9,3 +9,6 @@ module.exports = {
 var requestManager = new RequestManager();
 
 var projectBaseView = new ProjectBaseView();
+
+
+// requestManager.uploadSound("test.wav", trackView.createWaveForm);
