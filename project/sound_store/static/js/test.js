@@ -134,6 +134,7 @@ eventListener.ON_DELETE_PROJECT = "ON_DELETE_PROJECT";
 eventListener.DEFINE_USER = "DEFINE_USER";
 eventListener.SHOW_TRACK = "SHOW_TRACK";
 eventListener.SHOW_LOGIN_FORM = "SHOW_LOGIN_FORM";
+eventListener.SHOW_INSTRUMENT_VIEW = "SHOW_INSTRUMENT_VIEW";
 
 module.exports = eventListener;
 
@@ -173,12 +174,22 @@ function createDivBlock(className){
     return $("<div class='" + className + "'></div>");
 }
 
-function createGridData(titleList){
+function createGridData(titleList, callback){
     var i;
+    var title;
+    var $item;
     var $column;
     var $table = $("<div class='five column stackable ui grid'>");
     for(i = 0; i < titleList.length; ++i){
-        $column = $("<div class='column'><a>" + titleList[i] +"</a></div>");
+        title = titleList[i];
+        $item = $("<a id='" + title + "'>" + title +"</a>");
+        $item.on("click", function (event) {
+            var projectName = $(this).attr("id");
+            console.log(projectName);
+            callback(projectName); // ???????????????
+        });
+        $column = $("<div class='column'>");
+        $column.append($item);
         $table.append($column);
     }
     return $table;
@@ -283,7 +294,8 @@ module.exports = function(method, dataType, url, callback){
 module.exports = {
     "getAudioContextBuffer": getAudioContextBuffer,
     "merge": merge,
-    "BlobToArrayBuffer": BlobToArrayBuffer
+    "BlobToArrayBuffer": BlobToArrayBuffer,
+     "AudioContextToBlob": AudioContextToBlob
 };
 
 // return AudioBuffer
@@ -315,6 +327,10 @@ function BlobToArrayBuffer(blob, callback){
         callback(arrayBuffer);
     };
     reader.readAsArrayBuffer(blob);
+}
+
+function AudioContextToBlob(audioContext){
+
 }
 
 
@@ -485,7 +501,7 @@ ProjectBaseView.prototype._build = function(){
     container.append(this.contentView.getContainer());
     container.append(this.player.getContainer());
 
-    // eventListener.subscribe("ON_SHOW_PROJECT_LIST", this._fetchProjectList.bind(this));
+    // eventListener.subscribe("ON_SHOW_PROJECT_LIST", this.fetchProjectList.bind(this));
 };
 
 ProjectBaseView.prototype.hideUserOnlyElements = function(userName){
@@ -896,7 +912,8 @@ ContentView.prototype._build = function(){
 
 ContentView.prototype.showProjectList = function(){
     this.hideAll();
-    this.projectList._fetchProjectList();
+    this.getContainer().append(this.projectList.getContainer());
+    this.projectList.fetchProjectList();
     this.projectList.show();
 };
 
@@ -906,7 +923,8 @@ ContentView.prototype.showTrackToolView = function(){
 };
 
 ContentView.prototype.hideAll = function(){
-    this.projectList.hide();
+    this.projectList.getContainer().remove();
+    //this.projectList.hide();
     this.trackToolView.hide();
     // ... hide all evelements
 };
@@ -1152,14 +1170,13 @@ function ProjectList(){
 inherit(ProjectList, BaseView);
 
 ProjectList.prototype._build = function(){
-    //eventListener.subscribe("ON_SHOW_PROJECT_LIST", this._fetchProjectList.bind(this));
-
     this.getContainer().append(this.projectList);
 
-    // eventListener.subscribe("ON_SHOW_PROJECT_LIST", this._fetchProjectList.bind(this));
+    // eventListener.subscribe("ON_SHOW_PROJECT_LIST", this.fetchProjectList.bind(this));
 };
 
-ProjectList.prototype._fetchProjectList = function(){
+//
+ProjectList.prototype.fetchProjectList = function(){
     // request to the server:
     var requestManager = new RequestManager();
     requestManager.getProjectList(this.showProjectList.bind(this))
@@ -1167,7 +1184,8 @@ ProjectList.prototype._fetchProjectList = function(){
 };
 
 ProjectList.prototype.showProjectList = function(data){
-    this.projectList = Factory.createGridData(data);
+    var test;
+    this.projectList = Factory.createGridData(data, test);
     this.getContainer().append(this.projectList);
 };
 
@@ -1236,7 +1254,7 @@ module.exports = TrackToolView;
 function TrackToolView(){
     BaseView.call(this, "track-tool-view");
 
-    this.label1 = $("<div class='ui label'>TEST</div>");
+    this.label1 = $("<div class='ui label'>envelope</div>");
     this.label2 = $("<div class='ui label'>TEST</div>");
     this.label3 = $("<div class='ui label'>TEST</div>");
 
@@ -1370,37 +1388,45 @@ var BaseView = __webpack_require__(1);
 var RequestManager = __webpack_require__(4);
 var eventListener = __webpack_require__(2);
 
-module.exports = TrackView;
+module.exports = WaveForm;
 
-function TrackView(){
-    BaseView.call(this, "track-view");
+function WaveForm(){
+    BaseView.call(this, "waveform");
 
-    this.waveContainer = $("<div id='waveform'></div>");
+    $(this.getContainer()).attr("id", "waveform");
+
     this.waveform = null;
 
     this._build();
 }
 
-inherit(TrackView, BaseView);
+inherit(WaveForm, BaseView);
 
-TrackView.prototype._build = function(){
+WaveForm.prototype._build = function(){
     eventListener.subscribe("SHOW_TRACK", this._fetchSoundData.bind(this));
-
-    this.getContainer().append(this.waveContainer);
 };
 
-TrackView.prototype._fetchSoundData = function(){
+WaveForm.prototype._fetchSoundData = function(){
     var requestManager = new RequestManager();
-    requestManager.uploadSound("test.wav", this.createWaveForm.bind(this));
+    requestManager.uploadSound("test.wav", this.createWaveFormFromFile.bind(this));
 };
 
-TrackView.prototype.createWaveForm = function(blob){
+WaveForm.prototype.createWaveFormFromFile = function(blob){
     this.waveform = WaveSurfer.create({
         container: "#waveform",
         waveColor: "#626262",
         progressColor: "#fff843"
     });
     this.waveform.loadBlob(blob);
+};
+
+WaveForm.prototype.createWaveForm = function(audioContext){
+    this.waveform = WaveSurfer.create({
+        audioContext: audioContext,
+        container: "#waveform",
+        waveColor: "#626262",
+        progressColor: "#fff843"
+    });
 };
 
 
