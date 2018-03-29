@@ -8407,7 +8407,7 @@ $.fn.embed = function(parameters) {
           var
             icon  = module.get.icon(),
             url   = module.get.url(),
-            embed = module.generate.embed(url)
+            embed = module.generateSynth.embed(url)
           ;
           placeholder = placeholder || module.get.placeholder();
           $module.html( templates.placeholder(placeholder, icon) );
@@ -8419,7 +8419,7 @@ $.fn.embed = function(parameters) {
           url = url || module.get.url();
           $embed = $('<div/>')
             .addClass(className.embed)
-            .html( module.generate.embed(url) )
+            .html( module.generateSynth.embed(url) )
             .appendTo($module)
           ;
           settings.onCreate.call(element, url);
@@ -8428,7 +8428,7 @@ $.fn.embed = function(parameters) {
 
         changeEmbed: function(url) {
           $embed
-            .html( module.generate.embed(url) )
+            .html( module.generateSynth.embed(url) )
           ;
         },
 
@@ -8601,7 +8601,7 @@ $.fn.embed = function(parameters) {
           }
         },
 
-        generate: {
+        generateSynth: {
           embed: function(url) {
             module.debug('Generating embed html');
             var
@@ -8611,7 +8611,7 @@ $.fn.embed = function(parameters) {
             ;
             url = module.get.url(url);
             if(url) {
-              parameters = module.generate.parameters(source);
+              parameters = module.generateSynth.parameters(source);
               html       = templates.iframe(url, parameters);
             }
             else {
@@ -13370,7 +13370,7 @@ $.fn.rating.settings = {
 
   error         : {
     method    : 'The method you called is not defined',
-    noMaximum : 'No maximum rating specified. Cannot generate HTML automatically'
+    noMaximum : 'No maximum rating specified. Cannot generateSynth HTML automatically'
   },
 
 

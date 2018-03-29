@@ -24,7 +24,7 @@ try {
   npmPackage = require('../../../package.json');
 }
 catch(error) {
-  // generate fake package
+  // generateSynth fake package
   npmPackage = {
     name: 'Unknown',
     version: 'x.x'

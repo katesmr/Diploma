@@ -133,8 +133,11 @@ eventListener.ON_EDIT_PROJECT = "ON_EDIT_PROJECT";
 eventListener.ON_DELETE_PROJECT = "ON_DELETE_PROJECT";
 eventListener.DEFINE_USER = "DEFINE_USER";
 eventListener.SHOW_TRACK = "SHOW_TRACK";
+eventListener.SHOW_PROJECT = "SHOW_PROJECT";
 eventListener.SHOW_LOGIN_FORM = "SHOW_LOGIN_FORM";
 eventListener.SHOW_INSTRUMENT_VIEW = "SHOW_INSTRUMENT_VIEW";
+eventListener.PROJECT_LIST_MODEL_UPDATED = "PROJECT_LIST_MODEL_UPDATED";
+eventListener.PROJECT_MODEL_UPDATED = "PROJECT_MODEL_UPDATED";
 
 module.exports = eventListener;
 
@@ -148,8 +151,7 @@ module.exports = eventListener;
 
 module.exports = {
     "createButton": createButton,
-    "createIconButton": createIconButton,
-    "createGridData": createGridData
+    "createIconButton": createIconButton
 };
 
 function createButton(className, text){
@@ -174,96 +176,9 @@ function createDivBlock(className){
     return $("<div class='" + className + "'></div>");
 }
 
-function createGridData(titleList, callback){
-    var i;
-    var title;
-    var $item;
-    var $column;
-    var $table = $("<div class='five column stackable ui grid'>");
-    for(i = 0; i < titleList.length; ++i){
-        title = titleList[i];
-        $item = $("<a id='" + title + "'>" + title +"</a>");
-        $item.on("click", function (event) {
-            var projectName = $(this).attr("id");
-            console.log(projectName);
-            callback(projectName); // ???????????????
-        });
-        $column = $("<div class='column'>");
-        $column.append($item);
-        $table.append($column);
-    }
-    return $table;
-}
-
 
 /***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-// var getProjectData = require("requests/getProjectData");
-var transportAudioFile = __webpack_require__(18);
-var TrackManager = __webpack_require__(7);
-
-var changeSound = __webpack_require__(13);
-var getSound = __webpack_require__(15);
-var projectList = __webpack_require__(17);
-var deleteProject = __webpack_require__(14);
-var getUser = __webpack_require__(16);
-
-var MessageModal = __webpack_require__(21);
-
-module.exports = RequestManager;
-
-function RequestManager(){
-    this.messageModal = new MessageModal();
-}
-
-RequestManager.prototype.getUser = function(callback){
-    getUser(callback);
-    /*getUser(function(){
-        //projectList("projects/", projectView.showProjectList.bind(projectView));
-        projectList("projects/", callback.bind(context));
-    });*/
-};
-
-RequestManager.prototype.getProjectList = function(callback){
-    projectList(callback);
-};
-
-RequestManager.prototype.deleteProject = function(projectName){
-    var url = "projects/delete/";
-    var fullUrl = url + projectName + '/';
-    deleteProject(fullUrl, this.messageModal.show);
-};
-
-RequestManager.prototype.getProject = function(){};
-
-RequestManager.prototype.createSound = function(soundName, audioSrc){
-    var url = "sounds/create/";
-    // var url = "sound/update/";
-    var fullUrl = url + soundName + '/';
-    transportAudioFile(fullUrl, soundName, audioSrc, changeSound);
-};
-
-RequestManager.prototype.downloadSound = function(soundName){
-    var url = "sounds/download/";
-    var fullUrl = url + soundName + '/';
-    getSound(fullUrl, function(data){
-        TrackManager.save(data, soundName);
-    });
-};
-
-RequestManager.prototype.uploadSound = function(soundName, callback){
-    var url = "sounds/";
-    var fullUrl = url + soundName + '/';
-    getSound(fullUrl, callback);
-};
-
-
-/***/ }),
+/* 4 */,
 /* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -291,11 +206,14 @@ module.exports = function(method, dataType, url, callback){
 "use strict";
 
 
+var toWav = __webpack_require__(10);
+
 module.exports = {
     "getAudioContextBuffer": getAudioContextBuffer,
     "merge": merge,
     "BlobToArrayBuffer": BlobToArrayBuffer,
-     "AudioContextToBlob": AudioContextToBlob
+    "AudioBufferToBlob": AudioBufferToBlob,
+    "AudioContextToBlob": AudioContextToBlob
 };
 
 // return AudioBuffer
@@ -329,6 +247,12 @@ function BlobToArrayBuffer(blob, callback){
     reader.readAsArrayBuffer(blob);
 }
 
+function AudioBufferToBlob(audioBuffer){
+    var buffer = toWav(audioBuffer, {float32: true});
+    var blob = new Blob([buffer], {"type": "audio/x-wav"});
+    return blob;
+}
+
 function AudioContextToBlob(audioContext){
 
 }
@@ -341,7 +265,6 @@ function AudioContextToBlob(audioContext){
 "use strict";
 
 
-var toWav = __webpack_require__(10);
 var AudioHelper = __webpack_require__(6);
 
 module.exports = TrackManager;
@@ -375,13 +298,14 @@ TrackManager.save = (function(){
     document.body.appendChild(a);
     a.style = "display: none";
     return function(audioBuffer, fileName){
+        var blob;
         var buffer;
         if(audioBuffer instanceof AudioBuffer){
-            buffer = toWav(audioBuffer, {float32: true});
+            blob = AudioHelper.AudioBufferToBlob(audioBuffer);
         } else{
             buffer = AudioHelper.getAudioContextBuffer(audioBuffer._context);
+            blob = new Blob([buffer], {"type": "audio/x-wav"});
         }
-        var blob = new Blob([buffer], {"type": "audio/x-wav"});
         var url = window.URL.createObjectURL(blob);
         a.href = url;
         a.download = fileName;
@@ -471,10 +395,10 @@ function toAudioBuffer(blob, getAudioBuffer){
 
 var inherit = __webpack_require__(0);
 var BaseView = __webpack_require__(1);
-var MenuBar = __webpack_require__(20);
+var MenuBar = __webpack_require__(21);
 var ContentView = __webpack_require__(19);
-var PlayerView = __webpack_require__(23);
-var RequestManager = __webpack_require__(4);
+var PlayerView = __webpack_require__(24);
+var RequestManager = __webpack_require__(34);
 
 module.exports = ProjectBaseView;
 
@@ -494,8 +418,7 @@ inherit(ProjectBaseView, BaseView);
 ProjectBaseView.prototype._build = function(){
     var container = this.getContainer();
 
-    var requestManager = new RequestManager();
-    requestManager.getUser(this.hideUserOnlyElements.bind(this));
+    RequestManager.getUser(this.hideUserOnlyElements.bind(this));
 
     container.append(this.menuBar.getContainer());
     container.append(this.contentView.getContainer());
@@ -741,14 +664,13 @@ function _notify(list, event, data){
 
 
 var merger_test = __webpack_require__(8);
-var RequestManager = __webpack_require__(4);
+var RequestManager = __webpack_require__(34);
 var ProjectBaseView = __webpack_require__(9);
 
 module.exports = {
     "merger_test": merger_test
 };
 
-var requestManager = new RequestManager();
 
 var projectBaseView = new ProjectBaseView();
 
@@ -866,9 +788,14 @@ function fetch(url, resolve){
 
 var inherit = __webpack_require__(0);
 var BaseView = __webpack_require__(1);
-var ProjectList = __webpack_require__(25);
-var TrackToolView = __webpack_require__(27);
-var TrackView = __webpack_require__(30);
+var WaveForm = __webpack_require__(33);
+var ProjectList = __webpack_require__(26);
+var TrackToolView = __webpack_require__(29);
+var TrackComponentView = __webpack_require__(28);
+
+var ProjectModel = __webpack_require__(39);
+var ProjectListModel = __webpack_require__(35);
+
 var eventListener = __webpack_require__(2);
 
 module.exports = ContentView;
@@ -876,9 +803,12 @@ module.exports = ContentView;
 function ContentView(){
     BaseView.call(this, "content-view");
 
+    this.projectListModel = new ProjectListModel();
+    this.projectModel = null;
+
     this.projectList = new ProjectList();
     this.trackToolView = new TrackToolView();
-    this.trackView = new TrackView();
+    this.trackComponentView = new TrackComponentView();
 
     this.sideBar = null;
     //this.trackView = null;
@@ -895,25 +825,30 @@ ContentView.prototype._build = function(){
 
         console.error("Unable to subscribe to", eventListener.ON_SHOW_PROJECT_LIST, "event!");
     }*/
-    // EXAMPLE:
 
     eventListener.notify("SHOW_TRACK");
 
-    eventListener.subscribe("ON_SHOW_PROJECT_LIST", this.showProjectList.bind(this));
-    eventListener.subscribe("ON_ADD_PROJECT", this.showTrackToolView.bind(this));
-    eventListener.subscribe("ADD_TRACK", this.addTrack.bind(this));
+    eventListener.subscribe(eventListener.ON_SHOW_PROJECT_LIST, this.showProjectList.bind(this));
+    eventListener.subscribe(eventListener.ON_ADD_PROJECT, this.showTrackToolView.bind(this));
+    eventListener.subscribe(eventListener.ADD_TRACK, this.addTrack.bind(this));
+    eventListener.subscribe(eventListener.SHOW_PROJECT, this.showCurrentProject.bind(this));
 
     container.append(this.projectList.getContainer());
     container.append(this.trackToolView.getContainer());
-    container.append(this.trackView.getContainer());
+    //container.append(this.trackView.getContainer());
 
     this.appendToBlock($(".ui.container"));
+
+    var w = new WaveForm();
+    //w.test();
+
+    //container.append(w.getContainer());
 };
 
 ContentView.prototype.showProjectList = function(){
     this.hideAll();
     this.getContainer().append(this.projectList.getContainer());
-    this.projectList.fetchProjectList();
+    this.projectListModel.fetchData();
     this.projectList.show();
 };
 
@@ -934,6 +869,14 @@ ContentView.prototype.addTrack = function(trackInfo){
     this.trackView.addTrack(trackInfo);
 };
 
+ContentView.prototype.showCurrentProject = function(eventName, projectName){
+    this.hideAll();
+    this.projectModel = new ProjectModel(projectName);
+    this.projectModel.fetchProject();
+    this.getContainer().append(this.trackComponentView.getContainer());
+    this.trackComponentView.show();
+};
+
 
 /***/ }),
 /* 20 */
@@ -942,9 +885,45 @@ ContentView.prototype.addTrack = function(trackInfo){
 "use strict";
 
 
+var inherit = __webpack_require__(0);
+var Factory = __webpack_require__(3);
 var BaseView = __webpack_require__(1);
-var UserInfoBar = __webpack_require__(28);
-var ProjectBar = __webpack_require__(24);
+var eventListener = __webpack_require__(2);
+
+module.exports = InstrumentView;
+
+function InstrumentView(name, instrument){
+    BaseView.call(this, "instrument-view");
+
+    this.name = $("<h5 class='ui header'>" + name + "</h5>");
+    this.instrument = $("<h5 class='ui header'>" + instrument + "</h5>");
+
+    this._build();
+}
+
+inherit(InstrumentView, BaseView);
+
+InstrumentView.prototype._build = function(){
+    eventListener.subscribe(eventListener.SHOW_INSTRUMENT_VIEW, this.show.bind(this));
+
+    this.getContainer().append(this.name);
+    this.getContainer().append(this.instrument);
+};
+
+
+
+
+
+/***/ }),
+/* 21 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var BaseView = __webpack_require__(1);
+var UserInfoBar = __webpack_require__(31);
+var ProjectBar = __webpack_require__(25);
 var inherit = __webpack_require__(0);
 var eventListener = __webpack_require__(2);
 
@@ -972,7 +951,7 @@ MenuBar.prototype._build = function(){
 
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1006,7 +985,7 @@ MessageModal.prototype._build = function(){
 
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1056,7 +1035,7 @@ PlayButtonBar.prototype._build = function(){
 
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1064,8 +1043,8 @@ PlayButtonBar.prototype._build = function(){
 
 var inherit = __webpack_require__(0);
 var BaseView = __webpack_require__(1);
-var SaveButtonBar = __webpack_require__(26);
-var PlayButtonBar = __webpack_require__(22);
+var SaveButtonBar = __webpack_require__(27);
+var PlayButtonBar = __webpack_require__(23);
 
 module.exports = PlayerView;
 
@@ -1092,7 +1071,7 @@ PlayerView.prototype._build = function(){
 
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1144,7 +1123,7 @@ ProjectBar.prototype._build = function(){
 
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1152,8 +1131,6 @@ ProjectBar.prototype._build = function(){
 
 var inherit = __webpack_require__(0);
 var BaseView = __webpack_require__(1);
-var Factory = __webpack_require__(3);
-var RequestManager = __webpack_require__(4);
 var eventListener = __webpack_require__(2);
 
 module.exports = ProjectList;
@@ -1170,28 +1147,49 @@ function ProjectList(){
 inherit(ProjectList, BaseView);
 
 ProjectList.prototype._build = function(){
+    eventListener.subscribe(eventListener.PROJECT_LIST_MODEL_UPDATED, this.updateProjectListElement.bind(this));
     this.getContainer().append(this.projectList);
-
     // eventListener.subscribe("ON_SHOW_PROJECT_LIST", this.fetchProjectList.bind(this));
 };
 
-//
-ProjectList.prototype.fetchProjectList = function(){
-    // request to the server:
-    var requestManager = new RequestManager();
-    requestManager.getProjectList(this.showProjectList.bind(this))
-    // requestManager.getProjectLIst(function(){ self.showProjectList() });
+
+ProjectList.prototype.updateProjectListElement = function(eventName, projectListModel){
+    var container = this.getContainer();
+    // Clear (possibly) old project list:
+    container.empty();
+    //this.projectListModel.fetchData();
+    console.log(projectListModel.projectNameList);
+    this.projectList = this.createGridData(projectListModel.projectNameList);
+    // Add new one:
+    container.append(this.projectList);
 };
 
-ProjectList.prototype.showProjectList = function(data){
-    var test;
-    this.projectList = Factory.createGridData(data, test);
-    this.getContainer().append(this.projectList);
+
+ProjectList.prototype.createGridData = function(titleList, callback){
+    var i;
+    var title;
+    var $item;
+    var $column;
+    var projectName;
+    var $table = $("<div class='five column stackable ui grid'>");
+    for(i = 0; i < titleList.length; ++i){
+        title = titleList[i];
+        $item = $("<a id='" + title + "'>" + title +"</a>");
+        $item.on("click", function(event){
+            projectName = $(this).attr("id");
+            eventListener.notify(eventListener.SHOW_PROJECT, projectName);
+            console.log(projectName);
+        });
+        $column = $("<div class='column'>");
+        $column.append($item);
+        $table.append($column);
+    }
+    return $table;
 };
 
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1237,7 +1235,59 @@ SaveButtonBar.prototype._build = function(){
 
 
 /***/ }),
-/* 27 */
+/* 28 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+//TrackComponentView
+var inherit = __webpack_require__(0);
+var BaseView = __webpack_require__(1);
+var TrackView = __webpack_require__(30);
+var eventListener = __webpack_require__(2);
+
+module.exports = TrackComponentView;
+
+/*
+    wait:
+    {"synth": TrackObject, "noise": TrackObject, "oscillator": TrackObject}
+    or
+    {"synth": TrackObject} ....
+    TrackObject.context
+ */
+function TrackComponentView(){
+    BaseView.call(this, "track-component-view");
+
+    this.components = [];
+
+    this._build();
+    this.hide();
+}
+
+inherit(TrackComponentView, BaseView);
+
+TrackComponentView.prototype._build = function(){
+    //this.getContainer().empty();
+    eventListener.subscribe(eventListener.PROJECT_MODEL_UPDATED, this.createTrackViewList.bind(this));
+};
+
+TrackComponentView.prototype.createTrackViewList = function(eventName, project){
+    var i;
+    var track;
+    var trackView;
+    for(track in project.trackModelList){
+        console.log("tr");
+        console.log(track);
+        trackView = new TrackView(project.trackModelList[track]);
+        this.getContainer().append(trackView.getContainer());
+        this.components.push(trackView);
+    }
+};
+
+
+/***/ }),
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1246,11 +1296,15 @@ SaveButtonBar.prototype._build = function(){
 var inherit = __webpack_require__(0);
 var BaseView = __webpack_require__(1);
 var Factory = __webpack_require__(3);
-var RequestManager = __webpack_require__(4);
+var RequestManager = __webpack_require__(34);
 var eventListener = __webpack_require__(2);
 
 module.exports = TrackToolView;
 
+/**
+ *
+ * @constructor
+ */
 function TrackToolView(){
     BaseView.call(this, "track-tool-view");
 
@@ -1273,7 +1327,64 @@ TrackToolView.prototype._build = function(){
 
 
 /***/ }),
-/* 28 */
+/* 30 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+//TrackComponentView
+var inherit = __webpack_require__(0);
+var Factory = __webpack_require__(3);
+var BaseView = __webpack_require__(1);
+var WaveForm = __webpack_require__(33);
+var InstrumentView = __webpack_require__(20);
+var eventListener = __webpack_require__(2);
+
+module.exports = TrackView;
+
+function TrackView(trackModel){
+    BaseView.call(this, "track-view");
+
+    this.waveform = null;
+    this.instrumentView = null;
+
+    this.trackModel = trackModel;
+
+    this._build(trackModel);
+}
+
+inherit(TrackView, BaseView);
+
+TrackView.prototype._build = function(trackModel){
+    //eventListener.subscribe("SHOW_TRACK", this._fetchSoundData.bind(this));
+    //eventListener.notify("SHOW_TRACK");
+    /*this.getContainer().append(this.instrumentView);
+    this.getContainer().append(this.waveform);*/
+
+    this.createInstrument();
+    //this.createWaveForm();
+};
+
+TrackView.prototype.createInstrument = function(){
+    this.instrumentView = new InstrumentView(this.trackModel.name, this.trackModel.instrument);
+    this.getContainer().append(this.instrumentView.getContainer());
+};
+
+TrackView.prototype.createWaveForm = function(){
+    var data = this.trackModel.getContext();
+    this.waveform = new WaveForm();
+    this.getContainer().append(this.waveform.getContainer());
+    if(data instanceof Blob){
+        this.waveform.createWaveFormFromFile(data);
+    } else if(data instanceof AudioContext){
+        //this.waveform.createWaveForm(data);
+    }
+};
+
+
+/***/ }),
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1282,8 +1393,8 @@ TrackToolView.prototype._build = function(){
 var inherit = __webpack_require__(0);
 var Factory = __webpack_require__(3);
 var BaseView = __webpack_require__(1);
-var UserModal = __webpack_require__(29);
-var RequestManager = __webpack_require__(4);
+var UserModal = __webpack_require__(32);
+var RequestManager = __webpack_require__(34);
 var eventListener = __webpack_require__(2);
 
 module.exports = UserInfoBar;
@@ -1304,33 +1415,35 @@ UserInfoBar.prototype._build = function(){
     var container = this.getContainer();
 
     this.joinButton.on("click", function(){
-        eventListener.notify("SHOW_LOGIN_FORM");
+        eventListener.notify(eventListener.SHOW_LOGIN_FORM);
     });
 
-    eventListener.subscribe("DEFINE_USER", this._fetchUserName.bind(this));
+    //eventListener.subscribe(eventListener.DEFINE_USER, this._fetchUserName.bind(this));
+    this._fetchUserName();
 
     container.append(this.userName);
     container.append(this.joinButton);
 };
 
 UserInfoBar.prototype._fetchUserName = function(){
-    var requestManager = new RequestManager();
-    requestManager.getUser(this.setUserName.bind(this));
+    RequestManager.getUser(this.setUserName.bind(this));
 
 };
 
 UserInfoBar.prototype.setUserName = function(userName){
     if(userName instanceof Error){
         this.userName = $("<p>anonym</p>");
+        // eventListener.notify("USER_IS_ANONYM");
     } else{
         this.userName = $("<p>" + userName + "</p>");
+        // eventListener.notify("USER_IS_LOGEDIN", userName);
     }
     this.getContainer().append(this.userName);
 };
 
 
 /***/ }),
-/* 29 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1363,7 +1476,7 @@ UserModal.prototype._build = function(){
         location.href = "/accounts/logout/";
     });
 
-    eventListener.subscribe("SHOW_LOGIN_FORM", this.show.bind(this));
+    eventListener.subscribe(eventListener.SHOW_LOGIN_FORM, this.show.bind(this));
 
     this._container.append(this.facebookLogIn);
     //this._container.append(this.label);
@@ -1376,7 +1489,7 @@ UserModal.prototype.show = function(){
 
 
 /***/ }),
-/* 30 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1385,7 +1498,7 @@ UserModal.prototype.show = function(){
 var inherit = __webpack_require__(0);
 var Factory = __webpack_require__(3);
 var BaseView = __webpack_require__(1);
-var RequestManager = __webpack_require__(4);
+var RequestManager = __webpack_require__(34);
 var eventListener = __webpack_require__(2);
 
 module.exports = WaveForm;
@@ -1394,6 +1507,7 @@ function WaveForm(){
     BaseView.call(this, "waveform");
 
     $(this.getContainer()).attr("id", "waveform");
+    //this.waveContainer = $("<div id='waveform'></div>");
 
     this.waveform = null;
 
@@ -1403,12 +1517,11 @@ function WaveForm(){
 inherit(WaveForm, BaseView);
 
 WaveForm.prototype._build = function(){
-    eventListener.subscribe("SHOW_TRACK", this._fetchSoundData.bind(this));
+    //this.getContainer().append(this.waveContainer);
 };
 
-WaveForm.prototype._fetchSoundData = function(){
-    var requestManager = new RequestManager();
-    requestManager.uploadSound("test.wav", this.createWaveFormFromFile.bind(this));
+WaveForm.prototype.test = function(){
+    RequestManager.uploadSound("test.wav", this.createWaveFormFromFile.bind(this));
 };
 
 WaveForm.prototype.createWaveFormFromFile = function(blob){
@@ -1421,12 +1534,279 @@ WaveForm.prototype.createWaveFormFromFile = function(blob){
 };
 
 WaveForm.prototype.createWaveForm = function(audioContext){
+    console.log(this.getContainer());
     this.waveform = WaveSurfer.create({
-        audioContext: audioContext,
         container: "#waveform",
+        audioContext: audioContext,
         waveColor: "#626262",
         progressColor: "#fff843"
     });
+    console.log(this.waveform);
+};
+
+
+/***/ }),
+/* 34 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var transportAudioFile = __webpack_require__(18);
+var TrackManager = __webpack_require__(7);
+
+var changeSound = __webpack_require__(13);
+var getSound = __webpack_require__(15);
+var getProject = __webpack_require__(36);
+var projectList = __webpack_require__(17);
+var deleteProject = __webpack_require__(14);
+var getUser = __webpack_require__(16);
+
+var MessageModal = __webpack_require__(22);
+
+module.exports = {
+    "getUser": defineUser,
+    "getProjectList": getProjectList,
+    "deleteProject": deleteUserProject,
+    "createSound": createSound,
+    "downloadSound": downloadSound,
+    "uploadSound": uploadSound,
+    "getProject": getProjectData
+};
+
+function defineUser(callback){
+    getUser(callback);
+    /*getUser(function(){
+        //projectList("projects/", projectView.showProjectList.bind(projectView));
+        projectList("projects/", callback.bind(context));
+    });*/
+}
+
+function getProjectList(callback){
+    projectList(callback);
+}
+
+function getProjectData(projectName, callback){
+    var url = "projects/";
+    var fullUrl = url + projectName + '/';
+    getProject(fullUrl, callback);
+}
+
+function deleteUserProject(projectName){
+    var messageModal = new MessageModal();
+    var url = "projects/delete/";
+    var fullUrl = url + projectName + '/';
+    deleteProject(fullUrl, messageModal.show.bind(this));
+}
+
+function createSound(soundName, audioSrc){
+    var url = "sounds/create/";
+    // var url = "sound/update/";
+    var fullUrl = url + soundName + '/';
+    transportAudioFile(fullUrl, soundName, audioSrc, changeSound);
+}
+
+function downloadSound(soundName){
+    var url = "sounds/download/";
+    var fullUrl = url + soundName + '/';
+    getSound(fullUrl, function(data){
+        TrackManager.save(data, soundName);
+    });
+}
+
+function uploadSound(soundName, callback){
+    var url = "sounds/";
+    var fullUrl = url + soundName + '/';
+    getSound(fullUrl, callback);
+}
+
+
+/***/ }),
+/* 35 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var RequestManager = __webpack_require__(34);
+var eventListener = __webpack_require__(2);
+
+module.exports = ProjectListModel;
+
+function ProjectListModel(){
+    this.projectNameList = [];
+}
+
+ProjectListModel.prototype.fetchData = function(){
+    var self = this;
+    this.projectNameList.length = 0;
+    RequestManager.getProjectList(function(data){
+        if (data instanceof Error){
+            // Smth bad is happening!!
+        } else{
+            self.projectNameList = data; // disappear after request end !!
+            eventListener.notify(eventListener.PROJECT_LIST_MODEL_UPDATED, self);
+        }
+    });
+};
+
+
+/***/ }),
+/* 36 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var baseRequest = __webpack_require__(5);
+
+module.exports = baseRequest.bind(null, "GET", "json");
+
+
+/***/ }),
+/* 37 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var PostProcessSettings = __webpack_require__(38);
+
+module.exports = BaseTrackModel;
+
+// @param {String} name
+// @param {Object} source
+function BaseTrackModel(name, instrument, source){
+    this.name = name;
+    this.instrument = instrument;
+    this.postProcessSettings = new PostProcessSettings();
+    this.trackObject = this._generate(source);
+}
+
+BaseTrackModel.prototype.createFormData = function(){
+    var formData = new FormData();
+    formData.append("user_audio", toBlob(this.trackObject), this.name);
+    formData.append("postProcessSettings", JSON.stringify(this.postProcessSettings));
+    return formData;
+};
+
+BaseTrackModel.prototype.getContext = function(){
+    return this.trackObject.context;
+};
+
+BaseTrackModel.prototype.getAudioBuffer = function(){
+
+};
+
+/**
+ * @param {Object} source
+ * @type {null}
+ * @protected
+ * @return {Tone}
+ */
+BaseTrackModel.prototype._generate = null;
+
+/**
+ * @param {Object} options
+ * @type {null}
+ */
+BaseTrackModel.prototype.play = null;
+
+
+/***/ }),
+/* 38 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = PostProcessSettings;
+
+function PostProcessSettings(){
+    this.volume = 1;
+    this.vibrato = {};
+}
+
+
+/***/ }),
+/* 39 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var TrackSynthesizer = __webpack_require__(40);
+var RequestManager = __webpack_require__(34);
+var eventListener = __webpack_require__(2);
+
+module.exports = ProjectModel;
+
+function ProjectModel(projectName){
+    this.projectName = projectName;
+    this.trackModelList = [];
+}
+
+ProjectModel.prototype.setProjectNameList = function(list){
+    //this.trackModelList.lenth = 0;
+    var i;
+    var key;
+    var data;
+    var track;
+    var stream;
+    for(i = 0; i < list.length; ++i){
+        stream = list[i];
+        for(key in stream){
+            data = stream[key];
+            if(key === "synth"){
+                track = new TrackSynthesizer(i, key, data);
+            } else if(key === "noise"){
+
+            }
+            this.trackModelList.push(track);
+        }
+    }
+};
+
+ProjectModel.prototype.fetchProject = function(){
+    var self = this;
+    RequestManager.getProject(this.projectName, function(data){
+        if (data instanceof Error){
+            // Smth bad is happening!!
+        } else{
+            self.setProjectNameList(data); // disappear after request end !!
+            eventListener.notify(eventListener.PROJECT_MODEL_UPDATED, self);
+        }
+    });
+};
+
+
+/***/ }),
+/* 40 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var BaseTrackModel = __webpack_require__(37);
+var inherit = __webpack_require__(0);
+
+module.exports = TrackSynthesizer;
+
+// @param {String} name
+// @param {Object} source
+function TrackSynthesizer(name, instrument, source){
+    BaseTrackModel.call(this, name, instrument, source);
+    console.log(this.trackObject);
+}
+
+inherit(TrackSynthesizer, BaseTrackModel);
+
+TrackSynthesizer.prototype._generate = function(options){
+    return new Tone.Synth(options); //{"oscillator": {}, "envelope": {}}
+};
+
+TrackSynthesizer.prototype.play = function(options){
+    this.trackObject.triggerAttackRelease(options);
 };
 
 
