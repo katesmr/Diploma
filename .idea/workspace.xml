@@ -10,44 +10,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b869e63b-9454-4773-9649-2a5fbab85264" name="Default" comment="">
-      <change beforePath="" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/BaseTrackModel.js" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/ProjectListModel.js" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/ProjectModel2.js" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/TrackNoise.js" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/TrackSynthesizer.js" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change beforePath="$PROJECT_DIR$/project/sound_store/static/js/test.js" afterPath="$PROJECT_DIR$/project/sound_store/static/js/test.js" />
-      <change beforePath="$PROJECT_DIR$/project/sound_store/static/semantic/dist/components/embed.js" afterPath="$PROJECT_DIR$/project/sound_store/static/semantic/dist/components/embed.js" />
-      <change beforePath="$PROJECT_DIR$/project/sound_store/static/semantic/dist/components/embed.min.js" afterPath="$PROJECT_DIR$/project/sound_store/static/semantic/dist/components/embed.min.js" />
-      <change beforePath="$PROJECT_DIR$/project/sound_store/static/semantic/dist/components/rating.js" afterPath="$PROJECT_DIR$/project/sound_store/static/semantic/dist/components/rating.js" />
-      <change beforePath="$PROJECT_DIR$/project/sound_store/static/semantic/dist/components/rating.min.js" afterPath="$PROJECT_DIR$/project/sound_store/static/semantic/dist/components/rating.min.js" />
-      <change beforePath="$PROJECT_DIR$/project/sound_store/static/semantic/dist/semantic.js" afterPath="$PROJECT_DIR$/project/sound_store/static/semantic/dist/semantic.js" />
-      <change beforePath="$PROJECT_DIR$/project/sound_store/static/semantic/dist/semantic.min.js" afterPath="$PROJECT_DIR$/project/sound_store/static/semantic/dist/semantic.min.js" />
-      <change beforePath="$PROJECT_DIR$/project/sound_store/static/semantic/src/definitions/modules/embed.js" afterPath="$PROJECT_DIR$/project/sound_store/static/semantic/src/definitions/modules/embed.js" />
-      <change beforePath="$PROJECT_DIR$/project/sound_store/static/semantic/src/definitions/modules/rating.js" afterPath="$PROJECT_DIR$/project/sound_store/static/semantic/src/definitions/modules/rating.js" />
-      <change beforePath="$PROJECT_DIR$/project/sound_store/static/semantic/tasks/config/defaults.js" afterPath="$PROJECT_DIR$/project/sound_store/static/semantic/tasks/config/defaults.js" />
-      <change beforePath="$PROJECT_DIR$/project/sound_store/static/semantic/tasks/config/project/release.js" afterPath="$PROJECT_DIR$/project/sound_store/static/semantic/tasks/config/project/release.js" />
-      <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/index.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/index.js" />
-      <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/AudioPlayer.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/AudioPlayer.js" />
-      <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/RequestManager.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/utils/RequestManager.js" />
-      <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/audioplayer_test.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/audioplayer_test.js" />
-      <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/controller/AudioGenerator.js" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/ProjectModel.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/ProjectModel.js" />
-      <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/TrackData.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/TrackData.js" />
-      <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/eventListener.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/eventListener.js" />
-      <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/requests/getProject.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/requests/getProject.js" />
+      <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/BaseTrackModel.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/BaseTrackModel.js" />
       <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/utils/AudioHelper.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/utils/AudioHelper.js" />
-      <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/utils/TrackManager.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/utils/TrackManager.js" />
       <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/ContentView.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/ContentView.js" />
-      <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/Factory.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/Factory.js" />
-      <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/InstrumentView.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/InstrumentView.js" />
-      <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/ProjectBaseView.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/ProjectBaseView.js" />
-      <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/ProjectList.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/ProjectList.js" />
-      <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/TrackComponentView.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/TrackComponentView.js" />
-      <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/TrackToolView.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/TrackToolView.js" />
       <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/TrackView.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/TrackView.js" />
-      <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/UserInfoBar.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/UserInfoBar.js" />
-      <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/UserModal.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/UserModal.js" />
       <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/WaveForm.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/WaveForm.js" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
@@ -63,18 +31,68 @@
       <file leaf-file-name="ContentView.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/ContentView.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="710">
-              <caret line="84" column="19" lean-forward="false" selection-start-line="84" selection-start-column="19" selection-end-line="84" selection-end-column="19" />
+            <state relative-caret-position="404">
+              <caret line="52" column="0" lean-forward="false" selection-start-line="52" selection-start-column="0" selection-end-line="52" selection-end-column="0" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="TrackComponentView.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="WaveForm.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/WaveForm.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="756">
+              <caret line="42" column="38" lean-forward="false" selection-start-line="42" selection-start-column="38" selection-end-line="42" selection-end-column="38" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="AudioHelper.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/utils/AudioHelper.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="846">
+              <caret line="47" column="13" lean-forward="true" selection-start-line="47" selection-start-column="9" selection-end-line="47" selection-end-column="27" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="TrackManager.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/utils/TrackManager.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="648">
+              <caret line="36" column="60" lean-forward="false" selection-start-line="36" selection-start-column="60" selection-end-line="36" selection-end-column="60" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="TrackComponentView.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/TrackComponentView.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="666">
               <caret line="37" column="25" lean-forward="false" selection-start-line="37" selection-start-column="25" selection-end-line="37" selection-end-column="25" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="TrackView.js" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/TrackView.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="720">
+              <caret line="40" column="24" lean-forward="false" selection-start-line="40" selection-start-column="24" selection-end-line="40" selection-end-column="24" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="BaseTrackModel.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/BaseTrackModel.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="414">
+              <caret line="23" column="0" lean-forward="true" selection-start-line="23" selection-start-column="0" selection-end-line="23" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -85,16 +103,6 @@
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="144">
               <caret line="8" column="23" lean-forward="false" selection-start-line="8" selection-start-column="9" selection-end-line="8" selection-end-column="23" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ProjectList.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/ProjectList.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="278">
-              <caret line="27" column="7" lean-forward="false" selection-start-line="27" selection-start-column="7" selection-end-line="27" selection-end-column="7" />
               <folding />
             </state>
           </provider>
@@ -113,18 +121,8 @@
       <file leaf-file-name="ProjectListModel.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/ProjectListModel.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="216">
-              <caret line="12" column="47" lean-forward="false" selection-start-line="12" selection-start-column="43" selection-end-line="12" selection-end-column="47" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="TrackView.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/TrackView.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="458">
-              <caret line="28" column="0" lean-forward="true" selection-start-line="28" selection-start-column="0" selection-end-line="28" selection-end-column="0" />
+            <state relative-caret-position="18">
+              <caret line="1" column="17" lean-forward="false" selection-start-line="1" selection-start-column="4" selection-end-line="1" selection-end-column="17" />
               <folding />
             </state>
           </provider>
@@ -174,14 +172,11 @@
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/RequestManager.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/UserInfoBar.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/ProjectBaseView.js" />
-        <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/WaveForm.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/UserModal.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/TrackSynth.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/ProjectModel2.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/AudioPlayer.js" />
-        <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/utils/AudioHelper.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/utils/TrackManager.js" />
-        <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/BaseTrackModel.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/InstrumentView.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/ProjectList2.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/index.js" />
@@ -189,13 +184,16 @@
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/eventListener.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/ProjectListModel.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/ProjectList.js" />
-        <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/ContentView.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/TrackSynthesizer.js" />
         <option value="$PROJECT_DIR$/project/sound_store/ProjectManager.py" />
-        <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/TrackView.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/requests/getProject.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/ProjectModel.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/TrackComponentView.js" />
+        <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/ContentView.js" />
+        <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/WaveForm.js" />
+        <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/BaseTrackModel.js" />
+        <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/utils/AudioHelper.js" />
+        <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/TrackView.js" />
       </list>
     </option>
   </component>
@@ -400,12 +398,12 @@
       <workItem from="1521230773204" duration="39836000" />
       <workItem from="1521476030900" duration="27169000" />
       <workItem from="1521671563379" duration="27174000" />
-      <workItem from="1521915293120" duration="46184000" />
+      <workItem from="1521915293120" duration="49770000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="249388000" />
+    <option name="totallyTimeSpent" value="252974000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="66" y="-11" width="1855" height="1092" extended-state="6" />
@@ -559,14 +557,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/WaveForm.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="216">
-          <caret line="12" column="6" lean-forward="false" selection-start-line="12" selection-start-column="6" selection-end-line="12" selection-end-column="6" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/UserInfoBar.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="252">
@@ -623,26 +613,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/utils/TrackManager.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="648">
-          <caret line="36" column="60" lean-forward="false" selection-start-line="36" selection-start-column="60" selection-end-line="36" selection-end-column="60" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/project/sound_store/static/js/requests.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-1759">
           <caret line="47" column="31" lean-forward="false" selection-start-line="47" selection-start-column="31" selection-end-line="47" selection-end-column="31" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/utils/AudioHelper.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="42" lean-forward="false" selection-start-line="0" selection-start-column="42" selection-end-line="0" selection-end-column="42" />
           <folding />
         </state>
       </provider>
@@ -737,22 +711,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/ContentView.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="710">
-          <caret line="84" column="19" lean-forward="false" selection-start-line="84" selection-start-column="19" selection-end-line="84" selection-end-column="19" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/BaseTrackModel.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
-          <caret line="10" column="20" lean-forward="false" selection-start-line="10" selection-start-column="4" selection-end-line="10" selection-end-column="20" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/TrackSynthesizer.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="162">
@@ -786,14 +744,6 @@
           <folding>
             <element signature="e#0#14#0" expanded="false" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/TrackView.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="458">
-          <caret line="28" column="0" lean-forward="true" selection-start-line="28" selection-start-column="0" selection-end-line="28" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -831,8 +781,16 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/ProjectListModel.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="216">
-          <caret line="12" column="47" lean-forward="false" selection-start-line="12" selection-start-column="43" selection-end-line="12" selection-end-column="47" />
+        <state relative-caret-position="18">
+          <caret line="1" column="17" lean-forward="false" selection-start-line="1" selection-start-column="4" selection-end-line="1" selection-end-column="17" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/ContentView.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="404">
+          <caret line="52" column="0" lean-forward="false" selection-start-line="52" selection-start-column="0" selection-end-line="52" selection-end-column="0" />
           <folding />
         </state>
       </provider>
@@ -845,10 +803,50 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/WaveForm.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="756">
+          <caret line="42" column="38" lean-forward="false" selection-start-line="42" selection-start-column="38" selection-end-line="42" selection-end-column="38" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/BaseTrackModel.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="414">
+          <caret line="23" column="0" lean-forward="true" selection-start-line="23" selection-start-column="0" selection-end-line="23" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/utils/TrackManager.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="648">
+          <caret line="36" column="60" lean-forward="false" selection-start-line="36" selection-start-column="60" selection-end-line="36" selection-end-column="60" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/TrackComponentView.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="666">
           <caret line="37" column="25" lean-forward="false" selection-start-line="37" selection-start-column="25" selection-end-line="37" selection-end-column="25" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/utils/AudioHelper.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="846">
+          <caret line="47" column="13" lean-forward="true" selection-start-line="47" selection-start-column="9" selection-end-line="47" selection-end-column="27" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/TrackView.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="720">
+          <caret line="40" column="24" lean-forward="false" selection-start-line="40" selection-start-column="24" selection-end-line="40" selection-end-column="24" />
           <folding />
         </state>
       </provider>

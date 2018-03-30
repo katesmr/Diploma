@@ -254,7 +254,9 @@ function AudioBufferToBlob(audioBuffer){
 }
 
 function AudioContextToBlob(audioContext){
-
+    var buffer = getAudioContextBuffer(audioContext);
+    var blob = AudioBufferToBlob(buffer);
+    return blob;
 }
 
 
@@ -838,11 +840,6 @@ ContentView.prototype._build = function(){
     //container.append(this.trackView.getContainer());
 
     this.appendToBlock($(".ui.container"));
-
-    var w = new WaveForm();
-    //w.test();
-
-    //container.append(w.getContainer());
 };
 
 ContentView.prototype.showProjectList = function(){
@@ -1335,7 +1332,7 @@ TrackToolView.prototype._build = function(){
 
 //TrackComponentView
 var inherit = __webpack_require__(0);
-var Factory = __webpack_require__(3);
+var AudioHelper = __webpack_require__(6);
 var BaseView = __webpack_require__(1);
 var WaveForm = __webpack_require__(33);
 var InstrumentView = __webpack_require__(20);
@@ -1363,7 +1360,7 @@ TrackView.prototype._build = function(trackModel){
     this.getContainer().append(this.waveform);*/
 
     this.createInstrument();
-    //this.createWaveForm();
+    this.createWaveForm();
 };
 
 TrackView.prototype.createInstrument = function(){
@@ -1372,13 +1369,15 @@ TrackView.prototype.createInstrument = function(){
 };
 
 TrackView.prototype.createWaveForm = function(){
-    var data = this.trackModel.getContext();
+    //var data = this.trackModel.getContext();
+    console.log("data");
+    var data = AudioHelper.AudioContextToBlob(this.trackModel.getConstants());
     this.waveform = new WaveForm();
     this.getContainer().append(this.waveform.getContainer());
     if(data instanceof Blob){
         this.waveform.createWaveFormFromFile(data);
     } else if(data instanceof AudioContext){
-        //this.waveform.createWaveForm(data);
+        this.waveform.createWaveForm(data);
     }
 };
 
@@ -1506,7 +1505,7 @@ module.exports = WaveForm;
 function WaveForm(){
     BaseView.call(this, "waveform");
 
-    $(this.getContainer()).attr("id", "waveform");
+    //$(this.getContainer()).attr("id", "waveform");
     //this.waveContainer = $("<div id='waveform'></div>");
 
     this.waveform = null;
@@ -1534,9 +1533,10 @@ WaveForm.prototype.createWaveFormFromFile = function(blob){
 };
 
 WaveForm.prototype.createWaveForm = function(audioContext){
+    var self = this;
     console.log(this.getContainer());
     this.waveform = WaveSurfer.create({
-        container: "#waveform",
+        container: self.getContainer(),
         audioContext: audioContext,
         waveColor: "#626262",
         progressColor: "#fff843"
@@ -1691,6 +1691,10 @@ BaseTrackModel.prototype.createFormData = function(){
 };
 
 BaseTrackModel.prototype.getContext = function(){
+    return this.trackObject.context._context;
+};
+
+BaseTrackModel.prototype.getConstants = function(){
     return this.trackObject.context;
 };
 
