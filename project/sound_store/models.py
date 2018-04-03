@@ -29,10 +29,42 @@ class UserData(User):
         return result
 
 
+class Projects(models.Model):
+    name = models.CharField(max_length=128)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    @staticmethod
+    def project_object(project_id):
+        result = None
+        try:
+            result = Projects.objects.get(id=project_id)
+        except Sounds.DoesNotExist as error:
+            logging.error(error)
+        return result
+
+    @staticmethod
+    def user_projects_data(user_id):
+        result = dict()
+        user_projects = Projects.objects.filter(user_id=user_id)
+        for project in user_projects:
+            result[project.id] = dict()
+            result[project.id]['name'] = project.name
+        return result
+
+    @staticmethod
+    def project_id_by_name(user_id, name):
+        result = None
+        projects = Projects.objects.filter(user_id=user_id, name=name)
+        for project in projects:
+            result = project.id
+        return result
+
+
 class Sounds(models.Model):
     path = models.CharField(max_length=4096)
     name = models.CharField(max_length=128)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    # project = models.ForeignKey(Projects, on_delete=models.CASCADE)  #FIXME
 
     @staticmethod
     def sound_object(sound_id):
@@ -76,37 +108,6 @@ class Sounds(models.Model):
             result['name'] = sound_object.name
             # sound_object.user - return object of corresponding user
             result['user_id'] = sound_object.user.id
-        return result
-
-
-class Projects(models.Model):
-    name = models.CharField(max_length=128)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-
-    @staticmethod
-    def project_object(project_id):
-        result = None
-        try:
-            result = Projects.objects.get(id=project_id)
-        except Sounds.DoesNotExist as error:
-            logging.error(error)
-        return result
-
-    @staticmethod
-    def user_projects_data(user_id):
-        result = dict()
-        user_projects = Projects.objects.filter(user_id=user_id)
-        for project in user_projects:
-            result[project.id] = dict()
-            result[project.id]['name'] = project.name
-        return result
-
-    @staticmethod
-    def project_id_by_name(user_id, name):
-        result = None
-        projects = Projects.objects.filter(user_id=user_id, name=name)
-        for project in projects:
-            result = project.id
         return result
 
 

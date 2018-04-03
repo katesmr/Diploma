@@ -15,8 +15,11 @@ body {
     background-color: teal;
 }
 
-.menubar .ui.button, p {
+.user-info-bar {
     float: right;
+}
+
+.user-info-bar .ui.button, p {
     padding: 1%;
 }
 
@@ -42,20 +45,29 @@ body {
     padding-top: 2%;
 }
 
-.ui.modal {
+.ui.modal.user-registration {
     width: 300px;
     height: 200px;
     padding: 5%;
 }
 
-.ui.modal .button {
+.ui.modal.user-registration .button {
     display: block;
     margin: 10% auto;
     width: auto;
 }
 
 .project-list {
-    margin: 5% 10%;
+    margin: 1% 10%;
+}
+
+.project-list h1 {
+    color: white;
+    margin-bottom: 2%;
+}
+
+.project-list .circular.ui.icon.button {
+    margin-top: 2%;
 }
 
 .track-view {
@@ -83,4 +95,48 @@ body {
     margin: 5% auto;
     background-color: white;
     width: 80%;
+}
+
+.track-view {
+    width: 90%;
+    height: 128px;
+    margin-top: 1%;
+}
+
+.instrument-view {
+    float: left;
+    width: 10%;
+}
+
+.wave-form {
+    float: right;
+    width: 90%;
+    background-color: #767676;
+}
+
+.instrument-view, h4.ui.header {
+    color: white;
+    margin: 0;
+}
+
+.ui.modal.track-tool {
+    width: 30%;
+    height: 20%;
+    min-width: 400px;
+    min-height: 100px;
+    padding: 5%;
+}
+
+.ui.modal.track-tool .ui.button {
+    float: left;
+    margin: auto 2%;
+}
+
+.ui.modal.track-tool.h5 {
+    display: block;
+    margin: 0 auto;
+}
+
+.project-component-view h1 {
+    color: white;
 }
