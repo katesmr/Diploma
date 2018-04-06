@@ -18,6 +18,9 @@ class StreamsManager(BasicManager):
                 result.append(self.manager.json_file_data(stream_path))
         return result
 
+    def get_one_stream(self, project_id, stream_name):
+        pass
+
     def create(self, project_id, data):
         result = None
         project = Projects.project_object(project_id)
@@ -29,7 +32,7 @@ class StreamsManager(BasicManager):
             new_stream = Streams(path=stream_path, name=file_name, project=project)
             new_stream.save()
             result = file_name
-        return result
+        # return result
 
     def delete(self, project_id):
         """

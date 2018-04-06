@@ -143,6 +143,11 @@ def save_user_project(request, project_name):
 
 @csrf_exempt
 def delete_user_project(request, project_name):
+    """
+    :param request: HttpRequest
+    :param project_name: str
+    :return: json - if success case - name of deleted project, else - None
+    """
     project_manager = ProjectManager()
     project = project_manager.delete(request.user.id, project_name)
     if project is not None:
@@ -153,10 +158,10 @@ def delete_user_project(request, project_name):
 
 
 @csrf_exempt
-def update_user_project(request, project_name):
+def update_user_project(request, project_name, stream_id):
     data = parse_json_data(request)
     project_manager = ProjectManager()
-    project = project_manager.update(request.user.id, project_name, data)
+    project = project_manager.update(request.user.id, project_name, stream_id, data)
     if project is not None:
         response = HttpResponse(dumps(project), content_type='application/json')
     else:

@@ -28,6 +28,14 @@ class ProjectManager(BasicManager):
         return result
 
     def create(self, user_id, project_name, data):
+        """
+        Create project
+        Create or add stream (track) in project.
+        :param user_id:
+        :param project_name:
+        :param data:
+        :return:
+        """
         result = None
         user = UserData.user_object(user_id)
         if user is not None:
@@ -37,7 +45,12 @@ class ProjectManager(BasicManager):
                 new_project = Projects(name=project_name, user=user)
                 new_project.save()
                 project_id = new_project.pk
-            result = self.stream_manager.create(project_id, data)
+            if data is not None:
+                self.stream_manager.create(project_id, data)
+                result = project_name
+            else:
+                pass
+                # create empty project
         return result
 
     def delete(self, user_id, project_name):
