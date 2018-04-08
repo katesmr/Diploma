@@ -1,13 +1,26 @@
 var merger_test = require("merger_test");
-var RequestManager = require("utils/RequestManager");
-var ProjectBaseView = require("view/ProjectBaseView");
+
+var WindowManager = require("view/WindowManager");
+var ProjectList = require("view/ProjectList");
+
+var ProjectListController = require("controller/ProjectListController");
+var ProjectListModel = require("model/ProjectListModel");
+var Observer = require("observer");
 
 module.exports = {
     "merger_test": merger_test
 };
 
+var projectListObserver = new Observer();
+var projectListController = new ProjectListController(projectListObserver);
+var projectListModel = new ProjectListModel();
 
-var projectBaseView = new ProjectBaseView();
+var projectListView = new ProjectList(projectListController);
+projectListController.attachModel(projectListModel);
 
+var windowManager = new WindowManager({
+    "projectList": projectListView
+});
+windowManager.setActiveWindow(projectListView);
 
-// requestManager.uploadSound("test.wav", trackView.createWaveForm);
+projectListController.fetchData();

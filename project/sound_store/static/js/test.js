@@ -246,9 +246,7 @@ function getProjectData(projectName, callback){
 function deleteUserProject(projectName, callback){
     var url = "projects/delete/";
     var fullUrl = url + projectName + '/';
-    deleteProject(fullUrl, function(){
-        console.log("delete " + projectName);
-    });
+    deleteProject(fullUrl, callback);
 }
 
 function addProject(projectName, data, callback){
@@ -312,7 +310,8 @@ module.exports = {
     "E_ITEM_ADDED": "ITEM_ADDED",
     "E_ITEM_REMOVED": "ITEM_REMOVED",
     "E_CONFIRMED": "CONFIRMED",
-    "E_DECLINED": "DECLINED"
+    "E_DECLINED": "DECLINED",
+    "E_SHOW_MODAL": "E_SHOW_MODAL"
 };
 
 
@@ -631,53 +630,7 @@ function toAudioBuffer(blob, getAudioBuffer){
 
 
 /***/ }),
-/* 11 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var inherit = __webpack_require__(0);
-var BaseView = __webpack_require__(1);
-var MenuBar = __webpack_require__(29);
-var ContentView = __webpack_require__(27);
-var RequestManager = __webpack_require__(4);
-
-module.exports = ProjectBaseView;
-
-function ProjectBaseView(){
-    BaseView.call(this, "base-view");
-
-    this.menuBar = new MenuBar();
-    this.contentView = new ContentView();
-
-    this._build();
-    this.appendToBlock($(".ui.container"));
-}
-
-inherit(ProjectBaseView, BaseView);
-
-ProjectBaseView.prototype._build = function(){
-    var container = this.getContainer();
-
-    RequestManager.getUser(this.hideUserOnlyElements.bind(this));
-
-    container.append(this.menuBar.getContainer());
-    container.append(this.contentView.getContainer());
-
-    // eventListener.subscribe("ON_SHOW_PROJECT_LIST", this.fetchProjectList.bind(this));
-};
-
-ProjectBaseView.prototype.hideUserOnlyElements = function(userName){
-    if(userName instanceof Error){
-        var $elements = $(".user-only");
-        $elements.addClass("disabled");
-        // ... add "disable" class to all of these $elements
-    }
-};
-
-
-/***/ }),
+/* 11 */,
 /* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -788,18 +741,31 @@ function writeString (view, offset, string) {
 
 
 var merger_test = __webpack_require__(10);
-var RequestManager = __webpack_require__(4);
-var ProjectBaseView = __webpack_require__(11);
+
+var WindowManager = __webpack_require__(46);
+var ProjectList = __webpack_require__(35);
+
+var ProjectListController = __webpack_require__(45);
+var ProjectListModel = __webpack_require__(16);
+var Observer = __webpack_require__(9);
 
 module.exports = {
     "merger_test": merger_test
 };
 
+var projectListObserver = new Observer();
+var projectListController = new ProjectListController(projectListObserver);
+var projectListModel = new ProjectListModel();
 
-var projectBaseView = new ProjectBaseView();
+var projectListView = new ProjectList(projectListController);
+projectListController.attachModel(projectListModel);
 
+var windowManager = new WindowManager({
+    "projectList": projectListView
+});
+windowManager.setActiveWindow(projectListView);
 
-// requestManager.uploadSound("test.wav", trackView.createWaveForm);
+projectListController.fetchData();
 
 
 /***/ }),
@@ -903,12 +869,11 @@ ObservableList.prototype.add = function(item){
  * Removes item at index position.
  * @param {Number} index
  */
-ObservableList.prototype.remove = function(index){
+ObservableList.prototype.remove = function(value){
+    var index = this.__data.indexOf(value);
     if (index < this.size()){
         // fire before removing:
-        this.observer.notify(
-            commonEventNames.E_ITEM_REMOVED,
-            index);
+        this.observer.notify(commonEventNames.E_ITEM_REMOVED, index);
 
         // now remove:
         this.__data.splice(index, 1);
@@ -1105,81 +1070,12 @@ function BaseWindow(controller, classes){
 
 inherit(BaseWindow, BaseView);
 
-
-/***/ }),
-/* 27 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var inherit = __webpack_require__(0);
-var BaseView = __webpack_require__(1);
-var ProjectList = __webpack_require__(35);
-
-var eventListener = __webpack_require__(2);
-var ProjectListController = __webpack_require__(45);
-var ProjectListModel = __webpack_require__(16);
-var Observer = __webpack_require__(9);
-
-module.exports = ContentView;
-
-function ContentView(){
-    BaseView.call(this, "content-view");
-
-    this.projectListObserver = new Observer();
-    this.projectListController = new ProjectListController(this.projectListObserver);
-    this.projectListModel = new ProjectListModel();
-
-    //this.projectModel = null;
-
-    this.projectList = new ProjectList(this.projectListController);
-    this.projectListController.attachModel(this.projectListModel);
-
-    this._build();
-}
-
-inherit(ContentView, BaseView);
-
-ContentView.prototype._build = function(){
-    var container = this.getContainer();
-
-    /*if (!eventListener.subscribe(eventListener.ON_SHOW_PROJECT_LIST, this.showProjectList.bind(this))){
-
-        console.error("Unable to subscribe to", eventListener.ON_SHOW_PROJECT_LIST, "event!");
-    }*/
-
-    eventListener.subscribe(eventListener.ON_SHOW_PROJECT_LIST, this.showProjectList.bind(this));
-
-    container.append(this.projectList.getContainer());
-
-    this.showProjectList();
-
-    this.appendToBlock($(".ui.container"));
-};
-
-ContentView.prototype.showProjectList = function(){
-    this.hideAll();
-    this.getContainer().append(this.projectList.getContainer());
-    this.projectListController.fetchData();
-    this.projectList.show();
-};
-
-ContentView.prototype.hideAll = function(){
-    this.projectList.hide();
-    //this.trackComponentView.hide();
-};
-
-/*ContentView.prototype.showCurrentProject = function(eventName, projectName){
-    this.hideAll();
-    //this.projectModel = new ProjectModel(projectName);
-    //this.projectModel.fetchProject();
-    this.getContainer().append(this.trackComponentView.getContainer());
-    this.trackComponentView.show();
-};*/
+BaseWindow.prototype.confirmed = null;
+BaseWindow.prototype.declined = null;
 
 
 /***/ }),
+/* 27 */,
 /* 28 */,
 /* 29 */
 /***/ (function(module, exports, __webpack_require__) {
@@ -1215,6 +1111,13 @@ MenuBar.prototype._build = function(){
     container.append(this.projectBar.getContainer());
 };
 
+MenuBar.prototype.adaptToActiveWindow = function(window){
+    // Here you can get some public properties from the window to update the "look" of the menu bar
+    // For example:
+    // - window.title
+    // - change some controlls according to the window type
+};
+
 
 /***/ }),
 /* 30 */
@@ -1223,23 +1126,17 @@ MenuBar.prototype._build = function(){
 "use strict";
 
 
-//MessageModal
 var inherit = __webpack_require__(0);
 var BaseView = __webpack_require__(1);
 var Factory = __webpack_require__(3);
-var eventListner = __webpack_require__(2);
 var Observer = __webpack_require__(9);
 var commonEventNames = __webpack_require__(6);
 
 module.exports = MessageModal;
 
-/**
- * @param {String} message
- */
-function MessageModal(message){
+function MessageModal(){
     BaseView.call(this, "ui modal");
     this.text = $("<p></p>");
-    this.message = message;
     this.okButton = Factory.createButton("ui button", "ok");
     this.cancelButton = Factory.createButton("ui button", "cancel");
     this.observer = new Observer();
@@ -1268,13 +1165,13 @@ MessageModal.prototype._build = function(){
     container.append(this.cancelButton);
 };
 
-MessageModal.prototype.show = function(){
-    this.text.text(this.message);
-    this.getContainer().append(this.text);
+MessageModal.prototype.show = function(message){
+    this.text.text(message);
     this.getContainer().modal("show");
 };
 
 MessageModal.prototype.hide = function(){
+    this.text.text(""); // reset old message
     this.getContainer().modal("hide");
 };
 
@@ -1330,12 +1227,11 @@ ProjectBar.prototype._build = function(){
 "use strict";
 
 
-var commonEventNames = __webpack_require__(6);
 var inherit = __webpack_require__(0);
 var BaseWindow = __webpack_require__(26);
-var MessageModal = __webpack_require__(30);
 var Factory = __webpack_require__(3);
 var eventListener = __webpack_require__(2);
+var commonEventNames = __webpack_require__(6);
 
 module.exports = ProjectList;
 
@@ -1343,9 +1239,8 @@ function ProjectList(controller){
     BaseWindow.call(this, controller, "project-list");
 
     this.title = $("<h1>Project List</h1>");
-    this.addProjectButton = Factory.createIconButton("circular ui icon button", "plus icon", "");
-    this.messageModal = new MessageModal("Do you really want to delete project");
     this.table = $("<div class='five column stackable ui grid'>");
+    this.addProjectButton = Factory.createIconButton("circular ui icon button", "plus icon", "");
 
     this.selectedItem = null;
     this.onRemoveButtonClicked = onRemoveButtonClicked.bind(this);
@@ -1365,16 +1260,8 @@ ProjectList.prototype._build = function(){
     });
 
     this.controller.observer.subscribe(commonEventNames.E_ITEM_REMOVED, function(eventName, index){
-
-    });
-
-    this.messageModal.observer.subscribe(commonEventNames.E_CONFIRMED, function(eventName){
-        self.controller.remove(self.selectedItem.attr("id"));
         self.remove(self.selectedItem.attr("id"));
-        self.selectedItem = null;
-    });
-
-    this.messageModal.observer.subscribe(commonEventNames.E_DECLINED, function(eventName){
+        console.log("-" + self.selectedItem.attr("id"));
         self.selectedItem = null;
     });
 
@@ -1385,16 +1272,15 @@ ProjectList.prototype._build = function(){
     this.addComponents();
 };
 
+ProjectList.prototype.confirmed = function(name){
+    this.controller.remove(self.selectedItem.attr("id"));
+    //self.remove(self.selectedItem.attr("id"));
+    this.selectedItem = null;
+};
 
-/*ProjectList.prototype.updateProjectListElement = function(eventName, projectListModel){
-    var container = this.getContainer();
-    // Clear (possibly) old project list:
-    container.empty();
-    this.projectList = this.createGridData(projectListModel.projectNameList);
-    container.append(this.title);
-    container.append(this.projectList);
-    container.append(this.addProjectButton);
-};*/
+ProjectList.prototype.declined = function(name){
+    this.selectedItem = null;
+};
 
 ProjectList.prototype.add = function(name){
     // full table or
@@ -1419,7 +1305,8 @@ ProjectList.prototype.add = function(name){
 
 ProjectList.prototype.remove = function(name){
     // remove from table
-    $(".column." + name).remove();
+    console.log(this.table.find(".column." + name));
+    this.table.find(".column." + name).remove();
 };
 
 ProjectList.prototype.addComponents = function(){
@@ -1437,7 +1324,7 @@ ProjectList.prototype.updateProjectList = function(){
 function onRemoveButtonClicked($element){
     if (this.selectedItem === null){
         this.selectedItem = $element;
-        this.messageModal.show();
+        this.controller.observer.notify(commonEventNames.E_SHOW_MODAL);
     }
 }
 
@@ -1682,17 +1569,130 @@ ProjectListController.prototype.add = function(data){
 };
 
 ProjectListController.prototype.remove = function(name){
-    console.log("-" + name);
     var i;
     var model = this.model;
     for (i = 0; i < model.size(); ++i){
-        console.log(model.at(i));
         if (model.at(i) === name){
             RequestManager.deleteProject(name, this._removeHandler.bind(this));
             break;
         }
     }
 };
+
+
+/***/ }),
+/* 46 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var BaseView = __webpack_require__(1);
+var MessageModal = __webpack_require__(30);
+var MenuBar = __webpack_require__(29);
+var windowsTransport = __webpack_require__(47);
+var commonEventNames = __webpack_require__(6);
+
+module.exports = WindowManager;
+
+/**
+ * @param {Object} windows - map of BaseWindow instances. Example: new WindowManager({"ProjectList": new ProjectList})
+ */
+function WindowManager(windows){
+    BaseView.call(this, "window-manager");
+
+    this.__windows = windows;
+    
+    this.__activeWindow = null;
+    this.__modal = new MessageModal("");
+    this.__menuBar = new MenuBar();
+    
+    this._build();
+}
+
+inherit(WindowManager, BaseView);
+
+WindowManager.prototype._build = function(){
+    var key, tokenWindow;
+    var self = this;
+    var windows = this.__windows;
+    var container = this.getContainer();
+    
+    container.append(this.__menuBar.getContainer());
+    container.append(this.__modal.getContainer());
+
+    this.appendToBlock($(".ui.container"));
+    
+    this.__menuBar.show();
+    this.__modal.hide();
+    
+    for (key in windows){
+        tokenWindow = windows[key];
+        tokenWindow.hide(); // just in case...
+        container.append(tokenWindow.getContainer());
+    }
+
+    this.__modal.observer.subscribe(commonEventNames.E_CONFIRMED, function(eventName){
+        if (self.__activeWindow){
+            self.__activeWindow.confirmed();
+        }
+        self.__modal.hide();
+    });
+
+    this.__modal.observer.subscribe(commonEventNames.E_DECLINED, function(eventName){
+        if (self.__activeWindow){
+            self.__activeWindow.declined();
+        }
+        self.__modal.hide();
+    });
+
+    windowsTransport.subscribe(commonEventNames.E_SHOW_MODAL, function(eventName, message){
+        console.log("+");
+        self.showModal(message);
+    });
+
+    //RequestManager.getUser(this.hideUserOnlyElements.bind(this));
+};
+
+WindowManager.prototype.showModal = function(message){
+    if (this.__activeWindow){
+        self.__modal.show(message);
+    }
+};
+
+WindowManager.prototype.setActiveWindow = function(newActiveWindow){
+    if (this.__activeWindow){
+        // Hide previosly visible window
+        this.__activeWindow.hide();
+    }
+    // Attach & show the new one:
+    this.__activeWindow = newActiveWindow;
+    // if menubar change after change active window
+    // for example project view add play button when active project view
+    this.__menuBar.adaptToActiveWindow(this.__activeWindow);
+    this.__activeWindow.show();
+};
+
+/*WindowManager.prototype.hideUserOnlyElements = function(userName){
+    if(userName instanceof Error){
+        var $elements = $(".user-only");
+        $elements.addClass("disabled");
+        // ... add "disable" class to all of these $elements
+    }
+};*/
+
+
+/***/ }),
+/* 47 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var Observer = __webpack_require__(9);
+
+module.exports = new Observer();
 
 
 /***/ })
