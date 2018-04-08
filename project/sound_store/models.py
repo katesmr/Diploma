@@ -126,11 +126,20 @@ class Streams(models.Model):
         return result
 
     @staticmethod
+    def stream_data(stream_id):
+        result = None
+        stream = Streams.stream_object(stream_id)
+        if stream:
+            result = dict()
+            result['path'] = stream.path
+            result['name'] = stream.name
+        return result
+
+    @staticmethod
     def project_streams_data(project_id):
         result = dict()
         project_streams = Streams.objects.filter(project_id=project_id)
         for stream in project_streams:
-            result[stream.id] = dict()
-            result[stream.id]['path'] = stream.path
-            result[stream.id]['name'] = stream.name
+            _id = stream.id
+            result[_id] = Streams.stream_data(_id)
         return result

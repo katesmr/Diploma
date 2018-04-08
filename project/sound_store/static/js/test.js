@@ -172,11 +172,9 @@ function createIconButton(buttonClass, iconClass, name){
 }
 
 function deleteCircleButton(buttonId, callback){
-    var projectName;
     var $deleteProjectButton = createIconButton("circular ui icon button", "remove icon", "");
     $deleteProjectButton.attr("id", buttonId);
     $deleteProjectButton.on("click", function(event){
-        projectName = $(this).attr("id");
         callback($(this));
     });
     return $deleteProjectButton;
@@ -750,6 +748,8 @@ var ProjectListController = __webpack_require__(45);
 var ProjectListModel = __webpack_require__(16);
 var Observer = __webpack_require__(9);
 
+var Req = __webpack_require__(4);
+
 module.exports = {
     "merger_test": merger_test
 };
@@ -1279,7 +1279,7 @@ ProjectList.prototype._build = function(){
 
     container.append(this.title);
     container.append(this.table);
-    container.append(this.addProjectButton);this.addComponents();
+    container.append(this.addProjectButton);
 };
 
 ProjectList.prototype.confirmed = function(name){

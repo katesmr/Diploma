@@ -7,6 +7,8 @@ var ProjectListController = require("controller/ProjectListController");
 var ProjectListModel = require("model/ProjectListModel");
 var Observer = require("observer");
 
+var Req = require("utils/RequestManager");
+
 module.exports = {
     "merger_test": merger_test
 };

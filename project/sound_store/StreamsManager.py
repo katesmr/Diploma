@@ -7,21 +7,39 @@ from .src.utils.helper import create_unique_file_name
 class StreamsManager(BasicManager):
     manager = DataManager(1, STORE_PATH)
 
-    def get(self, project_id):
+    def get(self, stream_id):
+        """
+        Get single stream data
+        :param stream_id: int
+        :return: dict
+        """
+        result = None
+        data = Streams.stream_data(stream_id)
+        if data is not None:
+            result = self.manager.json_file_data(data['path'])
+        return result
+
+    def get_project_streams(self, project_id):
+        """
+        Return list of streams data of the project
+        :param project_id: int
+        :return: list
+        """
         result = None
         project = Projects.project_object(project_id)
         if project is not None:
             result = []
             streams = Streams.project_streams_data(project_id)
-            for key in streams:
-                stream_path = streams[key]['path']
-                result.append(self.manager.json_file_data(stream_path))
+            for _id in streams:
+                result.append(self.get(_id))
         return result
 
-    def get_one_stream(self, project_id, stream_name):
-        pass
-
     def create(self, project_id, data):
+        """
+        :param project_id: int
+        :param data: dict
+        :return: int - stream primary key
+        """
         result = None
         project = Projects.project_object(project_id)
         if project is not None:
@@ -31,25 +49,49 @@ class StreamsManager(BasicManager):
             stream_path = self.manager.get_full_file_path(file_name)
             new_stream = Streams(path=stream_path, name=file_name, project=project)
             new_stream.save()
-            result = file_name
-        # return result
+            result = new_stream.pk
+        return result
 
-    def delete(self, project_id):
+    def delete(self, stream_id):
         """
-        Delete streams from FS
-        :param project_id:
-        :return:
+        Delete the stream from FS
+        :param stream_id: int
+        :return: int|None
         """
+        result = None
+        stream = Streams.stream_object(stream_id)
+        if stream is not None:
+            self.manager.set_user_id(stream.project.user.id)
+            data = Streams.stream_data(stream_id)
+            if data is not None:
+                self.manager.delete_user_file(data['path'])
+                result = stream_id
+        return result
+
+    def delete_project_streams(self, project_id):
+        """
+        Delete all streams of the project from FS
+        :param project_id: int
+        :return: None
+        """
+        tmp = None
         project = Projects.project_object(project_id)
         if project is not None:
-            self.manager.set_user_id(project.user.id)
             streams = Streams.project_streams_data(project_id)
-            for key in streams:
-                stream_path = streams[key]['path']
-                self.manager.delete_user_file(stream_path)
+            for _id in streams:
+                tmp = self.delete(_id)
 
     def update(self, stream_id, data):
+        """
+        Update steam json data
+        :param stream_id: int
+        :param data: dict
+        :return: int|None
+        """
+        result = None
         stream = Streams.stream_object(stream_id)
         if stream is not None:
             self.manager.set_user_id(stream.project.user.id)
             self.manager.save_json_file(stream.name, data)
+            result = stream_id
+        return result

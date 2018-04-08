@@ -10,6 +10,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.datastructures import MultiValueDictKeyError
 from .SoundManager import SoundManager
 from .ProjectManager import ProjectManager
+from .StreamsManager import StreamsManager
 
 
 BAD_RESPONSE = HttpResponse(dumps(None), content_type='application/json', status=400)
@@ -119,9 +120,9 @@ def get_all_user_projects(request):
     return response
 
 
-def get_user_project(request, project_name):
+def get_user_project(request, project_id):
     project_manager = ProjectManager()
-    project = project_manager.get_project(request.user.id, project_name)
+    project = project_manager.get_project(request.user.id, project_id)
     if project is not None:
         response = HttpResponse(dumps(project), content_type='application/json')
     else:
@@ -130,10 +131,10 @@ def get_user_project(request, project_name):
 
 
 @csrf_exempt
-def save_user_project(request, project_name):
+def save_user_project(request, project_id):
     data = parse_json_data(request)
     project_manager = ProjectManager()
-    project = project_manager.create(request.user.id, project_name, data)
+    project = project_manager.create(request.user.id, project_id, data)
     if project is not None:
         response = HttpResponse(dumps(project), content_type='application/json')
     else:
@@ -142,14 +143,14 @@ def save_user_project(request, project_name):
 
 
 @csrf_exempt
-def delete_user_project(request, project_name):
+def delete_user_project(request, project_id):
     """
     :param request: HttpRequest
-    :param project_name: str
+    :param project_id: int
     :return: json - if success case - name of deleted project, else - None
     """
     project_manager = ProjectManager()
-    project = project_manager.delete(request.user.id, project_name)
+    project = project_manager.delete(request.user.id, project_id)
     if project is not None:
         response = HttpResponse(dumps(project), content_type='application/json')
     else:
@@ -158,12 +159,57 @@ def delete_user_project(request, project_name):
 
 
 @csrf_exempt
-def update_user_project(request, project_name, stream_id):
-    data = parse_json_data(request)
+def update_user_project(request, project_id):
+    project_name = parse_json_data(request)
     project_manager = ProjectManager()
-    project = project_manager.update(request.user.id, project_name, stream_id, data)
+    project = project_manager.update(request.user.id, project_id, project_name)
     if project is not None:
         response = HttpResponse(dumps(project), content_type='application/json')
+    else:
+        response = BAD_RESPONSE
+    return response
+
+
+def get_stream(request, stream_id):
+    stream_manager = StreamsManager()
+    stream = stream_manager.get(stream_id)
+    if stream is not None:
+        response = HttpResponse(dumps(stream), content_type='application/json')
+    else:
+        response = BAD_RESPONSE
+    return response
+
+
+@csrf_exempt
+def create_stream(request, project_id):
+    data = parse_json_data(request)
+    stream_manager = StreamsManager()
+    stream = stream_manager.create(project_id, data)
+    if stream is not None:
+        response = HttpResponse(dumps(stream), content_type='application/json')
+    else:
+        response = BAD_RESPONSE
+    return response
+
+
+@csrf_exempt
+def delete_stream(request, stream_id):
+    stream_manager = StreamsManager()
+    stream = stream_manager.delete(stream_id)
+    if stream is not None:
+        response = HttpResponse(dumps(stream), content_type='application/json')
+    else:
+        response = BAD_RESPONSE
+    return response
+
+
+@csrf_exempt
+def update_stream(request, stream_id):
+    data = parse_json_data(request)
+    stream_manager = StreamsManager()
+    stream = stream_manager.update(stream_id, data)
+    if stream is not None:
+        response = HttpResponse(dumps(stream), content_type='application/json')
     else:
         response = BAD_RESPONSE
     return response

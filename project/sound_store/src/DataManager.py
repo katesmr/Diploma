@@ -13,28 +13,28 @@ class DataManager(metaclass=Singleton):
         """
         # assert isinstance(user_id, int)
         # assert isinstance(storehouse_path, str)
-        if is_key(user_id):
-            self.file_manager = FileManager()
-            self.__user_id = str(user_id)
-            self.user_folder = None
-            if self.file_manager.is_valid_existing_folder_path(storehouse_path):
-                self.storehouse_path = storehouse_path
-                self.__update_user_path()
-            else:
-                raise ValueError("Invalid storehouse path")
+        # if is_key(user_id):
+        self.file_manager = FileManager()
+        self.__user_id = str(user_id)
+        self.user_folder = None
+        if self.file_manager.is_valid_existing_folder_path(storehouse_path):
+            self.storehouse_path = storehouse_path
+            self.__update_user_path()
         else:
-            raise ValueError("Invalid user id")
+            raise ValueError("Invalid storehouse path")
+        # else:
+            # raise ValueError("Invalid user id")
 
     def get_user_id(self):
         return self.__user_id
 
     def set_user_id(self, user_id):
         # assert isinstance(user_id, int)
-        if is_key(user_id):
-            self.__user_id = str(user_id)
-            self.__update_user_path()  # set new path to new user folder
-        else:
-            raise ValueError("Invalid user id")
+        # if is_key(user_id):
+        self.__user_id = str(user_id)
+        self.__update_user_path()  # set new path to new user folder
+        # else:
+            # raise ValueError("Invalid user id")
 
     def __update_user_path(self):
         self.user_folder = os.path.join(self.storehouse_path, self.__user_id)
