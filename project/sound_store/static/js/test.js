@@ -172,10 +172,11 @@ function createIconButton(buttonClass, iconClass, name){
 }
 
 function deleteCircleButton(buttonId, callback){
+    var projectName;
     var $deleteProjectButton = createIconButton("circular ui icon button", "remove icon", "");
     $deleteProjectButton.attr("id", buttonId);
     $deleteProjectButton.on("click", function(event){
-        console.log($(this));
+        projectName = $(this).attr("id");
         callback($(this));
     });
     return $deleteProjectButton;
@@ -1166,6 +1167,13 @@ MessageModal.prototype._build = function(){
 };
 
 MessageModal.prototype.show = function(message){
+
+    this.getContainer().modal({
+        closable : false,
+        allowMultiple: false,
+        context: $(".window-manager")
+    });
+
     this.text.text(message);
     this.getContainer().modal("show");
 };
@@ -1230,8 +1238,8 @@ ProjectBar.prototype._build = function(){
 var inherit = __webpack_require__(0);
 var BaseWindow = __webpack_require__(26);
 var Factory = __webpack_require__(3);
-var eventListener = __webpack_require__(2);
 var commonEventNames = __webpack_require__(6);
+var windowsTransport = __webpack_require__(47);
 
 module.exports = ProjectList;
 
@@ -1253,6 +1261,7 @@ inherit(ProjectList, BaseWindow);
 
 ProjectList.prototype._build = function(){
     var self = this;
+    var container = this.getContainer();
 
     this.controller.observer.subscribe(commonEventNames.E_ITEM_ADDED, function(eventName, index){
         var trackListModel = self.controller.model.at(index);
@@ -1261,7 +1270,6 @@ ProjectList.prototype._build = function(){
 
     this.controller.observer.subscribe(commonEventNames.E_ITEM_REMOVED, function(eventName, index){
         self.remove(self.selectedItem.attr("id"));
-        console.log("-" + self.selectedItem.attr("id"));
         self.selectedItem = null;
     });
 
@@ -1269,13 +1277,14 @@ ProjectList.prototype._build = function(){
         self.controller.add(JSON.stringify({"DEFAULT_KEY": "DEFAULT_VALUE"}));
     });
 
-    this.addComponents();
+    container.append(this.title);
+    container.append(this.table);
+    container.append(this.addProjectButton);this.addComponents();
 };
 
 ProjectList.prototype.confirmed = function(name){
-    this.controller.remove(self.selectedItem.attr("id"));
-    //self.remove(self.selectedItem.attr("id"));
-    this.selectedItem = null;
+    this.controller.remove(this.selectedItem.attr("id"));
+    //this.selectedItem = null;
 };
 
 ProjectList.prototype.declined = function(name){
@@ -1294,26 +1303,16 @@ ProjectList.prototype.add = function(name){
     $item = $("<a id='" + name + "'>" + name +"</a>");
     $item.on("click", function(event){
         projectName = $(this).attr("id");
-        eventListener.notify(eventListener.SHOW_PROJECT, projectName);
-        console.log(projectName);
+        windowsTransport.notify(commonEventNames.SHOW_PROJECT, projectName);
     });
-    $column = $("<div class='column '" + name + ">");
+    $column = $("<div class='column' id='item-" + name + "'>");
     $column.append($item);
     $column.append($deleteProjectButton);
     this.table.append($column);
 };
 
 ProjectList.prototype.remove = function(name){
-    // remove from table
-    console.log(this.table.find(".column." + name));
-    this.table.find(".column." + name).remove();
-};
-
-ProjectList.prototype.addComponents = function(){
-    var container = this.getContainer();
-    container.append(this.title);
-    container.append(this.table);
-    container.append(this.addProjectButton);
+    $("#item-" + name).remove(); //remove from table (grid)
 };
 
 ProjectList.prototype.updateProjectList = function(){
@@ -1324,7 +1323,7 @@ ProjectList.prototype.updateProjectList = function(){
 function onRemoveButtonClicked($element){
     if (this.selectedItem === null){
         this.selectedItem = $element;
-        this.controller.observer.notify(commonEventNames.E_SHOW_MODAL);
+        windowsTransport.notify(commonEventNames.E_SHOW_MODAL, "teeest");
     }
 }
 
@@ -1605,7 +1604,7 @@ function WindowManager(windows){
     this.__windows = windows;
     
     this.__activeWindow = null;
-    this.__modal = new MessageModal("");
+    this.__modal = new MessageModal();
     this.__menuBar = new MenuBar();
     
     this._build();
@@ -1620,13 +1619,13 @@ WindowManager.prototype._build = function(){
     var container = this.getContainer();
     
     container.append(this.__menuBar.getContainer());
-    container.append(this.__modal.getContainer());
+    //container.append(this.__modal.getContainer());
 
     this.appendToBlock($(".ui.container"));
     
     this.__menuBar.show();
     this.__modal.hide();
-    
+
     for (key in windows){
         tokenWindow = windows[key];
         tokenWindow.hide(); // just in case...
@@ -1648,7 +1647,6 @@ WindowManager.prototype._build = function(){
     });
 
     windowsTransport.subscribe(commonEventNames.E_SHOW_MODAL, function(eventName, message){
-        console.log("+");
         self.showModal(message);
     });
 
@@ -1657,7 +1655,7 @@ WindowManager.prototype._build = function(){
 
 WindowManager.prototype.showModal = function(message){
     if (this.__activeWindow){
-        self.__modal.show(message);
+        this.__modal.show(message);
     }
 };
 

@@ -140,3 +140,7 @@ body {
 .project-component-view h1 {
     color: white;
 }
+
+#item-name {
+    background-color: #767676;
+}

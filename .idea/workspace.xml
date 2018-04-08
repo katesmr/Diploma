@@ -11,18 +11,12 @@
   <component name="ChangeListManager">
     <list default="true" id="b869e63b-9454-4773-9649-2a5fbab85264" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change beforePath="$PROJECT_DIR$/project/sound_store/static/css/style.css" afterPath="$PROJECT_DIR$/project/sound_store/static/css/style.css" />
       <change beforePath="$PROJECT_DIR$/project/sound_store/static/js/test.js" afterPath="$PROJECT_DIR$/project/sound_store/static/js/test.js" />
-      <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/index.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/index.js" />
-      <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/controller/ProjectListController.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/controller/ProjectListController.js" />
-      <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/core/commonEventNames.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/core/commonEventNames.js" />
-      <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/ObservableList.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/ObservableList.js" />
-      <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/utils/RequestManager.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/utils/RequestManager.js" />
-      <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/BaseWindow.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/BaseWindow.js" />
-      <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/ContentView.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/ContentView.js" />
-      <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/MenuBar.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/MenuBar.js" />
+      <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/Factory.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/Factory.js" />
       <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/MessageModal.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/MessageModal.js" />
-      <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/ProjectBaseView.js" afterPath="" />
       <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/ProjectList.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/ProjectList.js" />
+      <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/WindowManager.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/WindowManager.js" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -38,7 +32,17 @@
         <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/index.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="450">
-              <caret line="25" column="34" lean-forward="false" selection-start-line="25" selection-start-column="34" selection-end-line="25" selection-end-column="34" />
+              <caret line="25" column="0" lean-forward="false" selection-start-line="25" selection-start-column="0" selection-end-line="25" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="style.css" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/project/sound_store/static/css/style.css">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="800">
+              <caret line="144" column="30" lean-forward="false" selection-start-line="144" selection-start-column="30" selection-end-line="144" selection-end-column="30" />
               <folding />
             </state>
           </provider>
@@ -48,27 +52,47 @@
         <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/controller/ProjectListController.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="450">
-              <caret line="25" column="60" lean-forward="false" selection-start-line="25" selection-start-column="60" selection-end-line="25" selection-end-column="60" />
+              <caret line="25" column="58" lean-forward="false" selection-start-line="25" selection-start-column="58" selection-end-line="25" selection-end-column="58" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ContentView.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/ContentView.js">
+      <file leaf-file-name="ObservableList.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/ObservableList.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="576">
-              <caret line="47" column="18" lean-forward="false" selection-start-line="47" selection-start-column="9" selection-end-line="47" selection-end-column="43" />
+            <state relative-caret-position="872">
+              <caret line="64" column="8" lean-forward="false" selection-start-line="64" selection-start-column="8" selection-end-line="64" selection-end-column="8" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ProjectList.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="ProjectList.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/ProjectList.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="710">
-              <caret line="94" column="41" lean-forward="false" selection-start-line="94" selection-start-column="41" selection-end-line="94" selection-end-column="41" />
+            <state relative-caret-position="144">
+              <caret line="26" column="40" lean-forward="false" selection-start-line="26" selection-start-column="40" selection-end-line="26" selection-end-column="40" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ProjectManager.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/project/sound_store/ProjectManager.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="306">
+              <caret line="20" column="47" lean-forward="false" selection-start-line="20" selection-start-column="47" selection-end-line="20" selection-end-column="47" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="MessageModal.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/MessageModal.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="810">
+              <caret line="45" column="7" lean-forward="false" selection-start-line="45" selection-start-column="7" selection-end-line="45" selection-end-column="7" />
               <folding />
             </state>
           </provider>
@@ -77,28 +101,18 @@
       <file leaf-file-name="WindowManager.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/WindowManager.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="242">
-              <caret line="61" column="25" lean-forward="false" selection-start-line="61" selection-start-column="25" selection-end-line="61" selection-end-column="25" />
+            <state relative-caret-position="710">
+              <caret line="60" column="91" lean-forward="false" selection-start-line="60" selection-start-column="91" selection-end-line="60" selection-end-column="91" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="windowsTransport.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/windowsTransport.js">
+      <file leaf-file-name="BaseController.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/controller/BaseController.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="36">
-              <caret line="2" column="31" lean-forward="false" selection-start-line="2" selection-start-column="31" selection-end-line="2" selection-end-column="31" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="commonEventNames.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/core/commonEventNames.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="144">
-              <caret line="8" column="0" lean-forward="false" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
+            <state relative-caret-position="699">
+              <caret line="55" column="13" lean-forward="false" selection-start-line="55" selection-start-column="13" selection-end-line="55" selection-end-column="13" />
               <folding />
             </state>
           </provider>
@@ -140,7 +154,6 @@
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/BaseTrackModel.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/InstrumentView.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/ProjectComponentView.js" />
-        <option value="$PROJECT_DIR$/project/sound_store/static/css/style.css" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/TrackView.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/eventListener.js" />
         <option value="$PROJECT_DIR$/project/sound_store/models.py" />
@@ -154,22 +167,23 @@
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/ProjectBaseView.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/ProjectBar.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/ProjectListModel.js" />
-        <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/Factory.js" />
         <option value="$PROJECT_DIR$/project/sound_store/StreamsManager.py" />
-        <option value="$PROJECT_DIR$/project/sound_store/ProjectManager.py" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/controller/ProjectListController.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/utils/RequestManager.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/controller/BaseController.js" />
-        <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/ObservableList.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/ContentView.js" />
-        <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/MessageModal.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/BaseWindow.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/core/commonEventNames.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/MenuBar.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/index.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/windowsTransport.js" />
+        <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/MessageModal.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/WindowManager.js" />
+        <option value="$PROJECT_DIR$/project/sound_store/static/css/style.css" />
+        <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/Factory.js" />
+        <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/ObservableList.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/ProjectList.js" />
+        <option value="$PROJECT_DIR$/project/sound_store/ProjectManager.py" />
       </list>
     </option>
   </component>
@@ -397,12 +411,12 @@
       <workItem from="1521915293120" duration="55361000" />
       <workItem from="1522435949000" duration="13074000" />
       <workItem from="1522517002747" duration="67160000" />
-      <workItem from="1523005213533" duration="28085000" />
+      <workItem from="1523005213533" duration="36806000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="366884000" />
+    <option name="totallyTimeSpent" value="375605000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="352" y="236" width="1855" height="1092" extended-state="6" />
@@ -447,13 +461,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/project/sound_store/src/utils/helper.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="178">
-          <caret line="30" column="0" lean-forward="false" selection-start-line="30" selection-start-column="0" selection-end-line="30" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/project/sound_store/models.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1422">
@@ -514,13 +521,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="36">
           <caret line="2" column="54" lean-forward="false" selection-start-line="2" selection-start-column="54" selection-end-line="2" selection-end-column="54" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/project/sound_store/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="656">
-          <caret line="157" column="0" lean-forward="true" selection-start-line="157" selection-start-column="0" selection-end-line="157" selection-end-column="0" />
         </state>
       </provider>
     </entry>
@@ -655,22 +655,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/BaseView.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="270">
-          <caret line="15" column="4" lean-forward="false" selection-start-line="15" selection-start-column="4" selection-end-line="15" selection-end-column="31" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/Factory.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="378">
-          <caret line="21" column="29" lean-forward="false" selection-start-line="21" selection-start-column="29" selection-end-line="21" selection-end-column="29" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/BaseModel.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="486">
@@ -695,34 +679,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/controller/BaseController.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="656">
-          <caret line="54" column="12" lean-forward="false" selection-start-line="54" selection-start-column="12" selection-end-line="54" selection-end-column="12" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/project/sound_store/ProjectManager.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="692">
-          <caret line="53" column="21" lean-forward="false" selection-start-line="53" selection-start-column="15" selection-end-line="53" selection-end-column="21" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/utils/RequestManager.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="414">
           <caret line="44" column="35" lean-forward="false" selection-start-line="44" selection-start-column="35" selection-end-line="44" selection-end-column="35" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/project/sound_store/static/css/style.css">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-748">
-          <caret line="55" column="21" lean-forward="true" selection-start-line="55" selection-start-column="21" selection-end-line="55" selection-end-column="21" />
           <folding />
         </state>
       </provider>
@@ -735,42 +695,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/MessageModal.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="458">
-          <caret line="28" column="0" lean-forward="true" selection-start-line="28" selection-start-column="0" selection-end-line="28" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/BaseWindow.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="270">
           <caret line="15" column="37" lean-forward="false" selection-start-line="15" selection-start-column="37" selection-end-line="15" selection-end-column="37" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/core/commonEventNames.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="144">
-          <caret line="8" column="0" lean-forward="false" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/ObservableList.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1098">
-          <caret line="61" column="61" lean-forward="false" selection-start-line="61" selection-start-column="61" selection-end-line="61" selection-end-column="61" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/controller/ProjectListController.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="450">
-          <caret line="25" column="60" lean-forward="false" selection-start-line="25" selection-start-column="60" selection-end-line="25" selection-end-column="60" />
           <folding />
         </state>
       </provider>
@@ -807,10 +735,18 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/index.js">
+    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/WaveForm.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="450">
-          <caret line="25" column="34" lean-forward="false" selection-start-line="25" selection-start-column="34" selection-end-line="25" selection-end-column="34" />
+        <state relative-caret-position="666">
+          <caret line="37" column="24" lean-forward="true" selection-start-line="37" selection-start-column="24" selection-end-line="37" selection-end-column="45" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/BaseView.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="270">
+          <caret line="15" column="4" lean-forward="false" selection-start-line="15" selection-start-column="4" selection-end-line="15" selection-end-column="31" />
           <folding />
         </state>
       </provider>
@@ -823,18 +759,98 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/core/commonEventNames.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="144">
+          <caret line="8" column="0" lean-forward="false" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/MessageModal.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="810">
+          <caret line="45" column="7" lean-forward="false" selection-start-line="45" selection-start-column="7" selection-end-line="45" selection-end-column="7" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/index.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="450">
+          <caret line="25" column="0" lean-forward="false" selection-start-line="25" selection-start-column="0" selection-end-line="25" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/project/sound_store/static/css/style.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="800">
+          <caret line="144" column="30" lean-forward="false" selection-start-line="144" selection-start-column="30" selection-end-line="144" selection-end-column="30" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/Factory.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="414">
+          <caret line="23" column="24" lean-forward="false" selection-start-line="23" selection-start-column="24" selection-end-line="23" selection-end-column="24" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/controller/ProjectListController.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="450">
+          <caret line="25" column="58" lean-forward="false" selection-start-line="25" selection-start-column="58" selection-end-line="25" selection-end-column="58" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/controller/BaseController.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="699">
+          <caret line="55" column="13" lean-forward="false" selection-start-line="55" selection-start-column="13" selection-end-line="55" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/WindowManager.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="242">
-          <caret line="61" column="25" lean-forward="false" selection-start-line="61" selection-start-column="25" selection-end-line="61" selection-end-column="25" />
+        <state relative-caret-position="710">
+          <caret line="60" column="91" lean-forward="false" selection-start-line="60" selection-start-column="91" selection-end-line="60" selection-end-column="91" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/ObservableList.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="872">
+          <caret line="64" column="8" lean-forward="false" selection-start-line="64" selection-start-column="8" selection-end-line="64" selection-end-column="8" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/project/sound_store/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="656">
+          <caret line="157" column="0" lean-forward="true" selection-start-line="157" selection-start-column="0" selection-end-line="157" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/ProjectList.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="710">
-          <caret line="94" column="41" lean-forward="false" selection-start-line="94" selection-start-column="41" selection-end-line="94" selection-end-column="41" />
+        <state relative-caret-position="144">
+          <caret line="26" column="40" lean-forward="false" selection-start-line="26" selection-start-column="40" selection-end-line="26" selection-end-column="40" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/project/sound_store/ProjectManager.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="306">
+          <caret line="20" column="47" lean-forward="false" selection-start-line="20" selection-start-column="47" selection-end-line="20" selection-end-column="47" />
           <folding />
         </state>
       </provider>
