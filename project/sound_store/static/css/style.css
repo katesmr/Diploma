@@ -97,15 +97,11 @@ body {
     width: 80%;
 }
 
-.track-view {
+.instrument-view {
     width: 90%;
     height: 128px;
     margin-top: 1%;
-}
-
-.instrument-view {
-    float: left;
-    width: 10%;
+    background-color: grey;
 }
 
 .wave-form {
@@ -114,7 +110,7 @@ body {
     background-color: #767676;
 }
 
-.instrument-view, h4.ui.header {
+.instrument-view, h4 {
     color: white;
     margin: 0;
 }
@@ -141,6 +137,6 @@ body {
     color: white;
 }
 
-#item-name {
-    background-color: #767676;
+.circular.ui.icon.button.add {
+    margin-top: 2%;
 }

@@ -205,53 +205,75 @@ var transportAudioFile = __webpack_require__(25);
 var TrackManager = __webpack_require__(8);
 
 var changeSound = __webpack_require__(19);
-var changeProject = __webpack_require__(18);
+var changeRequest = __webpack_require__(48);
 var getSound = __webpack_require__(22);
 var getProject = __webpack_require__(21);
 var projectList = __webpack_require__(24);
 var deleteProject = __webpack_require__(20);
+var deleteTrack = __webpack_require__(49);
 var getUser = __webpack_require__(23);
 
 
 module.exports = {
     "getUser": defineUser,
+    "getProject": getProjectData,
     "getProjectList": getProjectList,
     "deleteProject": deleteUserProject,
-    "createSound": createSound,
     "createProject": addProject,
-    "downloadSound": downloadSound,
+    "createTrack": createTrack,
+    "deleteTrack": deleteProjectTrack,
+    "updateTrack": updateTrack,
+    "createSound": createSound,
     "uploadSound": uploadSound,
-    "getProject": getProjectData
+    "downloadSound": downloadSound
 };
 
 function defineUser(callback){
     getUser(callback);
-    /*getUser(function(){
-        //projectList("projects/", projectView.showProjectList.bind(projectView));
-        projectList("projects/", callback.bind(context));
-    });*/
 }
 
 function getProjectList(callback){
     projectList(callback);
 }
 
-function getProjectData(projectName, callback){
+function getProjectData(projectId, callback){
     var url = "projects/";
-    var fullUrl = url + projectName + '/';
+    var fullUrl = url + projectId + '/';
     getProject(fullUrl, callback);
 }
 
-function deleteUserProject(projectName, callback){
+function deleteUserProject(projectId, callback){
     var url = "projects/delete/";
-    var fullUrl = url + projectName + '/';
+    var fullUrl = url + projectId + '/';
     deleteProject(fullUrl, callback);
 }
 
 function addProject(projectName, data, callback){
     var url = "projects/create/";
     var fullUrl = url + projectName + '/';
-    changeProject(fullUrl, data, "json", callback);
+    changeRequest(fullUrl, data, "json", callback);
+}
+
+function renameProject(projectId, newProjectName){
+
+}
+
+function createTrack(projectId, data, callback){
+    var url = "track/create/";
+    var fullUrl = url + projectId + '/';
+    changeRequest(fullUrl, data, "json", callback)
+}
+
+function deleteProjectTrack(trackId, callback){
+    var url = "track/delete/";
+    var fullUrl = url + trackId + '/';
+    deleteTrack(fullUrl, trackId, callback);
+}
+
+function updateTrack(trackId, data, callback){
+    var url = "track/update/";
+    var fullUrl = url + trackId + '/';
+    changeRequest(fullUrl, data, "json", callback)
 }
 
 function createSound(soundName, audioSrc){
@@ -743,9 +765,12 @@ var merger_test = __webpack_require__(10);
 
 var WindowManager = __webpack_require__(46);
 var ProjectList = __webpack_require__(35);
+var ProjectComponentView = __webpack_require__(34);
 
 var ProjectListController = __webpack_require__(45);
+var TrackLIstController = __webpack_require__(50);
 var ProjectListModel = __webpack_require__(16);
+var TrackListModel = __webpack_require__(51);
 var Observer = __webpack_require__(9);
 
 var Req = __webpack_require__(4);
@@ -758,15 +783,26 @@ var projectListObserver = new Observer();
 var projectListController = new ProjectListController(projectListObserver);
 var projectListModel = new ProjectListModel();
 
+var trackListObserver = new Observer();
+var trackListController = new TrackLIstController(trackListObserver);
+var trackListModel = new TrackListModel();
+
 var projectListView = new ProjectList(projectListController);
 projectListController.attachModel(projectListModel);
 
-var windowManager = new WindowManager({
-    "projectList": projectListView
-});
-windowManager.setActiveWindow(projectListView);
+var projectComponentView = new ProjectComponentView(trackListController);
+trackListController.attachModel(trackListModel);
 
-projectListController.fetchData();
+var windowManager = new WindowManager({
+    //"projectList": projectListView,
+    "trackList": projectComponentView
+});
+
+windowManager.setActiveWindow(projectComponentView);
+trackListController.fetchData(4);
+
+//windowManager.setActiveWindow(projectListView);
+//projectListController.fetchData();
 
 
 /***/ }),
@@ -855,27 +891,46 @@ ObservableList.prototype.at = function(index){
     return index < this.size() ? this.__data[index] : null;
 };
 
+ObservableList.prototype.isExistId = function(id){
+    var result = false;
+    if(this.findIndexById(id) >= 0){
+        result = true;
+    }
+    return result;
+};
+
+ObservableList.prototype.findIndexById = function(searchingId){
+    var i;
+    var result = -1;
+    var currentElement;
+    var id = parseInt(searchingId);
+    for(i = 0; i < this.__data.length; ++i){
+        currentElement = this.__data[i];
+        if(currentElement["id"] === id){
+            result = i;
+            break;
+        }
+    }
+    return result;
+};
+
 /**
  * Add item to the end of the list.
  * @param {*} item
  */
 ObservableList.prototype.add = function(item){
     // push to back and send actual index of the added item:
-    this.observer.notify(
-        commonEventNames.E_ITEM_ADDED,
-    this.__data.push(item) - 1);
+    this.observer.notify(commonEventNames.E_ITEM_ADDED, this.__data.push(item) - 1);
 };
 
 /**
  * Removes item at index position.
  * @param {Number} index
  */
-ObservableList.prototype.remove = function(value){
-    var index = this.__data.indexOf(value);
+ObservableList.prototype.remove = function(index){
     if (index < this.size()){
         // fire before removing:
         this.observer.notify(commonEventNames.E_ITEM_REMOVED, index);
-
         // now remove:
         this.__data.splice(index, 1);
     }
@@ -914,30 +969,7 @@ ProjectListModel.prototype.add = function(data){
 
 /***/ }),
 /* 17 */,
-/* 18 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-//changeProjectRequest
-
-module.exports = function(url, data, dataType, callback){
-    $.ajax({
-        url: url,
-        cache: false,
-        method: "POST",
-        dataType: dataType,
-        data: data,
-        success: callback,
-        error: function(status){
-            callback(new Error(status));
-        }
-    });
-};
-
-
-/***/ }),
+/* 18 */,
 /* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -1077,7 +1109,80 @@ BaseWindow.prototype.declined = null;
 
 /***/ }),
 /* 27 */,
-/* 28 */,
+/* 28 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var BaseView = __webpack_require__(1);
+
+module.exports = InstrumentView;
+
+function InstrumentView(instrument, time, context){
+    BaseView.call(this, "instrument-view");
+    this.instrument = $("<h4>" + instrument + "</h4>");
+    this.time = $("<h4>" + time + "</h4>");
+    this.waveform = $("<div class='wf'></div>");
+    // this.createWaveForm(context);
+
+    this._build();
+}
+
+inherit(InstrumentView, BaseView);
+
+InstrumentView.prototype._build = function(){
+    var container = this.getContainer();
+
+    container.append(this.instrument);
+    container.append(this.time);
+    container.append(this.waveform);
+};
+
+InstrumentView.prototype.createWaveForm = function(){
+    /*var data = this.trackModel.getContext();
+    //this.trackModel.play();
+    //this.trackModel.saveTest(TrackManager.save);
+    this.waveform = new WaveForm();
+    this.getContainer().append(this.waveform.getContainer());
+    if(data instanceof Blob){
+        this.waveform.createWaveFormFromFile(data);
+    } else if(data instanceof AudioContext){
+        this.waveform.createWaveForm(data);
+    }*/
+    var self = this;
+    Tone.Offline(function(){
+        //only nodes created in this callback will be recorded
+        //var oscillator = new Tone.Oscillator().toMaster().start(0);
+        var synthBass = new Tone.Synth({"oscillator": {"frequency": 440},
+            "envelope": {"attack" : 0.5, "decay": 0.9, "sustain": 0.3, "release": 1}}).toMaster();
+        synthBass.triggerAttackRelease('C4', 5);
+        synthBass.triggerAttackRelease('A2', 2, 2);
+        synthBass.triggerAttackRelease('A2', 2, 3);
+        //schedule their events
+    }, 5).then(function(buffer){
+        //do something with the output buffer
+        console.log(buffer);
+        //TrackManager.save(buffer._buffer);
+        var blob = AudioHelper.AudioBufferToBlob(buffer._buffer);
+        self.waveform = new WaveForm();
+        self.getContainer().append(self.waveform.getContainer());
+        self.waveform.createWaveFormFromFile(blob);
+
+        /*
+        self.waveform = new WaveForm();
+        self.getContainer().append(self.waveform.getContainer());
+
+        var p = new Tone.Player(buffer._buffer).toMaster().start();
+        self.waveform.createWaveForm(p.context._context);
+         */
+    })
+
+};
+
+
+/***/ }),
 /* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -1204,7 +1309,7 @@ function ProjectBar(){
     BaseView.call(this, "projectbar");
 
     this.showProjectListButton = Factory.createIconButton("ui button user-only", "book icon", "");
-    this.addProjectButton = Factory.createIconButton("ui button", "plus icon", "");
+    this.addTrackButton = Factory.createIconButton("ui button", "plus icon", "");
 
     this._build();
 }
@@ -1218,7 +1323,7 @@ ProjectBar.prototype._build = function(){
         // Possible additional visual effect for this button...
         eventListener.notify(eventListener.ON_SHOW_PROJECT_LIST);
     });
-    this.addProjectButton.on("click", function(event){
+    this.addTrackButton.on("click", function(event){
         //
         eventListener.notify(eventListener.SHOW_TRACK_TOOL_FORM);
     });
@@ -1228,7 +1333,100 @@ ProjectBar.prototype._build = function(){
 
 
 /***/ }),
-/* 34 */,
+/* 34 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var BaseWindow = __webpack_require__(26);
+var InstrumentView = __webpack_require__(28);
+var Factory = __webpack_require__(3);
+var commonEventNames = __webpack_require__(6);
+var windowsTransport = __webpack_require__(47);
+
+module.exports = ProjectComponentView;
+
+function ProjectComponentView(controller){
+    BaseWindow.call(this, controller, "project-component-view");
+
+    this.projectName = $("<h1></h1>");
+    this.addTrackButton = Factory.createIconButton("circular ui icon button add", "plus icon", "");
+    this.trackList = $("<div class='track-list'>");
+
+    this.selectedItem = null;
+
+    this._build();
+    this.hide();
+}
+
+inherit(ProjectComponentView, BaseWindow);
+
+ProjectComponentView.prototype._build = function(){
+    var self = this;
+    var container = this.getContainer();
+
+    this.controller.observer.subscribe(commonEventNames.E_ITEM_ADDED, function(eventName, index){
+        var element = self.controller.model.at(index);
+        self.add(element);
+    });
+
+    this.controller.observer.subscribe(commonEventNames.E_ITEM_REMOVED, function(eventName, index){
+        self.remove(self.selectedItem.attr("id"));
+        self.selectedItem = null;
+    });
+
+    this.addTrackButton.on("click", function(event){
+        self.controller.add(JSON.stringify({"DEFAULT_KEY": "DEFAULT_VALUE"}));
+    });
+
+    container.append(this.projectName);
+    container.append(this.trackList);
+    container.append(this.addTrackButton);
+};
+
+
+ProjectComponentView.prototype.confirmed = function(name){
+    this.controller.remove(this.selectedItem.attr("id"));
+};
+
+ProjectComponentView.prototype.declined = function(name){
+    this.selectedItem = null;
+};
+
+ProjectComponentView.prototype.add = function(track){
+    var $instrumentContainer = $("<div class='track-" + track.id + "'>");
+    var instrumentView = new InstrumentView(track.instrument, track.length, track.getContext());
+    var $deleteTrackButton = Factory.deleteCircleButton(track.id, this.onRemoveButtonClicked);
+    $instrumentContainer.append(instrumentView.getContainer());
+    $instrumentContainer.append($deleteTrackButton);
+    this.trackList.append($instrumentContainer);
+};
+
+ProjectComponentView.prototype.remove = function(id){
+    this.trackList.find("track-" + id).remove();
+};
+
+ProjectComponentView.prototype.onRemoveButtonClicked = function($element){
+    if (this.selectedItem === null){
+        this.selectedItem = $element;
+        windowsTransport.notify(commonEventNames.E_SHOW_MODAL, "teeest");
+    }
+};
+
+ProjectComponentView.prototype.createTrackViewList = function(project){
+    var track;
+    var trackView;
+    for(track in project.trackModelList){
+        trackView = new TrackView(project.trackModelList[track]);
+        this.getContainer().append(trackView.getContainer());
+        this.components.push(trackView);
+    }
+};
+
+
+/***/ }),
 /* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -1248,7 +1446,7 @@ function ProjectList(controller){
 
     this.title = $("<h1>Project List</h1>");
     this.table = $("<div class='five column stackable ui grid'>");
-    this.addProjectButton = Factory.createIconButton("circular ui icon button", "plus icon", "");
+    this.addTrackButton = Factory.createIconButton("circular ui icon button", "plus icon", "");
 
     this.selectedItem = null;
     this.onRemoveButtonClicked = onRemoveButtonClicked.bind(this);
@@ -1264,8 +1462,8 @@ ProjectList.prototype._build = function(){
     var container = this.getContainer();
 
     this.controller.observer.subscribe(commonEventNames.E_ITEM_ADDED, function(eventName, index){
-        var trackListModel = self.controller.model.at(index);
-        self.add(trackListModel);
+        var element = self.controller.model.at(index);
+        self.add(element);
     });
 
     this.controller.observer.subscribe(commonEventNames.E_ITEM_REMOVED, function(eventName, index){
@@ -1273,46 +1471,47 @@ ProjectList.prototype._build = function(){
         self.selectedItem = null;
     });
 
-    this.addProjectButton.on("click", function(event){
-        self.controller.add(JSON.stringify({"DEFAULT_KEY": "DEFAULT_VALUE"}));
+    this.addTrackButton.on("click", function(event){
+        // create empty project
+        self.controller.add();
     });
 
     container.append(this.title);
     container.append(this.table);
-    container.append(this.addProjectButton);
+    container.append(this.addTrackButton);
 };
 
 ProjectList.prototype.confirmed = function(name){
     this.controller.remove(this.selectedItem.attr("id"));
-    //this.selectedItem = null;
 };
 
 ProjectList.prototype.declined = function(name){
     this.selectedItem = null;
 };
 
-ProjectList.prototype.add = function(name){
+ProjectList.prototype.add = function(object){
     // full table or
     // add new item with new project
+    var _id = object.id;
     var $item;
     var $column;
-    var projectName;
+    var projectId;
     var $deleteProjectButton;
-    $deleteProjectButton = Factory.deleteCircleButton(name, this.onRemoveButtonClicked);
+    $deleteProjectButton = Factory.deleteCircleButton(_id, this.onRemoveButtonClicked);
     //create function for project name ITEM
-    $item = $("<a id='" + name + "'>" + name +"</a>");
+    $item = $("<a id='" + _id + "'>" + object.name +"</a>");
     $item.on("click", function(event){
-        projectName = $(this).attr("id");
-        windowsTransport.notify(commonEventNames.SHOW_PROJECT, projectName);
+        projectId = $(this).attr("id");
+        windowsTransport.notify(commonEventNames.SHOW_PROJECT, projectId);
     });
-    $column = $("<div class='column' id='item-" + name + "'>");
+    $column = $("<div class='column' id='item-" + _id + "'>");
     $column.append($item);
     $column.append($deleteProjectButton);
     this.table.append($column);
 };
 
-ProjectList.prototype.remove = function(name){
-    $("#item-" + name).remove(); //remove from table (grid)
+ProjectList.prototype.remove = function(id){
+    $("#item-" + id).remove(); //remove from table (grid)
 };
 
 ProjectList.prototype.updateProjectList = function(){
@@ -1500,7 +1699,7 @@ BaseController.prototype._removeHandler = function(value){
     if (value instanceof Error){
         // Oh no..
     } else {
-        model.remove(value);
+        model.remove(model.findIndexById(value));
     }
 };
 
@@ -1567,14 +1766,11 @@ ProjectListController.prototype.add = function(data){
     RequestManager.createProject("unknown", data, this._addHandler.bind(this));
 };
 
-ProjectListController.prototype.remove = function(name){
-    var i;
+ProjectListController.prototype.remove = function(id){
     var model = this.model;
-    for (i = 0; i < model.size(); ++i){
-        if (model.at(i) === name){
-            RequestManager.deleteProject(name, this._removeHandler.bind(this));
-            break;
-        }
+    console.log(id);
+    if(model.isExistId(id) === true){
+        RequestManager.deleteProject(id, this._removeHandler.bind(this));
     }
 };
 
@@ -1691,6 +1887,266 @@ WindowManager.prototype.setActiveWindow = function(newActiveWindow){
 var Observer = __webpack_require__(9);
 
 module.exports = new Observer();
+
+
+/***/ }),
+/* 48 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+//changeProjectRequest
+
+module.exports = function(url, data, dataType, callback){
+    $.ajax({
+        url: url,
+        cache: false,
+        method: "POST",
+        dataType: dataType,
+        data: data,
+        success: callback,
+        error: function(status){
+            callback(new Error(status));
+        }
+    });
+};
+
+
+/***/ }),
+/* 49 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var baseRequest = __webpack_require__(5);
+
+module.exports = baseRequest.bind(null, "POST", "json");
+
+
+/***/ }),
+/* 50 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var ListController = __webpack_require__(44);
+var inherit = __webpack_require__(0);
+var RequestManager = __webpack_require__(4);
+
+module.exports = TrackListController;
+
+function TrackListController(observer){
+    ListController.call(this, observer);
+}
+
+inherit(TrackListController, ListController);
+
+TrackListController.prototype.fetchData = function(projectId){
+    RequestManager.getProject(projectId, this._fetchDataHandler.bind(this));
+};
+
+TrackListController.prototype.add = function(projectId, data){
+    RequestManager.createTrack(projectId, data, this._addHandler.bind(this));
+};
+
+TrackListController.prototype.remove = function(trackId){
+    RequestManager.deleteTrack(trackId, this._removeHandler.bind(this));
+};
+
+
+/***/ }),
+/* 51 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var ObservableList = __webpack_require__(15);
+var inherit = __webpack_require__(0);
+var TrackSynthesizer = __webpack_require__(55);
+var TrackNoise = __webpack_require__(54);
+
+module.exports = TrackListModel;
+
+function TrackListModel(){
+    ObservableList.call(this);
+    this.name = "";
+}
+
+inherit(TrackListModel, ObservableList);
+
+TrackListModel.prototype.add = function(source){
+    var track;
+    var id = source["id"];
+    var data = source["data"];
+    var instrument = source["data"]["instrument"];
+    if(instrument === "synth"){
+        track = new TrackSynthesizer(id, data);
+    } else if(instrument === "noise"){
+        track = new TrackNoise(id, data);
+    } else{
+        // DEFAULT_JSON_SETTINGS
+    }
+
+    if (track){
+        ObservableList.prototype.add.call(this, track);
+    }
+};
+
+
+/***/ }),
+/* 52 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var PostProcessSettings = __webpack_require__(53);
+
+module.exports = BaseTrackModel;
+
+// @param {String} name
+// @param {Object} source
+function BaseTrackModel(id, source){
+    this.id = id;
+    this.length = source["length"];
+    this.instrument = source["instrument"];
+    this.playSetting = source["play-setting"];
+    this.postProcessSettings = new PostProcessSettings(source["post-setting"]);
+    this.trackObject = this._generate(source["setting"]);
+}
+
+BaseTrackModel.prototype.createFormData = function(){
+    var formData = new FormData();
+    formData.append("user_audio", toBlob(this.trackObject), this.name);
+    formData.append("postProcessSettings", JSON.stringify(this.postProcessSettings));
+    return formData;
+};
+
+BaseTrackModel.prototype.getContext = function(){
+    return this.trackObject.context._context;
+};
+
+BaseTrackModel.prototype.getConstants = function(){
+    return this.trackObject.context;
+};
+
+BaseTrackModel.prototype.getAudioBuffer = function(){
+
+};
+
+/**
+ * @param {Object} source
+ * @type {null}
+ * @protected
+ * @return {Tone}
+ */
+BaseTrackModel.prototype._generate = null;
+
+/**
+ * @param {Object} options
+ * @type {null}
+ */
+BaseTrackModel.prototype.play = null;
+
+BaseTrackModel.prototype.playCompomponent = null;
+
+
+/***/ }),
+/* 53 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = PostProcessSettings;
+
+function PostProcessSettings(options){
+    this.volume = 1;
+    this.vibrato = {};
+}
+
+
+/***/ }),
+/* 54 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var BaseTrackModel = __webpack_require__(52);
+var inherit = __webpack_require__(0);
+
+module.exports = TrackNoise;
+
+// @param {String} name
+// @param {Object} source
+function TrackNoise(name, source){
+    BaseTrackModel.call(this, name, source);
+}
+
+inherit(TrackNoise, BaseTrackModel);
+
+TrackNoise.prototype._generate = function(options){
+
+};
+
+TrackNoise.prototype.play = function(options){
+
+};
+
+
+/***/ }),
+/* 55 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var BaseTrackModel = __webpack_require__(52);
+var inherit = __webpack_require__(0);
+
+module.exports = TrackSynthesizer;
+
+// @param {String} name
+// @param {Object} source
+function TrackSynthesizer(id, source){
+    BaseTrackModel.call(this, id, source);
+    this.source = source;
+}
+
+inherit(TrackSynthesizer, BaseTrackModel);
+
+TrackSynthesizer.prototype._generate = function(options){
+    return new Tone.Synth(options).toMaster(); //{"oscillator": {}, "envelope": {}}
+};
+
+TrackSynthesizer.prototype.play = function(options){
+    var i;
+    var r = this.playSetting;
+    for(i = 0; i < r.length; ++i){
+        this.trackObject.triggerAttackRelease(r[i][0], r[i][1], r[i][2]);
+    }
+};
+
+TrackSynthesizer.prototype.saveTest = function(callback){
+    var DURATION = 5; // seconds
+    var self = this;
+    Tone.Offline(function(){
+        //only nodes created in this callback will be recorded
+        var i, j;
+        var r = self.playSetting;
+        for(i = 0; i < r.length; ++i){
+            self.trackObject.triggerAttackRelease(r[i][0], r[i][1], r[i][2]);
+        }
+    }, DURATION).then(function(buffer){
+        console.log(buffer);
+        callback(buffer._buffer);
+    });
+};
 
 
 /***/ })

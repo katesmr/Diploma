@@ -37,7 +37,7 @@ class ProjectManager(BasicManager):
         :param user_id: int
         :param project_name: str
         :param data: dict|None
-        :return:
+        :return: int - primary key of created project
         """
         result = None
         user = UserData.user_object(user_id)
@@ -49,10 +49,9 @@ class ProjectManager(BasicManager):
             project_id = new_project.pk
             if data is not None:
                 self.stream_manager.create(project_id, data)
-                result = project_id
             else:
-                pass
-                # create empty project
+                pass  # create empty project
+            result = project_id
         return result
 
     def delete(self, user_id, project_id):
@@ -60,7 +59,7 @@ class ProjectManager(BasicManager):
         Delete project from DB and cascade delete streams of the project
         :param user_id:
         :param project_id:
-        :return:
+        :return: int - primary key of deleted project
         """
         result = None
         user = UserData.user_object(user_id)
@@ -68,7 +67,7 @@ class ProjectManager(BasicManager):
             project = Projects.project_object(project_id)
             if project is not None:
                 self.stream_manager.delete_project_streams(project_id)
-                result = project.name
+                result = project_id
                 project.delete()
         return result
 

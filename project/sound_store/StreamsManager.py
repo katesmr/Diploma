@@ -16,7 +16,9 @@ class StreamsManager(BasicManager):
         result = None
         data = Streams.stream_data(stream_id)
         if data is not None:
-            result = self.manager.json_file_data(data['path'])
+            result = dict()
+            result["id"] = stream_id
+            result["data"] = self.manager.json_file_data(data['path'])
         return result
 
     def get_project_streams(self, project_id):
