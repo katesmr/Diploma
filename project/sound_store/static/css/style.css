@@ -97,20 +97,20 @@ body {
     width: 80%;
 }
 
-.instrument-view {
-    width: 90%;
-    height: 128px;
-    margin-top: 1%;
-    background-color: grey;
-}
-
 .wave-form {
     float: right;
     width: 90%;
     background-color: #767676;
 }
 
-.instrument-view, h4 {
+.track-data-view {
+    width: 70%;
+    height: 128px;
+    margin-top: 1%;
+    background-color: grey;
+}
+
+.track-data-view, h4 {
     color: white;
     margin: 0;
 }

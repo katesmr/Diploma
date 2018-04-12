@@ -170,9 +170,9 @@ def update_user_project(request, project_id):
     return response
 
 
-def get_stream(request, stream_id):
+def get_stream(request, track_id):
     stream_manager = StreamsManager()
-    stream = stream_manager.get(stream_id)
+    stream = stream_manager.get(track_id)
     if stream is not None:
         response = HttpResponse(dumps(stream), content_type='application/json')
     else:
@@ -193,9 +193,9 @@ def create_stream(request, project_id):
 
 
 @csrf_exempt
-def delete_stream(request, stream_id):
+def delete_stream(request, track_id):
     stream_manager = StreamsManager()
-    stream = stream_manager.delete(stream_id)
+    stream = stream_manager.delete(track_id)
     if stream is not None:
         response = HttpResponse(dumps(stream), content_type='application/json')
     else:
@@ -204,10 +204,10 @@ def delete_stream(request, stream_id):
 
 
 @csrf_exempt
-def update_stream(request, stream_id):
+def update_stream(request, track_id):
     data = parse_json_data(request)
     stream_manager = StreamsManager()
-    stream = stream_manager.update(stream_id, data)
+    stream = stream_manager.update(track_id, data)
     if stream is not None:
         response = HttpResponse(dumps(stream), content_type='application/json')
     else:

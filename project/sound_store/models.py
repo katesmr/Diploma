@@ -45,18 +45,10 @@ class Projects(models.Model):
     @staticmethod
     def user_projects_data(user_id):
         result = dict()
-        user_projects = Projects.objects.filter(user_id=user_id)
+        user_projects = Projects.objects.filter(user_id=user_id).order_by('id')
         for project in user_projects:
             result[project.id] = dict()
             result[project.id]['name'] = project.name
-        return result
-
-    @staticmethod
-    def project_id_by_name(user_id, name):
-        result = None
-        projects = Projects.objects.filter(user_id=user_id, name=name)
-        for project in projects:
-            result = project.id
         return result
 
 
@@ -78,24 +70,12 @@ class Sounds(models.Model):
     @staticmethod
     def user_sounds_data(user_id):
         result = dict()
-        user_sounds = Sounds.objects.filter(user_id=user_id)
+        user_sounds = Sounds.objects.filter(user_id=user_id).order_by('id')
         for sound in user_sounds:
             result[sound.id] = dict()
             result[sound.id]['path'] = sound.path
             result[sound.id]['name'] = sound.name
             # result[sound.id]['user_id'] = sound.user.id
-        return result
-
-    @staticmethod
-    def sound_data_by_name(user_id, name):
-        result = dict()
-        sounds = Sounds.objects.filter(user_id=user_id, name=name)
-        for sound in sounds:
-            result['id'] = sound.id
-            result['path'] = sound.path
-            result['name'] = sound.name
-            # sound.user - return object of corresponding user
-            result['user_id'] = sound.user.id
         return result
 
     @staticmethod
@@ -138,8 +118,21 @@ class Streams(models.Model):
     @staticmethod
     def project_streams_data(project_id):
         result = dict()
-        project_streams = Streams.objects.filter(project_id=project_id)
+        project_streams = Streams.objects.filter(project_id=project_id).order_by('id')
         for stream in project_streams:
             _id = stream.id
             result[_id] = Streams.stream_data(_id)
         return result
+
+
+"""
+result = list()
+project_streams = Streams.objects.filter(project_id=project_id).order_by('pk')
+for stream in project_streams:
+    _id = stream.id
+    print(_id)
+    tmp = dict()
+    tmp[_id] = Streams.stream_data(_id)
+    result.append(tmp)
+    print(result)
+"""

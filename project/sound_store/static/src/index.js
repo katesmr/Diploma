@@ -5,7 +5,7 @@ var ProjectList = require("view/ProjectList");
 var ProjectComponentView = require("view/ProjectComponentView");
 
 var ProjectListController = require("controller/ProjectListController");
-var TrackLIstController = require("controller/TrackLIstController");
+var TrackLIstController = require("controller/TrackListController");
 var ProjectListModel = require("model/ProjectListModel");
 var TrackListModel = require("model/TrackListModel");
 var Observer = require("observer");

@@ -51,7 +51,7 @@ class StreamsManager(BasicManager):
             stream_path = self.manager.get_full_file_path(file_name)
             new_stream = Streams(path=stream_path, name=file_name, project=project)
             new_stream.save()
-            result = new_stream.pk
+            result = {"id": new_stream.pk, "data": data}
         return result
 
     def delete(self, stream_id):
@@ -68,6 +68,7 @@ class StreamsManager(BasicManager):
             if data is not None:
                 self.manager.delete_user_file(data['path'])
                 result = stream_id
+                stream.delete()
         return result
 
     def delete_project_streams(self, project_id):
