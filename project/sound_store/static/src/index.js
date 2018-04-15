@@ -1,13 +1,13 @@
 var merger_test = require("merger_test");
 
 var WindowManager = require("view/WindowManager");
-var ProjectList = require("view/ProjectList");
-var ProjectComponentView = require("view/ProjectComponentView");
+var ProjectListView = require("view/ProjectListView");
+var TrackListView = require("view/TrackListView");
 
 var ProjectListController = require("controller/ProjectListController");
-var TrackLIstController = require("controller/TrackListController");
+var ProjectController = require("controller/ProjectController");
 var ProjectListModel = require("model/ProjectListModel");
-var TrackListModel = require("model/TrackListModel");
+var ProjectModel = require("model/ProjectModel");
 var Observer = require("observer");
 
 var Req = require("utils/RequestManager");
@@ -21,22 +21,22 @@ var projectListController = new ProjectListController(projectListObserver);
 var projectListModel = new ProjectListModel();
 
 var trackListObserver = new Observer();
-var trackListController = new TrackLIstController(trackListObserver);
-var trackListModel = new TrackListModel();
+var trackListController = new ProjectController(trackListObserver);
+//var ProjectModel = new ProjectModel();
 
-var projectListView = new ProjectList(projectListController);
+var projectListView = new ProjectListView(projectListController);
 projectListController.attachModel(projectListModel);
 
-var projectComponentView = new ProjectComponentView(trackListController);
-trackListController.attachModel(trackListModel);
+var projectComponentView = new TrackListView(trackListController);
+//trackListController.attachModel(trackListModel);
 
 var windowManager = new WindowManager({
-    //"projectList": projectListView,
+    "projectList": projectListView,
     "trackList": projectComponentView
 });
 
-windowManager.setActiveWindow(projectComponentView);
-trackListController.fetchData(4);
+//windowManager.setActiveWindow(projectComponentView);
+//trackListController.fetchData(4);
 
-//windowManager.setActiveWindow(projectListView);
-//projectListController.fetchData();
+windowManager.setActiveWindow(projectListView);
+projectListController.fetchData();

@@ -32,8 +32,8 @@ class StreamsManager(BasicManager):
         if project is not None:
             result = []
             streams = Streams.project_streams_data(project_id)
-            for _id in streams:
-                result.append(self.get(_id))
+            for element in streams:
+                result.append(self.get(element["id"]))
         return result
 
     def create(self, project_id, data):
@@ -51,7 +51,38 @@ class StreamsManager(BasicManager):
             stream_path = self.manager.get_full_file_path(file_name)
             new_stream = Streams(path=stream_path, name=file_name, project=project)
             new_stream.save()
-            result = {"id": new_stream.pk, "data": data}
+            result = new_stream.pk
+        return result
+
+    def update(self, project_id, stream_id, data):
+        """
+        Update steam json data
+        :param project_id: int
+        :param stream_id: int
+        :param data: dict
+        :return: int|None
+        """
+        stream = Streams.stream_object(stream_id)
+        if stream is not None:
+            # update stream if it exist
+            self.manager.set_user_id(stream.project.user.id)
+            self.manager.save_json_file(stream.name, data)
+            result = stream_id
+        else:
+            # create new stream if client sent self generating id
+            # in case of this application client create new track (stream) with
+            result = self.create(project_id, data)
+        return result
+
+    def update_all(self, project_id, stream_list):
+        """
+        :param project_id:
+        :param stream_list:
+        :return:
+        """
+        result = []
+        for stream in stream_list:
+            result.append(self.update(project_id, stream['id'], stream['track']))
         return result
 
     def delete(self, stream_id):
@@ -81,20 +112,5 @@ class StreamsManager(BasicManager):
         project = Projects.project_object(project_id)
         if project is not None:
             streams = Streams.project_streams_data(project_id)
-            for _id in streams:
-                tmp = self.delete(_id)
-
-    def update(self, stream_id, data):
-        """
-        Update steam json data
-        :param stream_id: int
-        :param data: dict
-        :return: int|None
-        """
-        result = None
-        stream = Streams.stream_object(stream_id)
-        if stream is not None:
-            self.manager.set_user_id(stream.project.user.id)
-            self.manager.save_json_file(stream.name, data)
-            result = stream_id
-        return result
+            for stream in streams:
+                tmp = self.delete(stream['id'])

@@ -1,3 +1,4 @@
+import logging
 from .models import UserData, Projects
 from .src.DataManager import DataManager
 from .StreamsManager import StreamsManager
@@ -12,13 +13,7 @@ class ProjectManager(BasicManager):
         result = None
         user = UserData.user_object(user_id)
         if user is not None:
-            projects = Projects.user_projects_data(user_id)
-            result = []
-            for project_id in projects:
-                element = dict()
-                element["id"] = project_id
-                element["name"] = projects[project_id]["name"]
-                result.append(element)
+            result = Projects.user_projects_data(user_id)
         return result
 
     def get_project(self, user_id, project_id):
@@ -51,7 +46,36 @@ class ProjectManager(BasicManager):
                 self.stream_manager.create(project_id, data)
             else:
                 pass  # create empty project
-            result = project_id
+            result = {"id": project_id, "name": project_name}
+        return result
+
+    def update(self, user_id, project_id, source):
+        """
+        :param user_id:
+        :param project_id:
+        :param source:
+        :return:
+        """
+        result = None
+        try:
+            _id = source['id']
+            name = source['name']
+            track_setting_list = source['__data']
+            project = Projects.project_object(_id)
+            if project is not None:
+                result = dict()
+                result["id"] = _id
+                if name is not None or name.length > 0:
+                    old_name = project.name
+                    if name != old_name:
+                        project = Projects(id=_id, name=name)
+                        project.save()
+                    result['name'] = project.name
+                else:
+                    raise ValueError('Project name should not be empty.')
+                result["data"] = self.stream_manager.update_all(_id, track_setting_list)
+        except KeyError as error:
+            logging.error(error)
         return result
 
     def delete(self, user_id, project_id):
@@ -69,20 +93,4 @@ class ProjectManager(BasicManager):
                 self.stream_manager.delete_project_streams(project_id)
                 result = project_id
                 project.delete()
-        return result
-
-    def update(self, user_id, project_id, new_project_name):
-        """
-        Rename project
-        :param user_id:
-        :param project_id:
-        :param new_project_name:
-        :return:
-        """
-        result = None
-        project = Projects.project_object(project_id)
-        if project is not None:
-            if new_project_name is not None or new_project_name.length > 0:
-                project = Projects(id=project_id, name=new_project_name)
-                project.save()
         return result

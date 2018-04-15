@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 import logging
 
+from django.core.exceptions import ObjectDoesNotExist
+
 
 class UserData(User):
     class Meta:
@@ -44,11 +46,13 @@ class Projects(models.Model):
 
     @staticmethod
     def user_projects_data(user_id):
-        result = dict()
+        result = []
         user_projects = Projects.objects.filter(user_id=user_id).order_by('id')
         for project in user_projects:
-            result[project.id] = dict()
-            result[project.id]['name'] = project.name
+            tmp = dict()
+            tmp['id'] = project.id
+            tmp['name'] = project.name
+            result.append(tmp)
         return result
 
 
@@ -101,7 +105,7 @@ class Streams(models.Model):
         result = None
         try:
             result = Streams.objects.get(id=stream_id)
-        except Sounds.DoesNotExist as error:
+        except ObjectDoesNotExist as error:
             logging.error(error)
         return result
 
@@ -111,28 +115,15 @@ class Streams(models.Model):
         stream = Streams.stream_object(stream_id)
         if stream:
             result = dict()
+            result['id'] = stream_id
             result['path'] = stream.path
             result['name'] = stream.name
         return result
 
     @staticmethod
     def project_streams_data(project_id):
-        result = dict()
+        result = []
         project_streams = Streams.objects.filter(project_id=project_id).order_by('id')
         for stream in project_streams:
-            _id = stream.id
-            result[_id] = Streams.stream_data(_id)
+            result.append(Streams.stream_data(stream.id))
         return result
-
-
-"""
-result = list()
-project_streams = Streams.objects.filter(project_id=project_id).order_by('pk')
-for stream in project_streams:
-    _id = stream.id
-    print(_id)
-    tmp = dict()
-    tmp[_id] = Streams.stream_data(_id)
-    result.append(tmp)
-    print(result)
-"""

@@ -131,10 +131,10 @@ def get_user_project(request, project_id):
 
 
 @csrf_exempt
-def save_user_project(request, project_id):
+def save_user_project(request, project_name):
     data = parse_json_data(request)
     project_manager = ProjectManager()
-    project = project_manager.create(request.user.id, project_id, data)
+    project = project_manager.create(request.user.id, project_name, data)
     if project is not None:
         response = HttpResponse(dumps(project), content_type='application/json')
     else:
@@ -160,9 +160,9 @@ def delete_user_project(request, project_id):
 
 @csrf_exempt
 def update_user_project(request, project_id):
-    project_name = parse_json_data(request)
+    data = parse_json_data(request)
     project_manager = ProjectManager()
-    project = project_manager.update(request.user.id, project_id, project_name)
+    project = project_manager.update(request.user.id, project_id, data)
     if project is not None:
         response = HttpResponse(dumps(project), content_type='application/json')
     else:

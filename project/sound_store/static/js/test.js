@@ -64,7 +64,7 @@ var test =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 13);
+/******/ 	return __webpack_require__(__webpack_require__.s = 24);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -123,28 +123,17 @@ BaseView.prototype.appendToBlock = function(blockName){
 "use strict";
 
 
-var Observer = __webpack_require__(9);
-
-var eventListener = new Observer;
-
-eventListener.ON_SHOW_PROJECT_LIST = "ON_SHOW_PROJECT_LIST";
-eventListener.ON_ADD_PROJECT = "ON_ADD_PROJECT";
-eventListener.ON_EDIT_PROJECT = "ON_EDIT_PROJECT";
-eventListener.ON_DELETE_PROJECT = "ON_DELETE_PROJECT";
-eventListener.DEFINE_USER = "DEFINE_USER";
-eventListener.SHOW_TRACK = "SHOW_TRACK";
-eventListener.SHOW_PROJECT = "SHOW_PROJECT";
-eventListener.SHOW_LOGIN_FORM = "SHOW_LOGIN_FORM";
-eventListener.SHOW_INSTRUMENT_VIEW = "SHOW_INSTRUMENT_VIEW";
-eventListener.PROJECT_LIST_MODEL_UPDATED = "PROJECT_LIST_MODEL_UPDATED";
-eventListener.PROJECT_MODEL_UPDATED = "PROJECT_MODEL_UPDATED";
-eventListener.SHOW_TRACK_TOOL_FORM = "SHOW_TRACK_TOOL_FORM";
-eventListener.SHOW_SYNTH_TOOL_FORM = "SHOW_SYNTH_TOOL_FORM";
-eventListener.SHOW_OSCILLATOR_TOOL_FORM = "SHOW_OSCILLATOR_TOOL_FORM";
-eventListener.SHOW_NOISE_TOOL_FORM = "SHOW_NOISE_TOOL_FORM";
-eventListener.CONFIRM_DELETE = "CONFIRM_DELETE";
-
-module.exports = eventListener;
+module.exports = {
+    "E_MODEL_UPDATED": "MODEL_UPDATED",
+    "E_ITEM_ADDED": "ITEM_ADDED",
+    "E_ITEM_REMOVED": "ITEM_REMOVED",
+    "E_CONFIRMED": "CONFIRMED",
+    "E_DECLINED": "DECLINED",
+    "E_SHOW_MODAL": "E_SHOW_MODAL",
+    "E_ACTIVATE_WINDOW": "E_ACTIVATE_WINDOW",
+    "DEFINE_USER": "DEFINE_USER",
+    "ON_BACK_BUTTON_CLICK": "ON_BACK_BUTTON_CLICK"
+};
 
 
 /***/ }),
@@ -154,7 +143,28 @@ module.exports = eventListener;
 "use strict";
 
 
-var eventListener = __webpack_require__(2);
+module.exports = function(method, dataType, url, callback){
+    $.ajax({
+        method: method,
+        url: url,
+        dataType: dataType,
+        cache: false,
+        success: callback,
+        error: function(status){
+            callback(new Error(status));
+        }
+    });
+};
+
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var eventListener = __webpack_require__(7);
 
 module.exports = {
     "createButton": createButton,
@@ -195,283 +205,7 @@ function createDivBlock(className){
 
 
 /***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var transportAudioFile = __webpack_require__(25);
-var TrackManager = __webpack_require__(8);
-
-var changeSound = __webpack_require__(19);
-var changeRequest = __webpack_require__(48);
-var getSound = __webpack_require__(22);
-var getProject = __webpack_require__(21);
-var projectList = __webpack_require__(24);
-var deleteProject = __webpack_require__(20);
-var deleteTrack = __webpack_require__(49);
-var getUser = __webpack_require__(23);
-
-
-module.exports = {
-    "getUser": defineUser,
-    "getProject": getProjectData,
-    "getProjectList": getProjectList,
-    "deleteProject": deleteUserProject,
-    "createProject": addProject,
-    "createTrack": createTrack,
-    "deleteTrack": deleteProjectTrack,
-    "updateTrack": updateTrack,
-    "createSound": createSound,
-    "uploadSound": uploadSound,
-    "downloadSound": downloadSound
-};
-
-function defineUser(callback){
-    getUser(callback);
-}
-
-function getProjectList(callback){
-    projectList(callback);
-}
-
-function getProjectData(projectId, callback){
-    var url = "projects/";
-    var fullUrl = url + projectId + '/';
-    getProject(fullUrl, callback);
-}
-
-function deleteUserProject(projectId, callback){
-    var url = "projects/delete/";
-    var fullUrl = url + projectId + '/';
-    deleteProject(fullUrl, callback);
-}
-
-function addProject(projectName, data, callback){
-    var url = "projects/create/";
-    var fullUrl = url + projectName + '/';
-    changeRequest(fullUrl, data, "json", callback);
-}
-
-function renameProject(projectId, newProjectName){
-
-}
-
-function createTrack(projectId, data, callback){
-    var url = "track/create/";
-    var fullUrl = url + projectId + '/';
-    if(data === null){
-        data = {
-            "instrument": "synth",
-            "setting": {},
-            "play-setting": [],
-            "length": 1
-        };
-    }
-    changeRequest(fullUrl, JSON.stringify(data), "json", callback)
-}
-
-function deleteProjectTrack(trackId, callback){
-    var url = "track/delete/";
-    var fullUrl = url + trackId + '/';
-    deleteTrack(fullUrl, callback);
-}
-
-function updateTrack(trackId, data, callback){
-    var url = "track/update/";
-    var fullUrl = url + trackId + '/';
-    changeRequest(fullUrl, data, "json", callback)
-}
-
-function createSound(soundName, audioSrc){
-    var url = "sounds/create/";
-    // var url = "sound/update/";
-    var fullUrl = url + soundName + '/';
-    transportAudioFile(fullUrl, soundName, audioSrc, changeSound);
-}
-
-function downloadSound(soundName){
-    var url = "sounds/download/";
-    var fullUrl = url + soundName + '/';
-    getSound(fullUrl, function(data){
-        TrackManager.save(data, soundName);
-    });
-}
-
-function uploadSound(soundName, callback){
-    var url = "sounds/";
-    var fullUrl = url + soundName + '/';
-    getSound(fullUrl, callback);
-}
-
-
-/***/ }),
 /* 5 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = function(method, dataType, url, callback){
-    $.ajax({
-        method: method,
-        url: url,
-        dataType: dataType,
-        cache: false,
-        success: callback,
-        error: function(status){
-            callback(new Error(status));
-        }
-    });
-};
-
-
-/***/ }),
-/* 6 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = {
-    "E_MODEL_UPDATED": "MODEL_UPDATED",
-    "E_ITEM_ADDED": "ITEM_ADDED",
-    "E_ITEM_REMOVED": "ITEM_REMOVED",
-    "E_CONFIRMED": "CONFIRMED",
-    "E_DECLINED": "DECLINED",
-    "E_SHOW_MODAL": "E_SHOW_MODAL"
-};
-
-
-/***/ }),
-/* 7 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var toWav = __webpack_require__(12);
-
-module.exports = {
-    "getAudioContextBuffer": getAudioContextBuffer,
-    "merge": merge,
-    "BlobToArrayBuffer": BlobToArrayBuffer,
-    "AudioBufferToBlob": AudioBufferToBlob,
-    "AudioContextToBlob": AudioContextToBlob
-};
-
-// return AudioBuffer
-function getAudioContextBuffer(context){
-    var contextConstants = context._constants; // replace on set method
-    var audioBufferSourceNode = contextConstants[1];
-    var buffer = audioBufferSourceNode.buffer;
-    return buffer;
-}
-
-function merge(context, buffer1, buffer2){
-    // add comparison channel numbers
-    var i, data;
-    var newLength = buffer1.length + buffer2.length;
-    var track = context.createBuffer(buffer1.numberOfChannels, newLength, buffer1.sampleRate);
-    for(i = 0; i < track.numberOfChannels; ++i){
-        data = track.getChannelData(i);
-        data.set(buffer1.getChannelData(i));
-        data.set(buffer2.getChannelData(i), buffer1.length);
-    }
-    return track;
-}
-
-function BlobToArrayBuffer(blob, callback){
-    var arrayBuffer;
-    var reader = new FileReader();
-    reader.onload = function(){
-        arrayBuffer = reader.result;
-        callback(arrayBuffer);
-    };
-    reader.readAsArrayBuffer(blob);
-}
-
-function AudioBufferToBlob(audioBuffer){
-    var buffer = toWav(audioBuffer, {float32: true});
-    console.log("+");
-    console.log(buffer);
-    var blob = new Blob([buffer], {"type": "audio/x-wav"});
-
-    console.log("+");
-    console.log(blob);
-    return blob;
-}
-
-function AudioContextToBlob(audioContext){
-    var buffer = getAudioContextBuffer(audioContext);
-    var blob = AudioBufferToBlob(buffer);
-    return blob;
-}
-
-
-/***/ }),
-/* 8 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var AudioHelper = __webpack_require__(7);
-
-module.exports = TrackManager;
-
-function TrackManager(){}
-
-// get array with Tone.Synth
-TrackManager.mergeTracks = function(trackList){
-    var i;
-    var nextIndex;
-    var currentBuffer;
-    var nextBuffer;
-    var nextTrackContext;
-    var currentTrack = trackList[0];
-    var currentTrackContext = currentTrack._context;
-    currentBuffer = AudioHelper.getAudioContextBuffer(currentTrackContext);
-	for(i = 0; i < trackList.length; ++i){
-	    nextIndex = i + 1;
-	    if(nextIndex !== trackList.length){
-	        nextTrackContext = trackList[nextIndex]._context;
-            nextBuffer = AudioHelper.getAudioContextBuffer(nextTrackContext);
-            // put new AudioBuffer where created from merging of past tracks
-            currentBuffer = AudioHelper.merge(currentTrackContext, currentBuffer, nextBuffer);
-        }
-	}
-	return currentBuffer;
-};
-
-TrackManager.save = (function(){
-    var a = document.createElement("a");
-    document.body.appendChild(a);
-    a.style = "display: none";
-    return function(data, fileName){
-        if(fileName === undefined){
-            fileName = "test.wav";
-        }
-        var blob;
-        var buffer;
-        if(data instanceof AudioBuffer){
-            blob = AudioHelper.AudioBufferToBlob(data);
-        } else{
-            buffer = AudioHelper.getAudioContextBuffer(data.context);
-            blob = new Blob([buffer], {"type": "audio/x-wav"});
-        }
-        var url = window.URL.createObjectURL(blob);
-        a.href = url;
-        a.download = fileName;
-        a.click();
-        window.URL.revokeObjectURL(url);
-    };
-}());
-
-
-/***/ }),
-/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -588,15 +322,750 @@ function _notify(list, event, data){
 
 
 /***/ }),
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var transportAudioFile = __webpack_require__(39);
+var TrackManager = __webpack_require__(15);
+
+var changeSound = __webpack_require__(32);
+var changeRequest = __webpack_require__(31);
+var getSound = __webpack_require__(36);
+var getProject = __webpack_require__(35);
+var projectList = __webpack_require__(38);
+var deleteProject = __webpack_require__(33);
+var deleteTrack = __webpack_require__(34);
+var getUser = __webpack_require__(37);
+
+
+module.exports = {
+    "getUser": defineUser,
+    "getProject": getProjectData,
+    "getProjectList": getProjectList,
+    "deleteProject": deleteUserProject,
+    "createProject": addProject,
+    "updateProject": updateProject,
+    "createTrack": createTrack,
+    "deleteTrack": deleteProjectTrack,
+    "updateTrack": updateTrack,
+    "createSound": createSound,
+    "uploadSound": uploadSound,
+    "downloadSound": downloadSound
+};
+
+function defineUser(callback){
+    getUser(callback);
+}
+
+function getProjectList(callback){
+    projectList(callback);
+}
+
+function getProjectData(projectId, callback){
+    var url = "projects/";
+    var fullUrl = url + projectId + '/';
+    getProject(fullUrl, callback);
+}
+
+function deleteUserProject(projectId, callback){
+    var url = "projects/delete/";
+    var fullUrl = url + projectId + '/';
+    deleteProject(fullUrl, callback);
+}
+
+function addProject(projectName, data, callback){
+    var url = "projects/create/";
+    var fullUrl = url + projectName + '/';
+    changeRequest(fullUrl, data, "json", callback);
+}
+
+function updateProject(projectId, data, callback){
+    var url = "projects/update/";
+    var fullUrl = url + projectId + '/';
+    changeRequest(fullUrl, data.toJson(), "json", callback);
+}
+
+function createTrack(projectId, data, callback){
+    var url = "track/create/";
+    var fullUrl = url + projectId + '/';
+    changeRequest(fullUrl, data.toJson(), "json", callback)
+}
+
+function deleteProjectTrack(trackId, callback){
+    var url = "track/delete/";
+    var fullUrl = url + trackId + '/';
+    deleteTrack(fullUrl, callback);
+}
+
+function updateTrack(trackId, data, callback){
+    var url = "track/update/";
+    var fullUrl = url + trackId + '/';
+    changeRequest(fullUrl, data, "json", callback)
+}
+
+function createSound(soundName, audioSrc){
+    var url = "sounds/create/";
+    // var url = "sound/update/";
+    var fullUrl = url + soundName + '/';
+    transportAudioFile(fullUrl, soundName, audioSrc, changeSound);
+}
+
+function downloadSound(soundName){
+    var url = "sounds/download/";
+    var fullUrl = url + soundName + '/';
+    getSound(fullUrl, function(data){
+        TrackManager.save(data, soundName);
+    });
+}
+
+function uploadSound(soundName, callback){
+    var url = "sounds/";
+    var fullUrl = url + soundName + '/';
+    getSound(fullUrl, callback);
+}
+
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var Observer = __webpack_require__(5);
+
+var eventListener = new Observer;
+
+eventListener.ON_SHOW_PROJECT_LIST = "ON_SHOW_PROJECT_LIST";
+eventListener.ON_ADD_PROJECT = "ON_ADD_PROJECT";
+eventListener.ON_EDIT_PROJECT = "ON_EDIT_PROJECT";
+eventListener.ON_DELETE_PROJECT = "ON_DELETE_PROJECT";
+eventListener.DEFINE_USER = "DEFINE_USER";
+eventListener.SHOW_TRACK = "SHOW_TRACK";
+eventListener.SHOW_PROJECT = "SHOW_PROJECT";
+eventListener.SHOW_LOGIN_FORM = "SHOW_LOGIN_FORM";
+eventListener.SHOW_INSTRUMENT_VIEW = "SHOW_INSTRUMENT_VIEW";
+eventListener.PROJECT_LIST_MODEL_UPDATED = "PROJECT_LIST_MODEL_UPDATED";
+eventListener.PROJECT_MODEL_UPDATED = "PROJECT_MODEL_UPDATED";
+eventListener.SHOW_TRACK_TOOL_FORM = "SHOW_TRACK_TOOL_FORM";
+eventListener.SHOW_SYNTH_TOOL_FORM = "SHOW_SYNTH_TOOL_FORM";
+eventListener.SHOW_OSCILLATOR_TOOL_FORM = "SHOW_OSCILLATOR_TOOL_FORM";
+eventListener.SHOW_NOISE_TOOL_FORM = "SHOW_NOISE_TOOL_FORM";
+eventListener.CONFIRM_DELETE = "CONFIRM_DELETE";
+
+module.exports = eventListener;
+
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var Observer = __webpack_require__(5);
+
+module.exports = new Observer();
+
+
+/***/ }),
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var BaseModel = __webpack_require__(27);
+var inherit = __webpack_require__(0);
+var commonEventNames = __webpack_require__(2);
+
+module.exports = ObservableList;
+
+/**
+ * Observable list model. Sends notifications about it's state.
+ * @constructor
+ * @class ObservableList
+ */
+function ObservableList(){
+    BaseModel.call(this, [], null);
+}
+
+inherit(ObservableList, BaseModel);
+
+ObservableList.prototype.clear = function(){
+    // Run over all items and remove each step-by-step:
+    while (this.size()){
+        //this.remove(0);
+        this.__data.splice(0, 1); // pop first element
+    }
+};
+
+ObservableList.prototype.update = function(data){
+    // Note: someone should ask to .clear() before calling this.. so don't forget!
+    var i;
+    if (Array.isArray(data)){
+        for (i = 0; i < data.length; ++i){
+            this.add(data[i]);
+        }
+    }
+
+};
+
+ObservableList.prototype.size = function(){
+    return this.__data.length;
+};
+
+ObservableList.prototype.at = function(index){
+    return index < this.size() ? this.__data[index] : null;
+};
+
+ObservableList.prototype.isExistId = function(id){
+    return this.findIndexById(id) >= 0;
+};
+
+ObservableList.prototype.findIndexById = function(searchingId){
+    var i;
+    var result = -1;
+    var currentElement;
+    var id = parseInt(searchingId);
+    for(i = 0; i < this.__data.length; ++i){
+        currentElement = this.__data[i];
+        if(currentElement.id === id){
+            result = i;
+            break;
+        }
+    }
+    return result;
+};
+
+/**
+ * Add item to the end of the list.
+ * @param {*} item
+ */
+ObservableList.prototype.add = function(item){
+    // push to back and send actual index of the added item:
+    this.observer.notify(commonEventNames.E_ITEM_ADDED, this.__data.push(item) - 1);
+    console.log(this.__data);
+};
+
+/**
+ * Removes item at index position.
+ * @param {Number} value
+ */
+ObservableList.prototype.remove = function(value){
+    var index = this.findIndexById(value);
+    if (index < this.size()){
+        // fire before removing:
+        this.observer.notify(commonEventNames.E_ITEM_REMOVED, index);
+        // now remove:
+        this.__data.splice(index, 1);
+    }
+};
+
+
+/***/ }),
 /* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+var ObservableList = __webpack_require__(9);
+var inherit = __webpack_require__(0);
+var TrackSynthesizer = __webpack_require__(30);
+var TrackNoise = __webpack_require__(29);
+var generateUID = __webpack_require__(26);
+
+module.exports = ProjectModel;
+
+/**
+ * @param project - object
+ * @constructor
+ */
+function ProjectModel(project){
+    ObservableList.call(this);
+    this.name = project.name;
+    this.id = project.id;
+    this.default = {
+        "id": -generateUID(),
+        "data": {
+            "instrument": "synth",
+            "setting": {},
+            "play-setting": [],
+            "length": 1
+        }
+    };
+}
+
+inherit(ProjectModel, ObservableList);
+
+/**
+ * @param source = object -
+ */
+ProjectModel.prototype.add = function(source){
+    var element = source || this.default;
+    var data = element.data;
+    console.log("model add");
+    console.log(element);
+    var track;
+    var item = {};
+    var instrument = data.instrument;
+    if(instrument === "synth"){
+        track = new TrackSynthesizer(data);
+    } else if(instrument === "noise"){
+        track = new TrackNoise(data);
+    }
+    if (track){
+        item.id = element.id;
+        item.track = track;
+        ObservableList.prototype.add.call(this, item);
+    }
+};
+
+ProjectModel.prototype.isEmpty = function(){
+    return this.name.length && this.id === 0 && this.__data.length;
+};
+
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var BaseWindow = __webpack_require__(16);
+var TrackDataView = __webpack_require__(42);
+var Factory = __webpack_require__(4);
+var commonEventNames = __webpack_require__(2);
+var windowsTransport = __webpack_require__(8);
+
+module.exports = TrackListView;
+
+function TrackListView(controller){
+    BaseWindow.call(this, controller, "project-component-view");
+
+    this.projectName = $("<h1></h1>");
+    this.addTrackButton = Factory.createIconButton("circular ui icon button add", "plus icon", "");
+    this.trackList = $("<div class='track-list'>");
+    this.__onRemoveButtonClicked = onRemoveButtonClicked.bind(this);
+
+    this.selectedItem = null;
+
+    this._build();
+    this.hide();
+}
+
+inherit(TrackListView, BaseWindow);
+
+TrackListView.prototype._build = function(){
+    var self = this;
+    var container = this.getContainer();
+
+    this.controller.observer.subscribe(commonEventNames.E_ITEM_ADDED, function(eventName, index){
+        var element = self.controller.model.at(index);
+        self.add(element);
+    });
+
+    this.controller.observer.subscribe(commonEventNames.E_ITEM_REMOVED, function(eventName, index){
+        self.remove(self.selectedItem.attr("id"));
+        self.selectedItem = null;
+    });
+
+    this.addTrackButton.on("click", function(event){
+        console.log("add view");
+        self.controller.add(null);
+    });
+
+    windowsTransport.subscribe(commonEventNames.ON_BACK_BUTTON_CLICK, function(){
+        if (self.controller.model.isEmpty()){
+            // Nothing to save, model is just in default state...
+            windowsTransport.notify(commonEventNames.E_ACTIVATE_WINDOW, "projectList");
+        } else {
+            self.controller.save(function(result){
+                if (result instanceof Error){
+                    // Can't save...
+                } else {
+                    self.controller.model.clear();
+                    // Project saved!
+                    windowsTransport.notify(commonEventNames.E_ACTIVATE_WINDOW, "projectList");
+                    console.log("back");
+                    console.log(self.controller.model);
+                }
+            });
+        }
+    });
+
+    container.append(this.projectName);
+    container.append(this.trackList);
+    container.append(this.addTrackButton);
+};
+
+
+TrackListView.prototype.confirmed = function(name){
+    // !!!!!!!!
+    this.controller.remove(this.selectedItem.attr("id"));
+};
+
+TrackListView.prototype.declined = function(name){
+    this.selectedItem = null;
+};
+
+TrackListView.prototype.add = function(element){
+    var id = element.id;
+    var track = element.track;
+    var $instrumentContainer = $("<div class='track-" + id + "'>");
+    var trackDataView = new TrackDataView(track.instrument, track.length, track.getContext());
+    var $deleteTrackButton = Factory.deleteCircleButton(id, this.__onRemoveButtonClicked);
+    $instrumentContainer.append(trackDataView.getContainer());
+    $instrumentContainer.append($deleteTrackButton);
+    this.trackList.append($instrumentContainer);
+};
+
+TrackListView.prototype.remove = function(id){
+    $(".track-" + id).remove();
+};
+
+function onRemoveButtonClicked($element){
+    if (this.selectedItem === null){
+        this.selectedItem = $element;
+        windowsTransport.notify(commonEventNames.E_SHOW_MODAL, "teeest");
+    }
+}
+
+
+/***/ }),
+/* 12 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var BaseController = __webpack_require__(25);
+var inherit = __webpack_require__(0);
+var ObservableList = __webpack_require__(9);
+
+module.exports = ListController;
+
+function ListController(observer){
+    BaseController.call(this, observer);
+}
+
+inherit(ListController, BaseController);
+
+// Override parent method:
+ListController.prototype.attachModel = function(model){
+    // as an example we can perform type checking,
+    // So ony list-like models may be attached to list-like controllers:
+    if (model instanceof ObservableList){
+        // model type is OK, so call parent method:
+        BaseController.prototype.attachModel.call(this, model);
+    }
+};
+
+
+/***/ }),
+/* 13 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var PostProcessSettings = __webpack_require__(28);
+
+module.exports = BaseTrackModel;
+
+// @param {String} name
+// @param {Object} source
+function BaseTrackModel(source){
+    this.length = source.length || 1;
+    this.setting = source.setting || {};
+    this.instrument = source.instrument || "synth";
+    this.playSetting = source["play-setting"] || [];
+    this.postProcessSettings = new PostProcessSettings(source["post-setting"]);
+    this.trackObject = this._generate();
+}
+
+BaseTrackModel.prototype.createFormData = function(){
+    var formData = new FormData();
+    formData.append("user_audio", toBlob(this.trackObject), this.name);
+    formData.append("postProcessSettings", JSON.stringify(this.postProcessSettings));
+    return formData;
+};
+
+BaseTrackModel.prototype.getContext = function(){
+    return this.trackObject.context._context;
+};
+
+BaseTrackModel.prototype.getConstants = function(){
+    return this.trackObject.context;
+};
+
+BaseTrackModel.prototype.getAudioBuffer = function(){
+
+};
+
+/**
+ * @param {Object} source
+ * @type {null}
+ * @protected
+ * @return {Tone}
+ */
+BaseTrackModel.prototype._generate = null;
+
+/**
+ * @param {Object} options
+ * @type {null}
+ */
+BaseTrackModel.prototype.play = null;
+
+BaseTrackModel.prototype.playCompomponent = null;
+
+BaseTrackModel.prototype.toJson = function(){
+    return JSON.stringify(this);
+};
+
+
+/***/ }),
+/* 14 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var toWav = __webpack_require__(23);
+
+module.exports = {
+    "getAudioContextBuffer": getAudioContextBuffer,
+    "merge": merge,
+    "BlobToArrayBuffer": BlobToArrayBuffer,
+    "AudioBufferToBlob": AudioBufferToBlob,
+    "AudioContextToBlob": AudioContextToBlob
+};
+
+// return AudioBuffer
+function getAudioContextBuffer(context){
+    var contextConstants = context._constants; // replace on set method
+    var audioBufferSourceNode = contextConstants[1];
+    var buffer = audioBufferSourceNode.buffer;
+    return buffer;
+}
+
+function merge(context, buffer1, buffer2){
+    // add comparison channel numbers
+    var i, data;
+    var newLength = buffer1.length + buffer2.length;
+    var track = context.createBuffer(buffer1.numberOfChannels, newLength, buffer1.sampleRate);
+    for(i = 0; i < track.numberOfChannels; ++i){
+        data = track.getChannelData(i);
+        data.set(buffer1.getChannelData(i));
+        data.set(buffer2.getChannelData(i), buffer1.length);
+    }
+    return track;
+}
+
+function BlobToArrayBuffer(blob, callback){
+    var arrayBuffer;
+    var reader = new FileReader();
+    reader.onload = function(){
+        arrayBuffer = reader.result;
+        callback(arrayBuffer);
+    };
+    reader.readAsArrayBuffer(blob);
+}
+
+function AudioBufferToBlob(audioBuffer){
+    var buffer = toWav(audioBuffer, {float32: true});
+    console.log("+");
+    console.log(buffer);
+    var blob = new Blob([buffer], {"type": "audio/x-wav"});
+
+    console.log("+");
+    console.log(blob);
+    return blob;
+}
+
+function AudioContextToBlob(audioContext){
+    var buffer = getAudioContextBuffer(audioContext);
+    var blob = AudioBufferToBlob(buffer);
+    return blob;
+}
+
+
+/***/ }),
+/* 15 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var AudioHelper = __webpack_require__(14);
+
+module.exports = TrackManager;
+
+function TrackManager(){}
+
+// get array with Tone.Synth
+TrackManager.mergeTracks = function(trackList){
+    var i;
+    var nextIndex;
+    var currentBuffer;
+    var nextBuffer;
+    var nextTrackContext;
+    var currentTrack = trackList[0];
+    var currentTrackContext = currentTrack._context;
+    currentBuffer = AudioHelper.getAudioContextBuffer(currentTrackContext);
+	for(i = 0; i < trackList.length; ++i){
+	    nextIndex = i + 1;
+	    if(nextIndex !== trackList.length){
+	        nextTrackContext = trackList[nextIndex]._context;
+            nextBuffer = AudioHelper.getAudioContextBuffer(nextTrackContext);
+            // put new AudioBuffer where created from merging of past tracks
+            currentBuffer = AudioHelper.merge(currentTrackContext, currentBuffer, nextBuffer);
+        }
+	}
+	return currentBuffer;
+};
+
+TrackManager.save = (function(){
+    var a = document.createElement("a");
+    document.body.appendChild(a);
+    a.style = "display: none";
+    return function(data, fileName){
+        if(fileName === undefined){
+            fileName = "test.wav";
+        }
+        var blob;
+        var buffer;
+        if(data instanceof AudioBuffer){
+            blob = AudioHelper.AudioBufferToBlob(data);
+        } else{
+            buffer = AudioHelper.getAudioContextBuffer(data.context);
+            blob = new Blob([buffer], {"type": "audio/x-wav"});
+        }
+        var url = window.URL.createObjectURL(blob);
+        a.href = url;
+        a.download = fileName;
+        a.click();
+        window.URL.revokeObjectURL(url);
+    };
+}());
+
+
+/***/ }),
+/* 16 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var BaseView = __webpack_require__(1);
+
+module.exports = BaseWindow;
+
+function BaseWindow(controller, classes){
+    BaseView.call(this, classes);
+
+    this.controller = controller;
+    this.title = "";
+}
+
+inherit(BaseWindow, BaseView);
+
+BaseWindow.prototype.confirmed = null;
+BaseWindow.prototype.declined = null;
+
+
+/***/ }),
+/* 17 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var ListController = __webpack_require__(12);
+var inherit = __webpack_require__(0);
+var RequestManager = __webpack_require__(6);
+
+module.exports = ProjectController;
+
+function ProjectController(observer){
+    ListController.call(this, observer);
+}
+
+inherit(ProjectController, ListController);
+
+ProjectController.prototype.fetchData = function(){
+    RequestManager.getProject(this.model.id, this._fetchDataHandler.bind(this));
+};
+
+ProjectController.prototype.add = function(data){
+    this._addHandler(data);
+    //RequestManager.createTrack(projectId, data, this._addHandler.bind(this));
+    //RequestManager.createTrack(this.model.id, [], this._addHandler.bind(this));
+};
+
+ProjectController.prototype.remove = function(trackId){
+    RequestManager.deleteTrack(trackId, this._removeHandler.bind(this));
+    //RequestManager.deleteTrack(this.model.id, this._removeHandler.bind(this));
+};
+
+ProjectController.prototype.save = function(callback){
+    console.log(this.model);
+    RequestManager.updateProject(this.model.id, this.model, callback);
+};
+
+
+/***/ }),
+/* 18 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var ListController = __webpack_require__(12);
+var inherit = __webpack_require__(0);
+var RequestManager = __webpack_require__(6);
+
+module.exports = ProjectListController;
+
+function ProjectListController(observer){
+    ListController.call(this, observer);
+}
+
+inherit(ProjectListController, ListController);
+
+ProjectListController.prototype.fetchData = function(){
+    RequestManager.getProjectList(this._fetchDataHandler.bind(this));
+};
+
+ProjectListController.prototype.add = function(data){
+    RequestManager.createProject("unknown", data, this._addHandler.bind(this));
+};
+
+ProjectListController.prototype.remove = function(id){
+    var model = this.model;
+    if(model.isExistId(id) === true){
+        RequestManager.deleteProject(id, this._removeHandler.bind(this));
+    }
+};
+
+
+/***/ }),
+/* 19 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
 //var audioBufferUtils = require("audio-buffer-utils");
-var AudioHelper = __webpack_require__(7);
-var TrackManager = __webpack_require__(8);
+var AudioHelper = __webpack_require__(14);
+var TrackManager = __webpack_require__(15);
 
 var sounds = [];
 
@@ -659,8 +1128,271 @@ function toAudioBuffer(blob, getAudioBuffer){
 
 
 /***/ }),
-/* 11 */,
-/* 12 */
+/* 20 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var ObservableList = __webpack_require__(9);
+var TrackListModel = __webpack_require__(10);
+var inherit = __webpack_require__(0);
+
+module.exports = ProjectListModel;
+
+function ProjectListModel(){
+    ObservableList.call(this);
+    this.__activeProject = null; // ProjectModel
+}
+
+inherit(ProjectListModel, ObservableList);
+
+ProjectListModel.prototype.toString = function(){
+    return "[object ProjectListModel]";
+};
+
+ProjectListModel.prototype.add = function(data){
+    var trackListModel = new TrackListModel(data);
+    ObservableList.prototype.add.call(this, trackListModel);
+};
+
+/**
+ * @param {TrackListModel} project
+ */
+ProjectListModel.prototype.setActiveProject = function(project){
+    this.activeProject = project;
+};
+
+
+
+/***/ }),
+/* 21 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var BaseWindow = __webpack_require__(16);
+var Factory = __webpack_require__(4);
+var commonEventNames = __webpack_require__(2);
+var windowsTransport = __webpack_require__(8);
+
+module.exports = ProjectListView;
+
+function ProjectListView(controller){
+    BaseWindow.call(this, controller, "project-list");
+
+    this.title = $("<h1>Project List</h1>");
+    this.table = $("<div class='five column stackable ui grid'>");
+    this.addTrackButton = Factory.createIconButton("circular ui icon button", "plus icon", "");
+
+    this.selectedItem = null;
+    this.onRemoveButtonClicked = onRemoveButtonClicked.bind(this);
+
+    //this.__stateCreateNewProject = false;
+
+    this._build();
+    this.hide();
+}
+
+inherit(ProjectListView, BaseWindow);
+
+ProjectListView.prototype._build = function(){
+    var self = this;
+    var container = this.getContainer();
+
+    this.controller.observer.subscribe(commonEventNames.E_ITEM_ADDED, function(eventName, index){
+        var trackList = self.controller.model.at(index);
+        self.add(trackList);
+
+        /*if (self.__stateCreateNewProject){
+            self.__stateCreateNewProject = false;
+            self.controller.model.setActiveProject(trackList);
+            windowsTransport.notify(commonEventNames.E_ACTIVATE_WINDOW, "trackList");
+        }*/
+    });
+
+    this.addTrackButton.on("click", function(event){
+        //self.__stateCreateNewProject = true;
+        self.controller.add();
+    });
+
+    this.controller.observer.subscribe(commonEventNames.E_ITEM_REMOVED, function(eventName, index){
+        self.remove(self.selectedItem.attr("id"));
+        self.selectedItem = null;
+    });
+
+    container.append(this.title);
+    container.append(this.table);
+    container.append(this.addTrackButton);
+};
+
+ProjectListView.prototype.confirmed = function(){
+    this.controller.remove(this.selectedItem.attr("id"));
+};
+
+ProjectListView.prototype.declined = function(){
+    this.selectedItem = null;
+};
+
+ProjectListView.prototype.add = function(object){
+    // full table or
+    // add new item with new project
+    var self = this;
+    var _id = object.id;
+    var $item;
+    var $column;
+    var projectId;
+    var $deleteProjectButton;
+    $deleteProjectButton = Factory.deleteCircleButton(_id, this.onRemoveButtonClicked);
+    //create function for project name ITEM
+    $item = $("<a id='" + _id + "'>" + object.name +"</a>");
+    $item.on("click", function(event){
+        projectId = $(this).attr("id");
+        var index = self.controller.model.findIndexById(projectId);
+        self.controller.model.setActiveProject(self.controller.model.at(index));
+        windowsTransport.notify(commonEventNames.E_ACTIVATE_WINDOW, "trackList");
+    });
+    $column = $("<div class='column' id='item-" + _id + "'>");
+    $column.append($item);
+    $column.append($deleteProjectButton);
+    this.table.append($column);
+};
+
+ProjectListView.prototype.remove = function(id){
+    this.table.find("#item-" + id).remove(); //remove from table (grid)
+};
+
+ProjectListView.prototype.updateProjectList = function(){
+    this.table.empty();
+    this.controller.fetchData();
+};
+
+function onRemoveButtonClicked($element){
+    if (this.selectedItem === null){
+        this.selectedItem = $element;
+        windowsTransport.notify(commonEventNames.E_SHOW_MODAL, "teeest");
+    }
+}
+
+
+/***/ }),
+/* 22 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var BaseView = __webpack_require__(1);
+var MessageModal = __webpack_require__(41);
+var TrackList = __webpack_require__(11);
+var MenuBar = __webpack_require__(40);
+var windowsTransport = __webpack_require__(8);
+var commonEventNames = __webpack_require__(2);
+
+module.exports = WindowManager;
+
+/**
+ * @param {Object} windows - map of BaseWindow instances. Example: new WindowManager({"ProjectList": new ProjectList})
+ */
+function WindowManager(windows){
+    BaseView.call(this, "window-manager");
+
+    this.__windows = windows;
+    
+    this.__activeWindow = null;
+    this.__modal = new MessageModal();
+    this.__menuBar = new MenuBar();
+    
+    this._build();
+}
+
+inherit(WindowManager, BaseView);
+
+WindowManager.prototype._build = function(){
+    var key, tokenWindow;
+    var self = this;
+    var windows = this.__windows;
+    var container = this.getContainer();
+    
+    container.append(this.__menuBar.getContainer());
+    //container.append(this.__modal.getContainer());
+
+    this.appendToBlock($(".ui.container"));
+    
+    this.__menuBar.show();
+    this.__modal.hide();
+
+    for (key in windows){
+        tokenWindow = windows[key];
+        tokenWindow.hide(); // just in case...
+        container.append(tokenWindow.getContainer());
+    }
+
+    this.__modal.observer.subscribe(commonEventNames.E_CONFIRMED, function(eventName){
+        if (self.__activeWindow){
+            self.__activeWindow.confirmed();
+        }
+        self.__modal.hide();
+    });
+
+    this.__modal.observer.subscribe(commonEventNames.E_DECLINED, function(eventName){
+        if (self.__activeWindow){
+            self.__activeWindow.declined();
+        }
+        self.__modal.hide();
+    });
+
+    windowsTransport.subscribe(commonEventNames.E_SHOW_MODAL, function(eventName, message){
+        self.showModal(message);
+    });
+
+    windowsTransport.subscribe(commonEventNames.E_ACTIVATE_WINDOW, function(eventName, windowName){
+        self.setActiveWindow(self.__windows[windowName]);
+    });
+
+    //RequestManager.getUser(this.hideUserOnlyElements.bind(this));
+};
+
+WindowManager.prototype.showModal = function(message){
+    if (this.__activeWindow){
+        this.__modal.show(message);
+    }
+};
+
+WindowManager.prototype.setActiveWindow = function(newActiveWindow){
+    if (this.__activeWindow){
+        // Hide previosly visible window
+        this.__activeWindow.hide();
+    }
+    // Attach & show the new one:
+    this.__activeWindow = newActiveWindow;
+    // if menubar change after change active window
+    // for example project view add play button when active project view
+    this.__menuBar.adaptToActiveWindow(this.__activeWindow);
+    this.__activeWindow.show();
+
+    // TODO: consider to re-implement this...
+    if (this.__activeWindow instanceof TrackList){
+        this.__activeWindow.controller.attachModel(this.__windows["projectList"].controller.model.activeProject);
+        this.__activeWindow.controller.fetchData();
+    }
+};
+
+
+/*WindowManager.prototype.hideUserOnlyElements = function(userName){
+    if(userName instanceof Error){
+        var $elements = $(".user-only");
+        $elements.addClass("disabled");
+        // ... add "disable" class to all of these $elements
+    }
+};*/
+
+
+/***/ }),
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -763,25 +1495,25 @@ function writeString (view, offset, string) {
 
 
 /***/ }),
-/* 13 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var merger_test = __webpack_require__(10);
+var merger_test = __webpack_require__(19);
 
-var WindowManager = __webpack_require__(46);
-var ProjectList = __webpack_require__(35);
-var ProjectComponentView = __webpack_require__(34);
+var WindowManager = __webpack_require__(22);
+var ProjectListView = __webpack_require__(21);
+var TrackListView = __webpack_require__(11);
 
-var ProjectListController = __webpack_require__(45);
-var TrackLIstController = __webpack_require__(57);
-var ProjectListModel = __webpack_require__(16);
-var TrackListModel = __webpack_require__(51);
-var Observer = __webpack_require__(9);
+var ProjectListController = __webpack_require__(18);
+var ProjectController = __webpack_require__(17);
+var ProjectListModel = __webpack_require__(20);
+var ProjectModel = __webpack_require__(10);
+var Observer = __webpack_require__(5);
 
-var Req = __webpack_require__(4);
+var Req = __webpack_require__(6);
 
 module.exports = {
     "merger_test": merger_test
@@ -792,777 +1524,29 @@ var projectListController = new ProjectListController(projectListObserver);
 var projectListModel = new ProjectListModel();
 
 var trackListObserver = new Observer();
-var trackListController = new TrackLIstController(trackListObserver);
-var trackListModel = new TrackListModel();
+var trackListController = new ProjectController(trackListObserver);
+//var ProjectModel = new ProjectModel();
 
-var projectListView = new ProjectList(projectListController);
+var projectListView = new ProjectListView(projectListController);
 projectListController.attachModel(projectListModel);
 
-var projectComponentView = new ProjectComponentView(trackListController);
-trackListController.attachModel(trackListModel);
+var projectComponentView = new TrackListView(trackListController);
+//trackListController.attachModel(trackListModel);
 
 var windowManager = new WindowManager({
-    //"projectList": projectListView,
+    "projectList": projectListView,
     "trackList": projectComponentView
 });
 
-windowManager.setActiveWindow(projectComponentView);
-trackListController.fetchData(4);
-
-//windowManager.setActiveWindow(projectListView);
-//projectListController.fetchData();
-
-
-/***/ }),
-/* 14 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = BaseModel;
-
-/**
- * Base model.
- * @constructor
- * @class BaseModel
- * @param {*} data - initial data
- * @param {Observer} observer
- */
-function BaseModel(data, observer){
-    this.__data = data;
-    this.observer = observer;
-}
-
-BaseModel.prototype.attachObserver = function(observer){
-    this.observer = observer;
-};
-
-/**
- * Should remove everything from itself
- */
-BaseModel.prototype.clear = null;
-
-/**
- * Should update old data
- * @param {*} data - new data
- */
-BaseModel.prototype.update = null;
-
-
-/***/ }),
-/* 15 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var BaseModel = __webpack_require__(14);
-var inherit = __webpack_require__(0);
-var commonEventNames = __webpack_require__(6);
-
-module.exports = ObservableList;
-
-/**
- * Observable list model. Sends notifications about it's state.
- * @constructor
- * @class ObservableList
- */
-function ObservableList(){
-    BaseModel.call(this, [], null);
-}
-
-inherit(ObservableList, BaseModel);
-
-ObservableList.prototype.clear = function(){
-    // Run over all items and remove each step-by-step:
-    while (this.size()){
-        this.remove(0);
-    }
-};
-
-ObservableList.prototype.update = function(data){
-    // Note: someone should ask to .clear() before calling this.. so don't forget!
-    var i;
-    if (Array.isArray(data)){
-        for (i = 0; i < data.length; ++i){
-            this.add(data[i]);
-        }
-    }
-    console.log("getting data");
-    console.log(this.__data);
-};
-
-ObservableList.prototype.size = function(){
-    return this.__data.length;
-};
-
-ObservableList.prototype.at = function(index){
-    return index < this.size() ? this.__data[index] : null;
-};
-
-ObservableList.prototype.isExistId = function(id){
-    return this.findIndexById(id) >= 0;
-};
-
-ObservableList.prototype.findIndexById = function(searchingId){
-    var i;
-    var result = -1;
-    var currentElement;
-    var id = parseInt(searchingId);
-    for(i = 0; i < this.__data.length; ++i){
-        currentElement = this.__data[i];
-        if(currentElement.id === id){
-            result = i;
-            break;
-        }
-    }
-    return result;
-};
-
-/**
- * Add item to the end of the list.
- * @param {*} item
- */
-ObservableList.prototype.add = function(item){
-    // push to back and send actual index of the added item:
-    this.observer.notify(commonEventNames.E_ITEM_ADDED, this.__data.push(item) - 1);
-};
-
-/**
- * Removes item at index position.
- * @param {Number} index
- */
-ObservableList.prototype.remove = function(index){
-    if (index < this.size()){
-        // fire before removing:
-        this.observer.notify(commonEventNames.E_ITEM_REMOVED, index);
-        // now remove:
-        this.__data.splice(index, 1);
-    }
-};
-
-
-/***/ }),
-/* 16 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var ObservableList = __webpack_require__(15);
-var inherit = __webpack_require__(0);
-
-module.exports = ProjectListModel;
-
-function ProjectListModel(){
-    ObservableList.call(this);
-}
-
-inherit(ProjectListModel, ObservableList);
-
-ProjectListModel.prototype.add = function(data){
-    var trackListModel;
-
-    // Transform response from server to "TrackListModel"
-    trackListModel = data;//JSON.parse(data);  // new TrackListModel(data.name)
-
-    if (trackListModel){
-        ObservableList.prototype.add.call(this, trackListModel);
-    }
-};
-
-
-/***/ }),
-/* 17 */,
-/* 18 */,
-/* 19 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = function(url, formData){
-    $.ajax({
-        method: "POST",
-        url: url,
-        data: formData,
-        mimeTypes: "multipart/form-data",
-        contentType: false,
-        dataType: "json",
-        cache: false,
-        processData: false,
-        success: callback,
-        error: function (status) {
-            callback(new Error(status));
-        }
-    });
-};
-
-
-/***/ }),
-/* 20 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var baseRequest = __webpack_require__(5);
-
-module.exports = baseRequest.bind(null, "POST", "json");
-
-
-/***/ }),
-/* 21 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var baseRequest = __webpack_require__(5);
-
-module.exports = baseRequest.bind(null, "GET", "json");
-
-
-/***/ }),
-/* 22 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var baseRequest = __webpack_require__(5);
-
-module.exports = baseRequest.bind(null, "GET", "binary");
-
-
-/***/ }),
-/* 23 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var baseRequest = __webpack_require__(5);
-
-module.exports = baseRequest.bind(null, "GET", "json", "user/");
-
-
-/***/ }),
-/* 24 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var baseRequest = __webpack_require__(5);
-
-module.exports = baseRequest.bind(null, "GET", "json", "projects/");
+//windowManager.setActiveWindow(projectComponentView);
+//trackListController.fetchData(4);
+
+windowManager.setActiveWindow(projectListView);
+projectListController.fetchData();
 
 
 /***/ }),
 /* 25 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = function(url, soundName, audioSrc, callback){
-    fetch(audioSrc, function(request){
-        var audioData = request.response;
-        var blob = new Blob([audioData], {type: 'audio/x-wav'});
-        var formData = new FormData();
-        formData.append('user_audio', blob, soundName);
-        callback(url, formData);
-    });
-};
-
-function fetch(url, resolve){
-    var request = new XMLHttpRequest();
-    request.open("GET", url, true);
-    request.responseType = "arraybuffer";
-    request.onload = function(){
-        resolve(request);
-    };
-    request.send();
-}
-
-
-/***/ }),
-/* 26 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var inherit = __webpack_require__(0);
-var BaseView = __webpack_require__(1);
-
-module.exports = BaseWindow;
-
-function BaseWindow(controller, classes){
-    BaseView.call(this, classes);
-
-    this.controller = controller;
-    this.title = "";
-}
-
-inherit(BaseWindow, BaseView);
-
-BaseWindow.prototype.confirmed = null;
-BaseWindow.prototype.declined = null;
-
-
-/***/ }),
-/* 27 */,
-/* 28 */,
-/* 29 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var BaseView = __webpack_require__(1);
-var UserInfoBar = __webpack_require__(40);
-var ProjectBar = __webpack_require__(33);
-var inherit = __webpack_require__(0);
-var eventListener = __webpack_require__(2);
-
-module.exports = MenuBar;
-
-function MenuBar(){
-    BaseView.call(this, "menubar");
-
-    this.userInfoBar = new UserInfoBar();
-    this.projectBar = new ProjectBar();
-
-    this._build();
-}
-
-inherit(MenuBar, BaseView);
-
-MenuBar.prototype._build = function(){
-    var container = this.getContainer();
-
-    eventListener.notify(eventListener.DEFINE_USER);
-
-    container.append(this.userInfoBar.getContainer());
-    container.append(this.projectBar.getContainer());
-};
-
-MenuBar.prototype.adaptToActiveWindow = function(window){
-    // Here you can get some public properties from the window to update the "look" of the menu bar
-    // For example:
-    // - window.title
-    // - change some controlls according to the window type
-};
-
-
-/***/ }),
-/* 30 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var inherit = __webpack_require__(0);
-var BaseView = __webpack_require__(1);
-var Factory = __webpack_require__(3);
-var Observer = __webpack_require__(9);
-var commonEventNames = __webpack_require__(6);
-
-module.exports = MessageModal;
-
-function MessageModal(){
-    BaseView.call(this, "ui modal");
-    this.text = $("<p></p>");
-    this.okButton = Factory.createButton("ui button", "ok");
-    this.cancelButton = Factory.createButton("ui button", "cancel");
-    this.observer = new Observer();
-
-    this._build();
-}
-
-inherit(MessageModal, BaseView);
-
-MessageModal.prototype._build = function(){
-    var container = this.getContainer();
-    var self = this;
-
-    this.okButton.on("click", function(event){
-        self.observer.notify(commonEventNames.E_CONFIRMED, null);
-        self.hide();
-    });
-
-    this.cancelButton.on("click", function(event){
-        self.observer.notify(commonEventNames.E_DECLINED, null);
-        self.hide();
-    });
-
-    container.append(this.text);
-    container.append(this.okButton);
-    container.append(this.cancelButton);
-};
-
-MessageModal.prototype.show = function(message){
-
-    this.getContainer().modal({
-        closable : false,
-        allowMultiple: false,
-        context: $(".window-manager")
-    });
-
-    this.text.text(message);
-    this.getContainer().modal("show");
-};
-
-MessageModal.prototype.hide = function(){
-    this.text.text(""); // reset old message
-    this.getContainer().modal("hide");
-};
-
-
-/***/ }),
-/* 31 */,
-/* 32 */,
-/* 33 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var inherit = __webpack_require__(0);
-var Factory = __webpack_require__(3);
-var BaseView = __webpack_require__(1);
-var eventListener = __webpack_require__(2);
-
-module.exports = ProjectBar;
-
-function ProjectBar(){
-    BaseView.call(this, "projectbar");
-
-    this.showProjectListButton = Factory.createIconButton("ui button user-only", "book icon", "");
-    this.addTrackButton = Factory.createIconButton("ui button", "plus icon", "");
-
-    this._build();
-}
-
-inherit(ProjectBar, BaseView);
-
-ProjectBar.prototype._build = function(){
-    var container = this.getContainer();
-
-    this.showProjectListButton.on("click", function(event){
-        // Possible additional visual effect for this button...
-        eventListener.notify(eventListener.ON_SHOW_PROJECT_LIST);
-    });
-    this.addTrackButton.on("click", function(event){
-        //
-        eventListener.notify(eventListener.SHOW_TRACK_TOOL_FORM);
-    });
-
-    container.append(this.showProjectListButton);
-};
-
-
-/***/ }),
-/* 34 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var inherit = __webpack_require__(0);
-var BaseWindow = __webpack_require__(26);
-var TrackDataView = __webpack_require__(56);
-var Factory = __webpack_require__(3);
-var commonEventNames = __webpack_require__(6);
-var windowsTransport = __webpack_require__(47);
-
-module.exports = ProjectComponentView;
-
-function ProjectComponentView(controller){
-    BaseWindow.call(this, controller, "project-component-view");
-
-    this.projectName = $("<h1></h1>");
-    this.addTrackButton = Factory.createIconButton("circular ui icon button add", "plus icon", "");
-    this.trackList = $("<div class='track-list'>");
-
-    this.selectedItem = null;
-
-    this._build();
-    this.hide();
-}
-
-inherit(ProjectComponentView, BaseWindow);
-
-ProjectComponentView.prototype._build = function(){
-    var self = this;
-    var container = this.getContainer();
-
-    this.controller.observer.subscribe(commonEventNames.E_ITEM_ADDED, function(eventName, index){
-        var element = self.controller.model.at(index);
-        self.add(element);
-    });
-
-    this.controller.observer.subscribe(commonEventNames.E_ITEM_REMOVED, function(eventName, index){
-        self.remove(self.selectedItem.attr("id"));
-        self.selectedItem = null;
-    });
-
-    this.addTrackButton.on("click", function(event){
-        self.controller.add(4, null);
-    });
-
-    container.append(this.projectName);
-    container.append(this.trackList);
-    container.append(this.addTrackButton);
-};
-
-
-ProjectComponentView.prototype.confirmed = function(name){
-    // !!!!!!!!
-    this.controller.remove(this.selectedItem.attr("id"));
-};
-
-ProjectComponentView.prototype.declined = function(name){
-    this.selectedItem = null;
-};
-
-ProjectComponentView.prototype.add = function(track){
-    var $instrumentContainer = $("<div class='track-" + track.id + "'>");
-    var trackDataView = new TrackDataView(track.instrument, track.length, track.getContext());
-    var $deleteTrackButton = Factory.deleteCircleButton(track.id, this.onRemoveButtonClicked.bind(this));
-    $instrumentContainer.append(trackDataView.getContainer());
-    $instrumentContainer.append($deleteTrackButton);
-    this.trackList.append($instrumentContainer);
-};
-
-ProjectComponentView.prototype.remove = function(id){
-    $(".track-" + id).remove();
-};
-
-ProjectComponentView.prototype.onRemoveButtonClicked = function($element){
-    if (this.selectedItem === null){
-        this.selectedItem = $element;
-        windowsTransport.notify(commonEventNames.E_SHOW_MODAL, "teeest");
-    }
-};
-
-
-/***/ }),
-/* 35 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var inherit = __webpack_require__(0);
-var BaseWindow = __webpack_require__(26);
-var Factory = __webpack_require__(3);
-var commonEventNames = __webpack_require__(6);
-var windowsTransport = __webpack_require__(47);
-
-module.exports = ProjectList;
-
-function ProjectList(controller){
-    BaseWindow.call(this, controller, "project-list");
-
-    this.title = $("<h1>Project List</h1>");
-    this.table = $("<div class='five column stackable ui grid'>");
-    this.addTrackButton = Factory.createIconButton("circular ui icon button", "plus icon", "");
-
-    this.selectedItem = null;
-    this.onRemoveButtonClicked = onRemoveButtonClicked.bind(this);
-
-    this._build();
-    this.hide();
-}
-
-inherit(ProjectList, BaseWindow);
-
-ProjectList.prototype._build = function(){
-    var self = this;
-    var container = this.getContainer();
-
-    this.controller.observer.subscribe(commonEventNames.E_ITEM_ADDED, function(eventName, index){
-        var element = self.controller.model.at(index);
-        self.add(element);
-    });
-
-    this.controller.observer.subscribe(commonEventNames.E_ITEM_REMOVED, function(eventName, index){
-        self.remove(self.selectedItem.attr("id"));
-        self.selectedItem = null;
-    });
-
-    this.addTrackButton.on("click", function(event){
-        // create empty project
-        self.controller.add();
-    });
-
-    container.append(this.title);
-    container.append(this.table);
-    container.append(this.addTrackButton);
-};
-
-ProjectList.prototype.confirmed = function(name){
-    this.controller.remove(this.selectedItem.attr("id"));
-};
-
-ProjectList.prototype.declined = function(name){
-    this.selectedItem = null;
-};
-
-ProjectList.prototype.add = function(object){
-    // full table or
-    // add new item with new project
-    var _id = object.id;
-    var $item;
-    var $column;
-    var projectId;
-    var $deleteProjectButton;
-    $deleteProjectButton = Factory.deleteCircleButton(_id, this.onRemoveButtonClicked);
-    //create function for project name ITEM
-    $item = $("<a id='" + _id + "'>" + object.name +"</a>");
-    $item.on("click", function(event){
-        projectId = $(this).attr("id");
-        windowsTransport.notify(commonEventNames.SHOW_PROJECT, projectId);
-    });
-    $column = $("<div class='column' id='item-" + _id + "'>");
-    $column.append($item);
-    $column.append($deleteProjectButton);
-    this.table.append($column);
-};
-
-ProjectList.prototype.remove = function(id){
-    $("#item-" + id).remove(); //remove from table (grid)
-};
-
-ProjectList.prototype.updateProjectList = function(){
-    this.table.empty();
-    this.controller.fetchData();
-};
-
-function onRemoveButtonClicked($element){
-    if (this.selectedItem === null){
-        this.selectedItem = $element;
-        windowsTransport.notify(commonEventNames.E_SHOW_MODAL, "teeest");
-    }
-}
-
-
-/***/ }),
-/* 36 */,
-/* 37 */,
-/* 38 */,
-/* 39 */,
-/* 40 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var inherit = __webpack_require__(0);
-var Factory = __webpack_require__(3);
-var BaseView = __webpack_require__(1);
-var UserModal = __webpack_require__(41);
-var RequestManager = __webpack_require__(4);
-var eventListener = __webpack_require__(2);
-
-module.exports = UserInfoBar;
-
-function UserInfoBar(){
-    BaseView.call(this, "user-info-bar");
-
-    this.userName = null;
-    this.joinButton = Factory.createButton("", "join");
-    this.userModal = new UserModal();
-
-    this._build();
-}
-
-inherit(UserInfoBar, BaseView);
-
-UserInfoBar.prototype._build = function(){
-    var container = this.getContainer();
-
-    this.joinButton.on("click", function(){
-        eventListener.notify(eventListener.SHOW_LOGIN_FORM);
-    });
-
-    //eventListener.subscribe(eventListener.DEFINE_USER, this._fetchUserName.bind(this));
-    this._fetchUserName();
-
-    container.append(this.userName);
-    container.append(this.joinButton);
-};
-
-UserInfoBar.prototype._fetchUserName = function(){
-    RequestManager.getUser(this.setUserName.bind(this));
-
-};
-
-UserInfoBar.prototype.setUserName = function(userName){
-    if(userName instanceof Error){
-        this.userName = $("<p>anonym</p>");
-        // eventListener.notify("USER_IS_ANONYM");
-    } else{
-        this.userName = $("<p>" + userName + "</p>");
-        // eventListener.notify("USER_IS_LOGEDIN", userName);
-    }
-    this.getContainer().append(this.userName);
-};
-
-
-/***/ }),
-/* 41 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var inherit = __webpack_require__(0);
-var Factory = __webpack_require__(3);
-var BaseView = __webpack_require__(1);
-var eventListener = __webpack_require__(2);
-
-module.exports = UserModal;
-
-function UserModal(){
-    BaseView.call(this, "ui modal user-registration");
-    this.facebookLogIn = Factory.createIconButton("ui facebook button", "facebook icon", "Facebook");
-    //this.label = $("<div class='ui pointing below label'>Join without registration");
-    this.buttonLogout = Factory.createButton("", "Logout");
-
-    this._build();
-}
-
-inherit(UserModal, BaseView);
-
-UserModal.prototype._build = function(){
-    this.facebookLogIn.on("click", function(event){
-        location.href = "/accounts/facebook/login/";
-    });
-
-    this.buttonLogout.on("click", function(event){
-        location.href = "/accounts/logout/";
-    });
-
-    eventListener.subscribe(eventListener.SHOW_LOGIN_FORM, this.show.bind(this));
-
-    this._container.append(this.facebookLogIn);
-    //this._container.append(this.label);
-    this._container.append(this.buttonLogout);
-};
-
-UserModal.prototype.show = function(){
-    this._container.modal("show");
-};
-
-
-/***/ }),
-/* 42 */,
-/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1624,7 +1608,7 @@ BaseController.prototype._removeHandler = function(value){
     if (value instanceof Error){
         // Oh no..
     } else {
-        model.remove(model.findIndexById(value));
+        model.remove(value);
     }
 };
 
@@ -1635,323 +1619,71 @@ BaseController.prototype.remove = null;
 
 
 /***/ }),
-/* 44 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var BaseController = __webpack_require__(43);
-var inherit = __webpack_require__(0);
-var ObservableList = __webpack_require__(15);
+var counterUID = 0;
 
-module.exports = ListController;
-
-function ListController(observer){
-    BaseController.call(this, observer);
-}
-
-inherit(ListController, BaseController);
-
-// Override parent method:
-ListController.prototype.attachModel = function(model){
-    // as an example we can perform type checking,
-    // So ony list-like models may be attached to list-like controllers:
-    if (model instanceof ObservableList){
-        // model type is OK, so call parent method:
-        BaseController.prototype.attachModel.call(this, model);
-    }
+module.exports = function(){
+    return ++counterUID;
 };
 
 
 /***/ }),
-/* 45 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var ListController = __webpack_require__(44);
-var inherit = __webpack_require__(0);
-var RequestManager = __webpack_require__(4);
-
-module.exports = ProjectListController;
-
-function ProjectListController(observer){
-    ListController.call(this, observer);
-}
-
-inherit(ProjectListController, ListController);
-
-ProjectListController.prototype.fetchData = function(){
-    RequestManager.getProjectList(this._fetchDataHandler.bind(this));
-};
-
-ProjectListController.prototype.add = function(data){
-    RequestManager.createProject("unknown", data, this._addHandler.bind(this));
-};
-
-ProjectListController.prototype.remove = function(id){
-    var model = this.model;
-    console.log(id);
-    if(model.isExistId(id) === true){
-        RequestManager.deleteProject(id, this._removeHandler.bind(this));
-    }
-};
-
-
-/***/ }),
-/* 46 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var inherit = __webpack_require__(0);
-var BaseView = __webpack_require__(1);
-var MessageModal = __webpack_require__(30);
-var MenuBar = __webpack_require__(29);
-var windowsTransport = __webpack_require__(47);
-var commonEventNames = __webpack_require__(6);
-
-module.exports = WindowManager;
+module.exports = BaseModel;
 
 /**
- * @param {Object} windows - map of BaseWindow instances. Example: new WindowManager({"ProjectList": new ProjectList})
+ * Base model.
+ * @constructor
+ * @class BaseModel
+ * @param {*} data - initial data
+ * @param {Observer} observer
  */
-function WindowManager(windows){
-    BaseView.call(this, "window-manager");
-
-    this.__windows = windows;
-    
-    this.__activeWindow = null;
-    this.__modal = new MessageModal();
-    this.__menuBar = new MenuBar();
-    
-    this._build();
+function BaseModel(data, observer){
+    this.__data = data;
+    this.observer = observer;
 }
 
-inherit(WindowManager, BaseView);
-
-WindowManager.prototype._build = function(){
-    var key, tokenWindow;
-    var self = this;
-    var windows = this.__windows;
-    var container = this.getContainer();
-    
-    container.append(this.__menuBar.getContainer());
-    //container.append(this.__modal.getContainer());
-
-    this.appendToBlock($(".ui.container"));
-    
-    this.__menuBar.show();
-    this.__modal.hide();
-
-    for (key in windows){
-        tokenWindow = windows[key];
-        tokenWindow.hide(); // just in case...
-        container.append(tokenWindow.getContainer());
-    }
-
-    this.__modal.observer.subscribe(commonEventNames.E_CONFIRMED, function(eventName){
-        if (self.__activeWindow){
-            self.__activeWindow.confirmed();
-        }
-        self.__modal.hide();
-    });
-
-    this.__modal.observer.subscribe(commonEventNames.E_DECLINED, function(eventName){
-        if (self.__activeWindow){
-            self.__activeWindow.declined();
-        }
-        self.__modal.hide();
-    });
-
-    windowsTransport.subscribe(commonEventNames.E_SHOW_MODAL, function(eventName, message){
-        self.showModal(message);
-    });
-
-    //RequestManager.getUser(this.hideUserOnlyElements.bind(this));
+BaseModel.prototype.attachObserver = function(observer){
+    this.observer = observer;
 };
 
-WindowManager.prototype.showModal = function(message){
-    if (this.__activeWindow){
-        this.__modal.show(message);
-    }
+BaseModel.prototype.valueOf = function(){
+    return JSON.stringify(this);
 };
 
-WindowManager.prototype.setActiveWindow = function(newActiveWindow){
-    if (this.__activeWindow){
-        // Hide previosly visible window
-        this.__activeWindow.hide();
-    }
-    // Attach & show the new one:
-    this.__activeWindow = newActiveWindow;
-    // if menubar change after change active window
-    // for example project view add play button when active project view
-    this.__menuBar.adaptToActiveWindow(this.__activeWindow);
-    this.__activeWindow.show();
-};
-
-/*WindowManager.prototype.hideUserOnlyElements = function(userName){
-    if(userName instanceof Error){
-        var $elements = $(".user-only");
-        $elements.addClass("disabled");
-        // ... add "disable" class to all of these $elements
-    }
-};*/
-
-
-/***/ }),
-/* 47 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var Observer = __webpack_require__(9);
-
-module.exports = new Observer();
-
-
-/***/ }),
-/* 48 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-//changeProjectRequest
-
-module.exports = function(url, data, dataType, callback){
-    $.ajax({
-        url: url,
-        cache: false,
-        method: "POST",
-        dataType: dataType,
-        data: data,
-        success: callback,
-        error: function(status){
-            callback(new Error(status));
-        }
-    });
+BaseModel.prototype.toString = function(){
+    return "[object BaseModel]";
 };
 
 
-/***/ }),
-/* 49 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var baseRequest = __webpack_require__(5);
-
-module.exports = baseRequest.bind(null, "POST", "json");
-
-
-/***/ }),
-/* 50 */,
-/* 51 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var ObservableList = __webpack_require__(15);
-var inherit = __webpack_require__(0);
-var TrackSynthesizer = __webpack_require__(55);
-var TrackNoise = __webpack_require__(54);
-
-module.exports = TrackListModel;
-
-function TrackListModel(){
-    ObservableList.call(this);
-    this.name = "";
-}
-
-inherit(TrackListModel, ObservableList);
-
-TrackListModel.prototype.add = function(source){
-    var track;
-    var id = source.id;
-    var data = source.data;
-    var instrument = source.data.instrument;
-    if(instrument === "synth"){
-        track = new TrackSynthesizer(id, data);
-    } else if(instrument === "noise"){
-        track = new TrackNoise(id, data);
-    } else{
-        // DEFAULT_JSON_SETTINGS
-    }
-
-    if (track){
-        ObservableList.prototype.add.call(this, track);
-    }
-};
-
-
-/***/ }),
-/* 52 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var PostProcessSettings = __webpack_require__(53);
-
-module.exports = BaseTrackModel;
-
-// @param {String} name
-// @param {Object} source
-function BaseTrackModel(id, source){
-    this.id = id;
-    this.length = source.length;
-    this.setting = source.setting;
-    this.instrument = source.instrument;
-    this.playSetting = source["play-setting"];
-    this.postProcessSettings = new PostProcessSettings(source["post-setting"]);
-    this.trackObject = this._generate();
-}
-
-BaseTrackModel.prototype.createFormData = function(){
-    var formData = new FormData();
-    formData.append("user_audio", toBlob(this.trackObject), this.name);
-    formData.append("postProcessSettings", JSON.stringify(this.postProcessSettings));
-    return formData;
-};
-
-BaseTrackModel.prototype.getContext = function(){
-    return this.trackObject.context._context;
-};
-
-BaseTrackModel.prototype.getConstants = function(){
-    return this.trackObject.context;
-};
-
-BaseTrackModel.prototype.getAudioBuffer = function(){
-
+BaseModel.prototype.toJson = function(){
+    return JSON.stringify(this);
 };
 
 /**
- * @param {Object} source
- * @type {null}
- * @protected
- * @return {Tone}
+ * Should remove everything from itself
  */
-BaseTrackModel.prototype._generate = null;
+BaseModel.prototype.clear = null;
 
 /**
- * @param {Object} options
- * @type {null}
+ * Should update old data
+ * @param {*} data - new data
  */
-BaseTrackModel.prototype.play = null;
-
-BaseTrackModel.prototype.playCompomponent = null;
+BaseModel.prototype.update = null;
 
 
 /***/ }),
-/* 53 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1966,13 +1698,13 @@ function PostProcessSettings(options){
 
 
 /***/ }),
-/* 54 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var BaseTrackModel = __webpack_require__(52);
+var BaseTrackModel = __webpack_require__(13);
 var inherit = __webpack_require__(0);
 
 module.exports = TrackNoise;
@@ -1995,38 +1727,31 @@ TrackNoise.prototype.play = function(options){
 
 
 /***/ }),
-/* 55 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var BaseTrackModel = __webpack_require__(52);
+var BaseTrackModel = __webpack_require__(13);
 var inherit = __webpack_require__(0);
 
 module.exports = TrackSynthesizer;
 
 // @param {String} name
 // @param {Object} source
-function TrackSynthesizer(id, source){
-    BaseTrackModel.call(this, id, source);
+function TrackSynthesizer(source){
+    BaseTrackModel.call(this, source);
     this.source = source;
 }
 
 inherit(TrackSynthesizer, BaseTrackModel);
 
 TrackSynthesizer.prototype._generate = function(){
-    var sound;
-    if(this.setting.length === 0){
-        // create synth with default parameters of Tone
-        sound = new Tone.Synth().toMaster();
-    } else{
-        sound = new Tone.Synth(this.setting).toMaster();
-    }
-    return sound; //{"oscillator": {}, "envelope": {}}
+    return new Tone.Synth(this.setting).toMaster(); //{"oscillator": {}, "envelope": {}}
 };
 
-TrackSynthesizer.prototype.play = function(){
+TrackSynthesizer.prototype.play = function(options){
     var i;
     var r = this.playSetting;
     for(i = 0; i < r.length; ++i){
@@ -2052,7 +1777,270 @@ TrackSynthesizer.prototype.saveTest = function(callback){
 
 
 /***/ }),
-/* 56 */
+/* 31 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+//changeProjectRequest
+
+module.exports = function(url, data, dataType, callback){
+    $.ajax({
+        url: url,
+        cache: false,
+        method: "POST",
+        dataType: dataType,
+        data: data,
+        success: callback,
+        error: function(status){
+            callback(new Error(status));
+        }
+    });
+};
+
+
+/***/ }),
+/* 32 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = function(url, formData){
+    $.ajax({
+        method: "POST",
+        url: url,
+        data: formData,
+        mimeTypes: "multipart/form-data",
+        contentType: false,
+        dataType: "json",
+        cache: false,
+        processData: false,
+        success: callback,
+        error: function (status) {
+            callback(new Error(status));
+        }
+    });
+};
+
+
+/***/ }),
+/* 33 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var baseRequest = __webpack_require__(3);
+
+module.exports = baseRequest.bind(null, "POST", "json");
+
+
+/***/ }),
+/* 34 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var baseRequest = __webpack_require__(3);
+
+module.exports = baseRequest.bind(null, "POST", "json");
+
+
+/***/ }),
+/* 35 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var baseRequest = __webpack_require__(3);
+
+module.exports = baseRequest.bind(null, "GET", "json");
+
+
+/***/ }),
+/* 36 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var baseRequest = __webpack_require__(3);
+
+module.exports = baseRequest.bind(null, "GET", "binary");
+
+
+/***/ }),
+/* 37 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var baseRequest = __webpack_require__(3);
+
+module.exports = baseRequest.bind(null, "GET", "json", "user/");
+
+
+/***/ }),
+/* 38 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var baseRequest = __webpack_require__(3);
+
+module.exports = baseRequest.bind(null, "GET", "json", "projects/");
+
+
+/***/ }),
+/* 39 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = function(url, soundName, audioSrc, callback){
+    fetch(audioSrc, function(request){
+        var audioData = request.response;
+        var blob = new Blob([audioData], {type: 'audio/x-wav'});
+        var formData = new FormData();
+        formData.append('user_audio', blob, soundName);
+        callback(url, formData);
+    });
+};
+
+function fetch(url, resolve){
+    var request = new XMLHttpRequest();
+    request.open("GET", url, true);
+    request.responseType = "arraybuffer";
+    request.onload = function(){
+        resolve(request);
+    };
+    request.send();
+}
+
+
+/***/ }),
+/* 40 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var BaseView = __webpack_require__(1);
+var UserInfoBar = __webpack_require__(43);
+var Factory = __webpack_require__(4);
+var inherit = __webpack_require__(0);
+var commonEventNames = __webpack_require__(2);
+var windowsTransport = __webpack_require__(8);
+var eventListener = __webpack_require__(7);
+
+module.exports = MenuBar;
+
+function MenuBar(){
+    BaseView.call(this, "menubar");
+
+    this.userInfoBar = new UserInfoBar();
+    this.backButton = Factory.createIconButton("ui button user-only", "arrow left icon", "");
+
+    this._build();
+}
+
+inherit(MenuBar, BaseView);
+
+MenuBar.prototype._build = function(){
+    var container = this.getContainer();
+
+    eventListener.notify(eventListener.DEFINE_USER);
+
+    this.backButton.on("click", function(event){
+        // Possible additional visual effect for this button...
+        windowsTransport.notify(commonEventNames.ON_BACK_BUTTON_CLICK);
+    });
+
+    container.append(this.backButton);
+    container.append(this.userInfoBar.getContainer());
+};
+
+MenuBar.prototype.adaptToActiveWindow = function(window){
+    // Here you can get some public properties from the window to update the "look" of the menu bar
+    // For example:
+    // - window.title
+    // - change some controlls according to the window type
+};
+
+
+/***/ }),
+/* 41 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var BaseView = __webpack_require__(1);
+var Factory = __webpack_require__(4);
+var Observer = __webpack_require__(5);
+var commonEventNames = __webpack_require__(2);
+
+module.exports = MessageModal;
+
+function MessageModal(){
+    BaseView.call(this, "ui modal");
+    this.text = $("<p></p>");
+    this.okButton = Factory.createButton("ui button", "ok");
+    this.cancelButton = Factory.createButton("ui button", "cancel");
+    this.observer = new Observer();
+
+    this._build();
+}
+
+inherit(MessageModal, BaseView);
+
+MessageModal.prototype._build = function(){
+    var container = this.getContainer();
+    var self = this;
+
+    this.okButton.on("click", function(event){
+        self.observer.notify(commonEventNames.E_CONFIRMED, null);
+        self.hide();
+    });
+
+    this.cancelButton.on("click", function(event){
+        self.observer.notify(commonEventNames.E_DECLINED, null);
+        self.hide();
+    });
+
+    container.append(this.text);
+    container.append(this.okButton);
+    container.append(this.cancelButton);
+};
+
+MessageModal.prototype.show = function(message){
+
+    this.getContainer().modal({
+        closable : false,
+        allowMultiple: false,
+        context: $(".window-manager")
+    });
+
+    this.text.text(message);
+    this.getContainer().modal("show");
+};
+
+MessageModal.prototype.hide = function(){
+    this.text.text(""); // reset old message
+    this.getContainer().modal("hide");
+};
+
+
+/***/ }),
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2126,34 +2114,107 @@ TrackDataView.prototype.createWaveForm = function(){
 
 
 /***/ }),
-/* 57 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var ListController = __webpack_require__(44);
 var inherit = __webpack_require__(0);
-var RequestManager = __webpack_require__(4);
+var Factory = __webpack_require__(4);
+var BaseView = __webpack_require__(1);
+var UserModal = __webpack_require__(44);
+var RequestManager = __webpack_require__(6);
+var eventListener = __webpack_require__(7);
 
-module.exports = TrackListController;
+module.exports = UserInfoBar;
 
-function TrackListController(observer){
-    ListController.call(this, observer);
+function UserInfoBar(){
+    BaseView.call(this, "user-info-bar");
+
+    this.userName = null;
+    this.joinButton = Factory.createButton("", "join");
+    this.userModal = new UserModal();
+
+    this._build();
 }
 
-inherit(TrackListController, ListController);
+inherit(UserInfoBar, BaseView);
 
-TrackListController.prototype.fetchData = function(projectId){
-    RequestManager.getProject(projectId, this._fetchDataHandler.bind(this));
+UserInfoBar.prototype._build = function(){
+    var container = this.getContainer();
+
+    this.joinButton.on("click", function(){
+        eventListener.notify(eventListener.SHOW_LOGIN_FORM);
+    });
+
+    //eventListener.subscribe(eventListener.DEFINE_USER, this._fetchUserName.bind(this));
+    this._fetchUserName();
+
+    container.append(this.userName);
+    container.append(this.joinButton);
 };
 
-TrackListController.prototype.add = function(projectId, data){
-    RequestManager.createTrack(projectId, data, this._addHandler.bind(this));
+UserInfoBar.prototype._fetchUserName = function(){
+    RequestManager.getUser(this.setUserName.bind(this));
+
 };
 
-TrackListController.prototype.remove = function(trackId){
-    RequestManager.deleteTrack(trackId, this._removeHandler.bind(this));
+UserInfoBar.prototype.setUserName = function(userName){
+    if(userName instanceof Error){
+        this.userName = $("<p>anonym</p>");
+        // eventListener.notify("USER_IS_ANONYM");
+    } else{
+        this.userName = $("<p>" + userName + "</p>");
+        // eventListener.notify("USER_IS_LOGEDIN", userName);
+    }
+    this.getContainer().append(this.userName);
+};
+
+
+/***/ }),
+/* 44 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var Factory = __webpack_require__(4);
+var BaseView = __webpack_require__(1);
+var eventListener = __webpack_require__(7);
+
+module.exports = UserModal;
+
+function UserModal(){
+    BaseView.call(this, "ui modal user-registration");
+    this.facebookLogIn = Factory.createIconButton("ui facebook button", "facebook icon", "Facebook");
+    //this.label = $("<div class='ui pointing below label'>Join without registration");
+    this.buttonLogout = Factory.createButton("", "Logout");
+
+    this._build();
+}
+
+inherit(UserModal, BaseView);
+
+UserModal.prototype._build = function(){
+    this.facebookLogIn.on("click", function(event){
+        location.href = "/accounts/facebook/login/";
+    });
+
+    this.buttonLogout.on("click", function(event){
+        location.href = "/accounts/logout/";
+    });
+
+    eventListener.subscribe(eventListener.SHOW_LOGIN_FORM, this.show.bind(this));
+
+    this._container.append(this.facebookLogIn);
+    //this._container.append(this.label);
+    this._container.append(this.buttonLogout);
+};
+
+UserModal.prototype.show = function(){
+    this._container.modal("show");
 };
 
 
