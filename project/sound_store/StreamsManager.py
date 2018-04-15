@@ -54,24 +54,28 @@ class StreamsManager(BasicManager):
             result = new_stream.pk
         return result
 
-    def update(self, project_id, stream_id, data):
+    def update(self, project_id, stream_id, data, is_deleted=False):
         """
         Update steam json data
         :param project_id: int
         :param stream_id: int
         :param data: dict
+        :param is_deleted: boolean
         :return: int|None
         """
         stream = Streams.stream_object(stream_id)
-        if stream is not None:
-            # update stream if it exist
-            self.manager.set_user_id(stream.project.user.id)
-            self.manager.save_json_file(stream.name, data)
-            result = stream_id
+        if is_deleted is True:
+            result = self.delete(stream_id)
         else:
-            # create new stream if client sent self generating id
-            # in case of this application client create new track (stream) with
-            result = self.create(project_id, data)
+            if stream is not None:
+                # update stream if it exist
+                self.manager.set_user_id(stream.project.user.id)
+                self.manager.save_json_file(stream.name, data)
+                result = stream_id
+            else:
+                # create new stream if client sent self generating id
+                # in case of this application client create new track (stream) with
+                result = self.create(project_id, data)
         return result
 
     def update_all(self, project_id, stream_list):
@@ -82,7 +86,7 @@ class StreamsManager(BasicManager):
         """
         result = []
         for stream in stream_list:
-            result.append(self.update(project_id, stream['id'], stream['track']))
+            result.append(self.update(project_id, stream['id'], stream['track'], stream['isDeleted']))
         return result
 
     def delete(self, stream_id):

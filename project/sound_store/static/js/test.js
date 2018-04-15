@@ -131,8 +131,9 @@ module.exports = {
     "E_DECLINED": "DECLINED",
     "E_SHOW_MODAL": "E_SHOW_MODAL",
     "E_ACTIVATE_WINDOW": "E_ACTIVATE_WINDOW",
-    "DEFINE_USER": "DEFINE_USER",
-    "ON_BACK_BUTTON_CLICK": "ON_BACK_BUTTON_CLICK"
+    "E_DEFINE_USER": "E_DEFINE_USER",
+    "ON_BACK_BUTTON_CLICK": "ON_BACK_BUTTON_CLICK",
+    "E_EMPTY_TRACK_LIST": "E_EMPTY_TRACK_LIST"
 };
 
 
@@ -443,7 +444,7 @@ eventListener.ON_SHOW_PROJECT_LIST = "ON_SHOW_PROJECT_LIST";
 eventListener.ON_ADD_PROJECT = "ON_ADD_PROJECT";
 eventListener.ON_EDIT_PROJECT = "ON_EDIT_PROJECT";
 eventListener.ON_DELETE_PROJECT = "ON_DELETE_PROJECT";
-eventListener.DEFINE_USER = "DEFINE_USER";
+eventListener.DEFINE_USER = "E_DEFINE_USER";
 eventListener.SHOW_TRACK = "SHOW_TRACK";
 eventListener.SHOW_PROJECT = "SHOW_PROJECT";
 eventListener.SHOW_LOGIN_FORM = "SHOW_LOGIN_FORM";
@@ -498,8 +499,7 @@ inherit(ObservableList, BaseModel);
 ObservableList.prototype.clear = function(){
     // Run over all items and remove each step-by-step:
     while (this.size()){
-        //this.remove(0);
-        this.__data.splice(0, 1); // pop first element
+        this.remove(0); // pop first element
     }
 };
 
@@ -548,20 +548,19 @@ ObservableList.prototype.findIndexById = function(searchingId){
 ObservableList.prototype.add = function(item){
     // push to back and send actual index of the added item:
     this.observer.notify(commonEventNames.E_ITEM_ADDED, this.__data.push(item) - 1);
-    console.log(this.__data);
 };
 
 /**
  * Removes item at index position.
- * @param {Number} value
+ * @param {Number} index
  */
-ObservableList.prototype.remove = function(value){
-    var index = this.findIndexById(value);
+ObservableList.prototype.remove = function(index){
     if (index < this.size()){
-        // fire before removing:
+        // fire before removing
+        // send signal to view for remove item from list
         this.observer.notify(commonEventNames.E_ITEM_REMOVED, index);
-        // now remove:
-        this.__data.splice(index, 1);
+        // but leave item in model for case saving project changes
+        //this.__data.splice(index, 1);
     }
 };
 
@@ -578,6 +577,7 @@ var inherit = __webpack_require__(0);
 var TrackSynthesizer = __webpack_require__(30);
 var TrackNoise = __webpack_require__(29);
 var generateUID = __webpack_require__(26);
+var commonEventNames = __webpack_require__(2);
 
 module.exports = ProjectModel;
 
@@ -589,8 +589,9 @@ function ProjectModel(project){
     ObservableList.call(this);
     this.name = project.name;
     this.id = project.id;
+    this.isDeleted = false;
     this.default = {
-        "id": -generateUID(),
+        "id": null,
         "data": {
             "instrument": "synth",
             "setting": {},
@@ -607,9 +608,8 @@ inherit(ProjectModel, ObservableList);
  */
 ProjectModel.prototype.add = function(source){
     var element = source || this.default;
+    var id = element.id || -generateUID();
     var data = element.data;
-    console.log("model add");
-    console.log(element);
     var track;
     var item = {};
     var instrument = data.instrument;
@@ -619,9 +619,25 @@ ProjectModel.prototype.add = function(source){
         track = new TrackNoise(data);
     }
     if (track){
-        item.id = element.id;
+        item.id = id;
         item.track = track;
+        item.isDeleted = false;
         ObservableList.prototype.add.call(this, item);
+    }
+};
+
+ProjectModel.prototype.remove = function(trackId){
+    var index = this.findIndexById(trackId);
+    var item = this.at(index);
+    item.isDeleted = true;
+    ObservableList.prototype.remove.call(this, index);
+};
+
+ProjectModel.prototype.clear = function(){
+    // Run over all items and remove each step-by-step:
+    this.observer.notify(commonEventNames.E_EMPTY_TRACK_LIST);
+    while (this.size()){
+        this.__data.splice(0, 1); // pop first element
     }
 };
 
@@ -679,6 +695,11 @@ TrackListView.prototype._build = function(){
     this.addTrackButton.on("click", function(event){
         console.log("add view");
         self.controller.add(null);
+    });
+
+    this.controller.observer.subscribe(commonEventNames.E_EMPTY_TRACK_LIST, function(){
+        console.log("--------");
+        self.trackList.empty();  // clear track list div
     });
 
     windowsTransport.subscribe(commonEventNames.ON_BACK_BUTTON_CLICK, function(){
@@ -1011,8 +1032,8 @@ ProjectController.prototype.add = function(data){
 };
 
 ProjectController.prototype.remove = function(trackId){
-    RequestManager.deleteTrack(trackId, this._removeHandler.bind(this));
-    //RequestManager.deleteTrack(this.model.id, this._removeHandler.bind(this));
+    this.model.remove(trackId);
+    //RequestManager.deleteTrack(trackId, this._removeHandler.bind(this));
 };
 
 ProjectController.prototype.save = function(callback){
@@ -1154,6 +1175,15 @@ ProjectListModel.prototype.toString = function(){
 ProjectListModel.prototype.add = function(data){
     var trackListModel = new TrackListModel(data);
     ObservableList.prototype.add.call(this, trackListModel);
+};
+
+ProjectListModel.prototype.remove = function(projectId){
+    var index = this.findIndexById(projectId);
+    //var item = this.at(index);
+    //item.isDeleted = true;
+    ObservableList.prototype.remove.call(this, index);
+    // remove project from model
+    this.__data.splice(index, 1);
 };
 
 /**
@@ -1603,7 +1633,6 @@ BaseController.prototype._clearHandler = function(result){
 };
 
 BaseController.prototype._removeHandler = function(value){
-    console.log(value);
     var model = this.model;
     if (value instanceof Error){
         // Oh no..
@@ -1956,7 +1985,7 @@ inherit(MenuBar, BaseView);
 MenuBar.prototype._build = function(){
     var container = this.getContainer();
 
-    eventListener.notify(eventListener.DEFINE_USER);
+    eventListener.notify(eventListener.E_DEFINE_USER);
 
     this.backButton.on("click", function(event){
         // Possible additional visual effect for this button...
@@ -2148,7 +2177,7 @@ UserInfoBar.prototype._build = function(){
         eventListener.notify(eventListener.SHOW_LOGIN_FORM);
     });
 
-    //eventListener.subscribe(eventListener.DEFINE_USER, this._fetchUserName.bind(this));
+    //eventListener.subscribe(eventListener.E_DEFINE_USER, this._fetchUserName.bind(this));
     this._fetchUserName();
 
     container.append(this.userName);
