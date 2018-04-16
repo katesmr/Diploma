@@ -85,8 +85,11 @@ class StreamsManager(BasicManager):
         :return:
         """
         result = []
+        _id = None
         for stream in stream_list:
-            result.append(self.update(project_id, stream['id'], stream['track'], stream['isDeleted']))
+            _id = stream['track']['id']
+            stream['track'].pop('id')
+            result.append(self.update(project_id, _id, stream['track'], stream['isDeleted']))
         return result
 
     def delete(self, stream_id):

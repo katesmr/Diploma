@@ -60,7 +60,7 @@ class ProjectManager(BasicManager):
         try:
             _id = source['id']
             name = source['name']
-            track_setting_list = source['__data']
+            track_setting_list = source['data']
             project = Projects.project_object(_id)
             if project is not None:
                 result = dict()
