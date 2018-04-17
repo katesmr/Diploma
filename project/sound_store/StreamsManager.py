@@ -86,10 +86,13 @@ class StreamsManager(BasicManager):
         """
         result = []
         _id = None
+        is_deleted = None
         for stream in stream_list:
-            _id = stream['track']['id']
-            stream['track'].pop('id')
-            result.append(self.update(project_id, _id, stream['track'], stream['isDeleted']))
+            _id = stream['id']
+            is_deleted = stream['isDeleted']
+            stream.pop('id')
+            stream.pop('isDeleted')
+            result.append(self.update(project_id, _id, stream, is_deleted))
         return result
 
     def delete(self, stream_id):
