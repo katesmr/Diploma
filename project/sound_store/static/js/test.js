@@ -497,9 +497,10 @@ inherit(ObservableList, BaseModel);
 
 ObservableList.prototype.clear = function(){
     // Run over all items and remove each step-by-step:
-    while(this.size()){
+    while(this.size()){  //for
         this.remove(0); // pop first element
     }
+    this.__data.length = 0
 };
 
 ObservableList.prototype.update = function(data){
@@ -1109,6 +1110,15 @@ ProjectListController.prototype.remove = function(id){
     }
 };
 
+ProjectListController.prototype._removeHandler = function(id){
+    var model = this.model;
+    if(id instanceof Error){
+        // Oh no..
+    } else{
+        model.remove(this.model.findIndexById(id));
+    }
+};
+
 
 /***/ }),
 /* 19 */
@@ -1208,10 +1218,6 @@ ProjectListModel.prototype.toString = function(){
 ProjectListModel.prototype.add = function(data){
     var projectModel = new ProjectModel(data);
     ObservableList.prototype.add.call(this, projectModel);
-};
-
-ProjectListModel.prototype.remove = function(id){
-    ObservableList.prototype.remove.call(this, this.model.findIndexById(id));
 };
 
 /**
