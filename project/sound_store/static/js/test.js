@@ -132,7 +132,8 @@ module.exports = {
     "E_SHOW_MODAL": "E_SHOW_MODAL",
     "E_ACTIVATE_WINDOW": "E_ACTIVATE_WINDOW",
     "E_DEFINE_USER": "E_DEFINE_USER",
-    "ON_BACK_BUTTON_CLICK": "ON_BACK_BUTTON_CLICK"
+    "ON_BACK_BUTTON_CLICK": "ON_BACK_BUTTON_CLICK",
+    "E_SHOW_LOGIN_FORM": "E_SHOW_LOGIN_FORM"
 };
 
 
@@ -163,8 +164,6 @@ module.exports = function(method, dataType, url, callback){
 
 "use strict";
 
-
-var eventListener = __webpack_require__(7);
 
 module.exports = {
     "createButton": createButton,
@@ -429,37 +428,7 @@ function uploadSound(soundName, callback){
 
 
 /***/ }),
-/* 7 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var Observer = __webpack_require__(5);
-
-var eventListener = new Observer;
-
-eventListener.ON_SHOW_PROJECT_LIST = "ON_SHOW_PROJECT_LIST";
-eventListener.ON_ADD_PROJECT = "ON_ADD_PROJECT";
-eventListener.ON_EDIT_PROJECT = "ON_EDIT_PROJECT";
-eventListener.ON_DELETE_PROJECT = "ON_DELETE_PROJECT";
-eventListener.DEFINE_USER = "E_DEFINE_USER";
-eventListener.SHOW_TRACK = "SHOW_TRACK";
-eventListener.SHOW_PROJECT = "SHOW_PROJECT";
-eventListener.SHOW_LOGIN_FORM = "SHOW_LOGIN_FORM";
-eventListener.SHOW_INSTRUMENT_VIEW = "SHOW_INSTRUMENT_VIEW";
-eventListener.PROJECT_LIST_MODEL_UPDATED = "PROJECT_LIST_MODEL_UPDATED";
-eventListener.PROJECT_MODEL_UPDATED = "PROJECT_MODEL_UPDATED";
-eventListener.SHOW_TRACK_TOOL_FORM = "SHOW_TRACK_TOOL_FORM";
-eventListener.SHOW_SYNTH_TOOL_FORM = "SHOW_SYNTH_TOOL_FORM";
-eventListener.SHOW_OSCILLATOR_TOOL_FORM = "SHOW_OSCILLATOR_TOOL_FORM";
-eventListener.SHOW_NOISE_TOOL_FORM = "SHOW_NOISE_TOOL_FORM";
-eventListener.CONFIRM_DELETE = "CONFIRM_DELETE";
-
-module.exports = eventListener;
-
-
-/***/ }),
+/* 7 */,
 /* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -496,11 +465,17 @@ function ObservableList(){
 inherit(ObservableList, BaseModel);
 
 ObservableList.prototype.clear = function(){
-    // Run over all items and remove each step-by-step:
-    while(this.size()){  //for
-        this.remove(0); // pop first element
+    var data = this.__data;
+    console.log("+++++++");
+    console.log(data);
+    var i = data.length;
+    while(i--){
+        // Warn: item may be really removed from the data-list inside .remove() method!!
+        console.log(i);
+        this.remove(i);
     }
-    this.__data.length = 0
+    // Just in case:
+    data.length = 0;
 };
 
 ObservableList.prototype.update = function(data){
@@ -553,17 +528,9 @@ ObservableList.prototype.add = function(item){
 };
 
 ObservableList.prototype.remove = function(index){
-    console.log("rem obs mod");
-    console.log(index);
-    var element = this.at(index);
-    //item.isDeleted = true;
-    if (index < this.size() && index >= 0) {
-        // send signal to view for remove item from list
+    if (index >= 0 && index < this.size()) {
         this.observer.notify(commonEventNames.E_ITEM_REMOVED, index);
-        // leave item (if it isDeleted) in model for case of some changes and send full model for saving on server
-        if(element.isDeleted === false){
-            this.__data.splice(index, 1);
-        }
+        this.__data.splice(index, 1);
     }
 };
 
@@ -592,6 +559,7 @@ function ProjectModel(project) {
     this.name = project.name;
     this.id = project.id;
     this.isDeleted = false;
+    this.__activeTrack = null;
 }
 
 inherit(ProjectModel, ObservableList);
@@ -600,37 +568,26 @@ inherit(ProjectModel, ObservableList);
  * @param source = object - wait {id, data}
  */
 ProjectModel.prototype.add = function(source){
+    var data = (source.data && typeof source.data === "object") ? source.data : {};
     var track;
-    var instrument;
-    var data = source.data;
-    if(data === undefined){
-        //default data
-        track = new TrackSynthesizer(source.id, {});
-    } else{
-        instrument = data.instrument;
-        if(instrument === "synth"){
+    switch (data.instrument){
+        case "synth":
             track = new TrackSynthesizer(source.id, data);
-        } else if(instrument === "noise"){
+            break;
+        case "noise":
             track = new TrackNoise(source.id, data);
-        }
+            break;
+        default:
+            track = new TrackSynthesizer(source.id, data);
     }
-    if(track){
-        ObservableList.prototype.add.call(this, track);
-    }
-    console.log(this);
+    ObservableList.prototype.add.call(this, track);
 };
 
 ProjectModel.prototype.remove = function(index){
-    var item = this.at(index);
-    item.isDeleted = true;
-    ObservableList.prototype.remove.call(this, index);
-};
-
-ProjectModel.prototype.clear = function(){
-    var index = 0;
-    while(this.size()){
+    if (index >= 0 && index < this.size()) {
+        this.at(index).isDeleted = true;
         this.observer.notify(commonEventNames.E_ITEM_REMOVED, index);
-        this.__data.splice(index, 1);
+        // leave item in model for case of some changes and send full model for saving on server
     }
 };
 
@@ -742,12 +699,12 @@ TrackListView.prototype._build = function(){
 };
 
 
-TrackListView.prototype.confirmed = function(name){
+TrackListView.prototype.confirmed = function(){
     // !!!!!!!!
     this.controller.removeById(this.selectedItem.attr("id"));
 };
 
-TrackListView.prototype.declined = function(name){
+TrackListView.prototype.declined = function(){
     this.selectedItem = null;
 };
 
@@ -762,7 +719,7 @@ TrackListView.prototype.add = function(track){
 };
 
 TrackListView.prototype.remove = function(id){
-    $(".track-" + id).remove();
+    this.trackList.find(".track-" + id).remove();
 };
 
 function onRemoveButtonClicked($element){
@@ -1351,7 +1308,8 @@ function onRemoveButtonClicked($element){
 var inherit = __webpack_require__(0);
 var BaseView = __webpack_require__(1);
 var MessageModal = __webpack_require__(41);
-var TrackList = __webpack_require__(11);
+var TrackListView = __webpack_require__(11);
+var ProjectListView = __webpack_require__(21);
 var MenuBar = __webpack_require__(40);
 var windowsTransport = __webpack_require__(8);
 var commonEventNames = __webpack_require__(2);
@@ -1439,9 +1397,11 @@ WindowManager.prototype.setActiveWindow = function(newActiveWindow){
     this.__activeWindow.show();
 
     // TODO: consider to re-implement this...
-    if (this.__activeWindow instanceof TrackList){
+    if (this.__activeWindow instanceof TrackListView){
         this.__activeWindow.controller.attachModel(this.__windows["projectList"].controller.model.activeProject);
         this.__activeWindow.controller.fetchData();
+    } else if(this.__activeWindow instanceof ProjectListView){
+        this.__activeWindow.controller.model.__activeProject = null;
     }
 };
 
@@ -2002,7 +1962,6 @@ var Factory = __webpack_require__(4);
 var inherit = __webpack_require__(0);
 var commonEventNames = __webpack_require__(2);
 var windowsTransport = __webpack_require__(8);
-var eventListener = __webpack_require__(7);
 
 module.exports = MenuBar;
 
@@ -2020,7 +1979,7 @@ inherit(MenuBar, BaseView);
 MenuBar.prototype._build = function(){
     var container = this.getContainer();
 
-    eventListener.notify(eventListener.E_DEFINE_USER);
+    //windowsTransport.notify(commonEventNames.E_DEFINE_USER);
 
     this.backButton.on("click", function(event){
         // Possible additional visual effect for this button...
@@ -2189,7 +2148,8 @@ var Factory = __webpack_require__(4);
 var BaseView = __webpack_require__(1);
 var UserModal = __webpack_require__(44);
 var RequestManager = __webpack_require__(6);
-var eventListener = __webpack_require__(7);
+var commonEventNames = __webpack_require__(2);
+var windowsTransport = __webpack_require__(8);
 
 module.exports = UserInfoBar;
 
@@ -2209,7 +2169,7 @@ UserInfoBar.prototype._build = function(){
     var container = this.getContainer();
 
     this.joinButton.on("click", function(){
-        eventListener.notify(eventListener.SHOW_LOGIN_FORM);
+        windowsTransport.notify(commonEventNames.E_SHOW_LOGIN_FORM);
     });
 
     //eventListener.subscribe(eventListener.E_DEFINE_USER, this._fetchUserName.bind(this));
@@ -2246,7 +2206,8 @@ UserInfoBar.prototype.setUserName = function(userName){
 var inherit = __webpack_require__(0);
 var Factory = __webpack_require__(4);
 var BaseView = __webpack_require__(1);
-var eventListener = __webpack_require__(7);
+var commonEventNames = __webpack_require__(2);
+var windowsTransport = __webpack_require__(8);
 
 module.exports = UserModal;
 
@@ -2270,7 +2231,7 @@ UserModal.prototype._build = function(){
         location.href = "/accounts/logout/";
     });
 
-    eventListener.subscribe(eventListener.SHOW_LOGIN_FORM, this.show.bind(this));
+    windowsTransport.subscribe(commonEventNames.E_SHOW_LOGIN_FORM, this.show.bind(this));
 
     this._container.append(this.facebookLogIn);
     //this._container.append(this.label);
