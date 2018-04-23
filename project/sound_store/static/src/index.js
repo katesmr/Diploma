@@ -6,8 +6,12 @@ var TrackListView = require("view/TrackListView");
 
 var ProjectListController = require("controller/ProjectListController");
 var ProjectController = require("controller/ProjectController");
+var TrackController = require("controller/TrackController");
+
 var ProjectListModel = require("model/ProjectListModel");
-var ProjectModel = require("model/ProjectModel");
+
+var TrackView = require("view/TrackView");
+
 var Observer = require("observer");
 
 var Req = require("utils/RequestManager");
@@ -20,23 +24,24 @@ var projectListObserver = new Observer();
 var projectListController = new ProjectListController(projectListObserver);
 var projectListModel = new ProjectListModel();
 
-var trackListObserver = new Observer();
-var trackListController = new ProjectController(trackListObserver);
-//var ProjectModel = new ProjectModel();
+var projectObserver = new Observer();
+var projectController = new ProjectController(projectObserver);
+
+var trackObserver = new Observer();
+var trackController = new TrackController(trackObserver);
 
 var projectListView = new ProjectListView(projectListController);
 projectListController.attachModel(projectListModel);
 
-var projectComponentView = new TrackListView(trackListController);
-//trackListController.attachModel(trackListModel);
+var trackListView = new TrackListView(projectController);
+
+var trackView = new TrackView(trackController);
 
 var windowManager = new WindowManager({
     "projectList": projectListView,
-    "trackList": projectComponentView
+    "trackList": trackListView,
+    "trackView": trackView
 });
-
-//windowManager.setActiveWindow(projectComponentView);
-//trackListController.fetchData(4);
 
 windowManager.setActiveWindow(projectListView);
 projectListController.fetchData();

@@ -98,8 +98,9 @@ body {
 }
 
 .wave-form {
-    float: right;
     width: 90%;
+    height: 10%;
+    margin-top: 1%;
     background-color: #767676;
 }
 
@@ -137,6 +138,6 @@ body {
     color: white;
 }
 
-.circular.ui.icon.button.add {
+.circular.ui.icon.button.add-track {
     margin-top: 2%;
 }

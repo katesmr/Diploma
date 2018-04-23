@@ -54,7 +54,7 @@ class ProjectManager(BasicManager):
         :param user_id:
         :param project_id:
         :param source:
-        :return:
+        :return: updated project info (data)
         """
         result = None
         try:
