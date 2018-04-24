@@ -470,221 +470,7 @@ function _notify(list, event, data){
 
 
 var inherit = __webpack_require__(0);
-var BaseWindow = __webpack_require__(11);
-var FilterView = __webpack_require__(42);
-var SettingView = __webpack_require__(46);
-var Factory = __webpack_require__(2);
-var commonEventNames = __webpack_require__(1);
-var windowsTransport = __webpack_require__(4);
-
-module.exports = TrackView;
-
-function TrackView(controller){
-    BaseWindow.call(this, controller, "track-view");
-
-    this.title = ""; //this.track.instrument; // instrument name
-
-    this.waveform = $("<div class='wave-form'></div>");
-    this.tabBlock = $("<div class='ui top attached tabular menu'>");
-
-    this.settingTabSegment = new SettingView(null);
-    this.filterTabSegment = new FilterView(null);
-
-    this.settingTitle = $("<a class='item active' data-tab='" + this.settingTabSegment.dataTab + "'>setting</a>");
-    this.filterTitle = $("<a class='item active' data-tab='" + this.filterTabSegment.dataTab + "'>filter</a>");
-
-    this._build();
-    this.hide();
-    this.showTabMenu();
-}
-
-inherit(TrackView, BaseWindow);
-
-TrackView.prototype._build = function(){
-    var self = this;
-    var container = this.getContainer();
-
-    this.settingTabSegment.setActive();
-
-    windowsTransport.subscribe(commonEventNames.E_SET_TRACK, this.setTrack.bind(this));
-
-    container.append(this.waveform);
-    this.tabBlock.append(this.settingTitle);
-    this.tabBlock.append(this.filterTitle);
-    container.append(this.tabBlock);
-    container.append(this.settingTabSegment.getContainer());
-    container.append(this.filterTabSegment.getContainer());
-};
-
-TrackView.prototype.showTabMenu = function(){
-    this.tabBlock.tab();
-};
-
-TrackView.prototype.back = function(){
-    windowsTransport.notify(commonEventNames.E_ACTIVATE_WINDOW, "trackList");
-};
-
-TrackView.prototype.setTrack = function(eventName, track){
-    this.settingTabSegment.setTrack(track);
-    this.filterTabSegment.setTrack(track);
-};
-
-
-/***/ }),
-/* 9 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var BaseController = __webpack_require__(26);
-var inherit = __webpack_require__(0);
-var ObservableList = __webpack_require__(10);
-
-module.exports = ListController;
-
-function ListController(observer){
-    BaseController.call(this, observer);
-}
-
-inherit(ListController, BaseController);
-
-// Override parent method:
-ListController.prototype.attachModel = function(model){
-    // as an example we can perform type checking,
-    // So ony list-like models may be attached to list-like controllers:
-    if (model instanceof ObservableList){
-        // model type is OK, so call parent method:
-        BaseController.prototype.attachModel.call(this, model);
-    }
-};
-
-
-/***/ }),
-/* 10 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var BaseModel = __webpack_require__(28);
-var inherit = __webpack_require__(0);
-var commonEventNames = __webpack_require__(1);
-
-module.exports = ObservableList;
-
-/**
- * Observable list model. Sends notifications about it's state.
- * @constructor
- * @class ObservableList
- */
-function ObservableList(){
-    BaseModel.call(this, [], null);
-}
-
-inherit(ObservableList, BaseModel);
-
-ObservableList.prototype.clear = function(){
-    var data = this.__data;
-    var i = data.length;
-    while(i--){
-        // Warn: item may be really removed from the data-list inside .remove() method!!
-        this.remove(i);
-    }
-    // Just in case:
-    this.__data.length = 0;
-};
-
-ObservableList.prototype.update = function(data){
-    // Note: someone should ask to .clear() before calling this.. so don't forget!
-    var i;
-    if(Array.isArray(data)){
-        for(i = 0; i < data.length; ++i){
-            this.add(data[i]);
-        }
-    }
-
-};
-
-ObservableList.prototype.size = function(){
-    return this.__data.length;
-};
-
-ObservableList.prototype.at = function(index){
-    return index < this.size() ? this.__data[index] : null;
-};
-
-ObservableList.prototype.isExistId = function(id){
-    return this.findIndexById(id) >= 0;
-};
-
-ObservableList.prototype.findIndexById = function(searchingId){
-    var i;
-    var result = -1;
-    var currentElement;
-    var id = parseInt(searchingId);
-    for(i = 0; i < this.__data.length; ++i){
-        currentElement = this.__data[i];
-        if(currentElement.id === id){
-            result = i;
-            break;
-        }
-    }
-    return result;
-};
-
-/**
- * Add item to the end of the list.
- * @param {*} item
- */
-ObservableList.prototype.add = function(item){
-    // push to back and send actual index of the added item:
-    this.observer.notify(commonEventNames.E_ITEM_ADDED, this.__data.push(item) - 1);
-};
-
-ObservableList.prototype.remove = function(index){
-    if (index >= 0 && index < this.size()) {
-        this.observer.notify(commonEventNames.E_ITEM_REMOVED, index);
-        this.__data.splice(index, 1);
-    }
-};
-
-
-/***/ }),
-/* 11 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var inherit = __webpack_require__(0);
-var BaseView = __webpack_require__(3);
-
-module.exports = BaseWindow;
-
-function BaseWindow(controller, classes){
-    BaseView.call(this, classes);
-
-    this.controller = controller;
-    this.title = "";
-}
-
-inherit(BaseWindow, BaseView);
-
-BaseWindow.prototype.confirmed = null;
-BaseWindow.prototype.declined = null;
-BaseWindow.prototype.back = null;
-
-
-/***/ }),
-/* 12 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var inherit = __webpack_require__(0);
-var BaseWindow = __webpack_require__(11);
+var BaseWindow = __webpack_require__(13);
 var Factory = __webpack_require__(2);
 var commonEventNames = __webpack_require__(1);
 var windowsTransport = __webpack_require__(4);
@@ -791,14 +577,14 @@ function onRemoveButtonClicked($element){
 
 
 /***/ }),
-/* 13 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var BaseWindow = __webpack_require__(11);
+var BaseWindow = __webpack_require__(13);
 var TrackDataView = __webpack_require__(47);
 var Factory = __webpack_require__(2);
 var commonEventNames = __webpack_require__(1);
@@ -875,7 +661,6 @@ TrackListView.prototype.back = function(){
                 self.controller.model.clear();
                 // Project saved!
                 windowsTransport.notify(commonEventNames.E_ACTIVATE_WINDOW, "projectList");
-                console.log("back");
             }
         });
     }
@@ -922,6 +707,220 @@ function setTrackInstrument(value){
     result.data.instrument = value;
     this.controller.add(result);
 }
+
+
+/***/ }),
+/* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var BaseWindow = __webpack_require__(13);
+var FilterView = __webpack_require__(42);
+var SettingView = __webpack_require__(46);
+var Factory = __webpack_require__(2);
+var commonEventNames = __webpack_require__(1);
+var windowsTransport = __webpack_require__(4);
+
+module.exports = TrackView;
+
+function TrackView(controller){
+    BaseWindow.call(this, controller, "track-view");
+
+    this.title = ""; //this.track.instrument; // instrument name
+
+    this.waveform = $("<div class='wave-form'></div>");
+    this.tabBlock = $("<div class='ui top attached tabular menu'>");
+
+    this.settingTabSegment = new SettingView(null);
+    this.filterTabSegment = new FilterView(null);
+
+    this.settingTitle = $("<a class='item active' data-tab='" + this.settingTabSegment.dataTab + "'>setting</a>");
+    this.filterTitle = $("<a class='item active' data-tab='" + this.filterTabSegment.dataTab + "'>filter</a>");
+
+    this._build();
+    this.hide();
+    this.showTabMenu();
+}
+
+inherit(TrackView, BaseWindow);
+
+TrackView.prototype._build = function(){
+    var self = this;
+    var container = this.getContainer();
+
+    this.settingTabSegment.setActive();
+
+    windowsTransport.subscribe(commonEventNames.E_SET_TRACK, this.setTrack.bind(this));
+
+    container.append(this.waveform);
+    this.tabBlock.append(this.settingTitle);
+    this.tabBlock.append(this.filterTitle);
+    container.append(this.tabBlock);
+    container.append(this.settingTabSegment.getContainer());
+    container.append(this.filterTabSegment.getContainer());
+};
+
+TrackView.prototype.showTabMenu = function(){
+    this.tabBlock.tab();
+};
+
+TrackView.prototype.back = function(){
+    windowsTransport.notify(commonEventNames.E_ACTIVATE_WINDOW, "trackList");
+};
+
+TrackView.prototype.setTrack = function(eventName, track){
+    this.settingTabSegment.setTrack(track);
+    this.filterTabSegment.setTrack(track);
+};
+
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var BaseController = __webpack_require__(26);
+var inherit = __webpack_require__(0);
+var ObservableList = __webpack_require__(12);
+
+module.exports = ListController;
+
+function ListController(observer){
+    BaseController.call(this, observer);
+}
+
+inherit(ListController, BaseController);
+
+// Override parent method:
+ListController.prototype.attachModel = function(model){
+    // as an example we can perform type checking,
+    // So ony list-like models may be attached to list-like controllers:
+    if (model instanceof ObservableList){
+        // model type is OK, so call parent method:
+        BaseController.prototype.attachModel.call(this, model);
+    }
+};
+
+
+/***/ }),
+/* 12 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var BaseModel = __webpack_require__(28);
+var inherit = __webpack_require__(0);
+var commonEventNames = __webpack_require__(1);
+
+module.exports = ObservableList;
+
+/**
+ * Observable list model. Sends notifications about it's state.
+ * @constructor
+ * @class ObservableList
+ */
+function ObservableList(){
+    BaseModel.call(this, [], null);
+}
+
+inherit(ObservableList, BaseModel);
+
+ObservableList.prototype.clear = function(){
+    var data = this.__data;
+    var i = data.length;
+    while(i--){
+        // Warn: item may be really removed from the data-list inside .remove() method!!
+        this.remove(i);
+    }
+    // Just in case:
+    this.__data.length = 0;
+};
+
+ObservableList.prototype.update = function(data){
+    // Note: someone should ask to .clear() before calling this.. so don't forget!
+    var i;
+    if(Array.isArray(data)){
+        for(i = 0; i < data.length; ++i){
+            this.add(data[i]);
+        }
+    }
+
+};
+
+ObservableList.prototype.size = function(){
+    return this.__data.length;
+};
+
+ObservableList.prototype.at = function(index){
+    return index < this.size() ? this.__data[index] : null;
+};
+
+ObservableList.prototype.isExistId = function(id){
+    return this.findIndexById(id) >= 0;
+};
+
+ObservableList.prototype.findIndexById = function(searchingId){
+    var i;
+    var result = -1;
+    var currentElement;
+    var id = parseInt(searchingId);
+    for(i = 0; i < this.__data.length; ++i){
+        currentElement = this.__data[i];
+        if(currentElement.id === id){
+            result = i;
+            break;
+        }
+    }
+    return result;
+};
+
+/**
+ * Add item to the end of the list.
+ * @param {*} item
+ */
+ObservableList.prototype.add = function(item){
+    // push to back and send actual index of the added item:
+    this.observer.notify(commonEventNames.E_ITEM_ADDED, this.__data.push(item) - 1);
+};
+
+ObservableList.prototype.remove = function(index){
+    if (index >= 0 && index < this.size()) {
+        this.observer.notify(commonEventNames.E_ITEM_REMOVED, index);
+        this.__data.splice(index, 1);
+    }
+};
+
+
+/***/ }),
+/* 13 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var BaseView = __webpack_require__(3);
+
+module.exports = BaseWindow;
+
+function BaseWindow(controller, classes){
+    BaseView.call(this, classes);
+
+    this.controller = controller;
+    this.title = "";
+}
+
+inherit(BaseWindow, BaseView);
+
+BaseWindow.prototype.confirmed = null;
+BaseWindow.prototype.declined = null;
+BaseWindow.prototype.back = null;
 
 
 /***/ }),
@@ -1160,7 +1159,7 @@ TabSegment.prototype.setActive = function(){
 "use strict";
 
 
-var ListController = __webpack_require__(9);
+var ListController = __webpack_require__(11);
 var inherit = __webpack_require__(0);
 var RequestManager = __webpack_require__(6);
 
@@ -1204,7 +1203,7 @@ ProjectController.prototype.removeById = function(id){
 "use strict";
 
 
-var ListController = __webpack_require__(9);
+var ListController = __webpack_require__(11);
 var inherit = __webpack_require__(0);
 var RequestManager = __webpack_require__(6);
 
@@ -1248,7 +1247,7 @@ ProjectListController.prototype._removeHandler = function(id){
 "use strict";
 
 
-var ListController = __webpack_require__(9);
+var ListController = __webpack_require__(11);
 var inherit = __webpack_require__(0);
 var commonEventNames = __webpack_require__(1);
 
@@ -1345,7 +1344,7 @@ function toAudioBuffer(blob, getAudioBuffer){
 "use strict";
 
 
-var ObservableList = __webpack_require__(10);
+var ObservableList = __webpack_require__(12);
 var ProjectModel = __webpack_require__(30);
 var inherit = __webpack_require__(0);
 
@@ -1367,6 +1366,10 @@ ProjectListModel.prototype.add = function(data){
     ObservableList.prototype.add.call(this, projectModel);
 };
 
+ProjectListModel.prototype.getActiveProject = function(){
+    return this.__activeProject;
+};
+
 /**
  * @param {ProjectModel} project
  */
@@ -1375,10 +1378,7 @@ ProjectListModel.prototype.setActiveProject = function(project){
 };
 
 ProjectListModel.prototype.clearActiveProject = function(){
-    if(this.__activeProject !== null){
-        this.__activeProject.__data.length = 0;
-        this.__activeProject = null;
-    }
+    this.__activeProject = null;
 };
 
 
@@ -1393,9 +1393,9 @@ ProjectListModel.prototype.clearActiveProject = function(){
 var inherit = __webpack_require__(0);
 var BaseView = __webpack_require__(3);
 var MessageModal = __webpack_require__(44);
-var ProjectListView = __webpack_require__(12);
-var TrackListView = __webpack_require__(13);
-var TrackView = __webpack_require__(8);
+var ProjectListView = __webpack_require__(8);
+var TrackListView = __webpack_require__(9);
+var TrackView = __webpack_require__(10);
 var MenuBar = __webpack_require__(43);
 var windowsTransport = __webpack_require__(4);
 var commonEventNames = __webpack_require__(1);
@@ -1489,7 +1489,7 @@ WindowManager.prototype.setActiveWindow = function(newActiveWindow){
 
     // TODO: consider to re-implement this...
     if(this.__activeWindow instanceof TrackListView){
-        this.__activeWindow.controller.attachModel(this.__windows["projectList"].controller.model.__activeProject);
+        this.__activeWindow.controller.attachModel(this.__windows["projectList"].controller.model.getActiveProject());
         this.__activeWindow.controller.model.clearActiveTrack();
         // catch project data only from ProjectListView !!!!!!!!
         if(this.isProjectListView === true){
@@ -1498,10 +1498,10 @@ WindowManager.prototype.setActiveWindow = function(newActiveWindow){
         this.isProjectListView = false;
     } else if(this.__activeWindow instanceof ProjectListView){
         this.isProjectListView = true;
-        //this.__activeWindow.controller.model.setActiveProject(null);
         this.__activeWindow.controller.model.clearActiveProject();
     } else if(this.__activeWindow instanceof TrackView){
-        this.__activeWindow.controller.attachModel(this.__windows["trackList"].controller.model.__activeTrack);
+        this.__activeWindow.controller.attachModel(this.__windows["trackList"].controller.model.getActiveTrack);
+        // send track settings to view
         this.__activeWindow.controller.sendTrack();
     }
 };
@@ -1628,8 +1628,8 @@ function writeString (view, offset, string) {
 var merger_test = __webpack_require__(21);
 
 var WindowManager = __webpack_require__(23);
-var ProjectListView = __webpack_require__(12);
-var TrackListView = __webpack_require__(13);
+var ProjectListView = __webpack_require__(8);
+var TrackListView = __webpack_require__(9);
 
 var ProjectListController = __webpack_require__(19);
 var ProjectController = __webpack_require__(18);
@@ -1637,7 +1637,7 @@ var TrackController = __webpack_require__(20);
 
 var ProjectListModel = __webpack_require__(22);
 
-var TrackView = __webpack_require__(8);
+var TrackView = __webpack_require__(10);
 
 var Observer = __webpack_require__(7);
 
@@ -1834,7 +1834,7 @@ function PostProcessSettings(options){
 "use strict";
 
 
-var ObservableList = __webpack_require__(10);
+var ObservableList = __webpack_require__(12);
 var inherit = __webpack_require__(0);
 var TrackSynthesizer = __webpack_require__(32);
 var TrackNoise = __webpack_require__(31);
@@ -1855,6 +1855,18 @@ function ProjectModel(project) {
 }
 
 inherit(ProjectModel, ObservableList);
+
+ProjectModel.prototype.getActiveTrack = function(){
+    return this.__activeTrack;
+};
+
+ProjectModel.prototype.setActiveTrack = function(track){
+    this.__activeTrack = track;
+};
+
+ProjectModel.prototype.clearActiveTrack = function(){
+    this.__activeTrack = null;
+};
 
 /**
  * @param source = object - wait {id, data}
@@ -1902,16 +1914,6 @@ ProjectModel.prototype.getData = function(){
 
 ProjectModel.prototype.toJson = function(){
     return JSON.stringify(this.getData());
-};
-
-
-ProjectModel.prototype.setActiveTrack = function(track){
-    this.__activeTrack = track;
-};
-
-ProjectModel.prototype.clearActiveTrack = function(){
-    this.__activeTrack = null;
-    //this.__data.length = 0;
 };
 
 
@@ -2199,7 +2201,9 @@ FilterView.prototype.setTrack = function(track){
 var inherit = __webpack_require__(0);
 var BaseView = __webpack_require__(3);
 var UserInfoBar = __webpack_require__(48);
-var TrackView = __webpack_require__(8);
+var TrackView = __webpack_require__(10);
+var TrackListView = __webpack_require__(9);
+var ProjectListView = __webpack_require__(8);
 var PlayerView = __webpack_require__(45);
 var Factory = __webpack_require__(2);
 var commonEventNames = __webpack_require__(1);
@@ -2212,7 +2216,7 @@ function MenuBar(){
 
     this.userInfoBar = new UserInfoBar();
     this.backButton = Factory.createIconButton("ui button user-only", "arrow left icon", "");
-    this.player = null;
+    this.player = new PlayerView();
 
     this._build();
 }
@@ -2230,14 +2234,17 @@ MenuBar.prototype._build = function(){
     });
 
     container.append(this.backButton);
-    container.append(this.player);
+    container.append(this.player.getContainer());
     container.append(this.userInfoBar.getContainer());
 };
 
 MenuBar.prototype.adaptToActiveWindow = function(window){
-    if(window instanceof TrackView){
-        this.player = new PlayerView();
-        this.getContainer().append();
+    if(window instanceof TrackView || window instanceof TrackListView){
+        this.backButton.show();
+        this.player.show();
+    } else if(window instanceof ProjectListView){
+        this.backButton.hide();
+        this.player.hide();
     }
     // Here you can get some public properties from the window to update the "look" of the menu bar
     // For example:
