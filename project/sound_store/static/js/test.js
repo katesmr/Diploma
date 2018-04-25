@@ -110,11 +110,13 @@ module.exports = {
 
 
 module.exports = {
+    "rangeElement": rangeElement,
     "buttonsPopup": buttonsPopup,
     "createButton": createButton,
     "createDivButton": createDivButton,
     "createIconButton": createIconButton,
-    "deleteCircleButton": deleteCircleButton
+    "deleteCircleButton": deleteCircleButton,
+    "setBeginValueToRangeElement": setBeginValueToRangeElement
 };
 
 function createButton(className, text){
@@ -137,6 +139,27 @@ function deleteCircleButton(buttonId, callback){
         callback($(this));
     });
     return $deleteProjectButton;
+}
+
+function rangeElement(className, minValue, maxValue, callback, beginValue){
+    var value;
+    var begin = beginValue || 0;
+    var $result = $("<div class='" + className + "'>");
+    var $label = $("<div class='ui label'>" + begin + "</div>");
+    var $element = $("<input type='range' min='" + minValue + "' max='" + maxValue + "' value='" + begin + "'>");
+    $element.on("input", function(){
+        value = $(this).val();
+        $label.text(value);
+        callback(value);
+    });
+    $result.append($element);
+    $result.append($label);
+    return $result;
+}
+
+function setBeginValueToRangeElement(rangeElement, beginValue){
+    rangeElement.find("input").value = beginValue; // set input range value
+    rangeElement.find(".ui.label").text(beginValue); // set label value
 }
 
 /**
@@ -751,9 +774,9 @@ TrackView.prototype._build = function(){
     var self = this;
     var container = this.getContainer();
 
-    this.settingTabSegment.setActive();
+    this.settingTabSegment.setActive(); // set Setting tab in active state
 
-    windowsTransport.subscribe(commonEventNames.E_SET_TRACK, this.setTrack.bind(this));
+    this.controller.observer.subscribe(commonEventNames.E_SET_TRACK, setTrack.bind(this));
 
     container.append(this.waveform);
     this.tabBlock.append(this.settingTitle);
@@ -771,10 +794,10 @@ TrackView.prototype.back = function(){
     windowsTransport.notify(commonEventNames.E_ACTIVATE_WINDOW, "trackList");
 };
 
-TrackView.prototype.setTrack = function(eventName, track){
+function setTrack(eventName, track){
     this.settingTabSegment.setTrack(track);
     this.filterTabSegment.setTrack(track);
-};
+}
 
 
 /***/ }),
@@ -1259,9 +1282,13 @@ function TrackController(observer){
 
 inherit(TrackController, ListController);
 
+TrackController.prototype.attachModel = function(model){
+    this.model = model;
+};
+
 TrackController.prototype.sendTrack = function(){
     if(this.model){
-        this.observer.notify(commonEventNames.E_SET_TRACK, this.model.track);  // here ?????????
+        this.observer.notify(commonEventNames.E_SET_TRACK, this.model);  // here ?????????
     }
 };
 
@@ -1500,7 +1527,7 @@ WindowManager.prototype.setActiveWindow = function(newActiveWindow){
         this.isProjectListView = true;
         this.__activeWindow.controller.model.clearActiveProject();
     } else if(this.__activeWindow instanceof TrackView){
-        this.__activeWindow.controller.attachModel(this.__windows["trackList"].controller.model.getActiveTrack);
+        this.__activeWindow.controller.attachModel(this.__windows["trackList"].controller.model.getActiveTrack());
         // send track settings to view
         this.__activeWindow.controller.sendTrack();
     }
@@ -2375,11 +2402,15 @@ module.exports = SettingView;
 function SettingView(track){
     TabSegment.call(this, "setting-view");
 
-    this.track = track;
-    /*this.oscillatorData = this.track.trackObject.oscillator;
-    this.envelopeData = this.track.trackObject.envelope;*/
+    this.track = null;
+    this.oscillatorData = null;
+    this.envelopeData = null;
 
+    this.frequencyRange = Factory.rangeElement("frequency-range", 0, 1000, function(value){
+        // setFrequencyValue apply with PLAY button !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    });
 
+    this.setTrack(track);
 
     this._build();
     this.show();
@@ -2391,15 +2422,23 @@ SettingView.prototype._build = function(){
     var self = this;
     var container = this.getContainer();
 
-
+    container.append(this.frequencyRange);
 };
 
 SettingView.prototype.setTrack = function(track){
-    this.track = track;
+    if(track){
+        console.log(track);
+        this.track = track;
+        this.oscillatorData = this.track.trackObject.oscillator;
+        this.envelopeData = this.track.trackObject.envelope;
+        // set starting values from model:
+        console.log(this.track.trackObject.frequency.value);
+        Factory.setBeginValueToRangeElement(this.frequencyRange, this.track.trackObject.frequency.value);
+    }
 };
 
-SettingView.prototype.setFrequencyValue = function(){
-
+SettingView.prototype.setFrequencyValue = function(value){
+    this.track.trackObject.oscillator.frequency = value;
 };
 
 
