@@ -113,6 +113,7 @@ module.exports = {
     "rangeElement": rangeElement,
     "buttonsPopup": buttonsPopup,
     "createButton": createButton,
+    "radioButtonRow": radioButtonRow,
     "createDivButton": createDivButton,
     "createIconButton": createIconButton,
     "deleteCircleButton": deleteCircleButton,
@@ -135,18 +136,30 @@ function createIconButton(buttonClass, iconClass, name){
 function deleteCircleButton(buttonId, callback){
     var $deleteProjectButton = createIconButton("circular ui icon button", "remove icon", "");
     $deleteProjectButton.attr("id", buttonId);
-    $deleteProjectButton.on("click", function(event){
+    $deleteProjectButton.on("click", function(){
         callback($(this));
     });
     return $deleteProjectButton;
 }
 
-function rangeElement(className, minValue, maxValue, callback, beginValue){
+/**
+ * Create range element (equalizer) with label with value of it
+ * @param className
+ * @param minValue
+ * @param maxValue
+ * @param callback
+ * @param stepValue
+ * @param beginValue
+ * @returns {*|jQuery|HTMLElement}
+ */
+function rangeElement(className, minValue, maxValue, callback, stepValue, beginValue){
     var value;
+    var step = stepValue || 1;
     var begin = beginValue || 0;
     var $result = $("<div class='" + className + "'>");
     var $label = $("<div class='ui label'>" + begin + "</div>");
-    var $element = $("<input type='range' min='" + minValue + "' max='" + maxValue + "' value='" + begin + "'>");
+    var $element = $("<input type='range' step='" + step + "' min='" + minValue +
+                     "' max='" + maxValue + "' value='" + begin + "'>");
     $element.on("input", function(){
         value = $(this).val();
         $label.text(value);
@@ -157,9 +170,48 @@ function rangeElement(className, minValue, maxValue, callback, beginValue){
     return $result;
 }
 
+/**
+ * Set value to range element and its label
+ * @param rangeElement
+ * @param beginValue
+ */
 function setBeginValueToRangeElement(rangeElement, beginValue){
     rangeElement.find("input").value = beginValue; // set input range value
     rangeElement.find(".ui.label").text(beginValue); // set label value
+}
+
+/**
+ * Create div-block with radiobutton set with same callback for each other
+ * @param className
+ * @param radioNameList
+ * @param callback
+ * @param beginValue
+ * @returns {*|jQuery|HTMLElement}
+ */
+function radioButtonRow(className, radioNameList, callback, beginValue){
+    var i;
+    var value;
+    var $text;
+    var $input;
+    var $radioBox;
+    var $result = $("<div class='" + className + "'>");
+    for(i = 0; i < radioNameList.length; ++i){
+        value = radioNameList[i];
+        $radioBox = $("<div class='radiobutton'>");
+        $text = $("<label>" + value + "</label>");
+        $input = $("<input id='" + value +"' type='radio' name='radiobutton'>");
+        $input.on("click", function(){
+            callback($(this).attr("id"));
+        });
+        $radioBox.append($text);
+        $radioBox.append($input);
+        $result.append($radioBox);
+    }
+    if(radioNameList.indexOf(beginValue) > -1){
+        // set begin value if it exist in name list
+        $('#' + beginValue).prop("checked", true);
+    }
+    return $result;
 }
 
 /**
@@ -989,6 +1041,35 @@ BaseTrackModel.prototype.getConstants = function(){
 
 BaseTrackModel.prototype.getAudioBuffer = function(){
 
+};
+
+// CALL THIS BEFORE SAVE ON SERVER !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/**
+ * Update or create oscillator && envelope data
+ */
+BaseTrackModel.prototype.setSetting = function(){
+    if(this.trackObject){
+        if(this.setting.oscillator === undefined){
+            this.setting.oscillator = {};
+        } else if(this.setting.envelope === undefined){
+            this.setting.envelope = {};
+        }
+        this.setting.oscillator.valume = this.trackObject.volume.value;
+        this.setting.oscillator.frequency = this.trackObject.frequency.value;
+        this.setting.oscillator.type = this.trackObject.oscillator.type;
+        this.setting.envelope.attack = this.trackObject.envelope.attack;
+        this.setting.envelope.decay = this.trackObject.envelope.decay;
+        this.setting.envelope.sustain = this.trackObject.envelope.sustain;
+        this.setting.envelope.release = this.trackObject.envelope.release;
+    }
+};
+
+/**
+ * Rewrite play setting data
+ * @param playSetting
+ */
+BaseTrackModel.prototype.setPlaySetting = function(playSetting){ // ??????????
+    this.playSetting = playSetting;
 };
 
 /**
@@ -2394,21 +2475,36 @@ PlayerView.prototype._build = function(){
 var inherit = __webpack_require__(0);
 var TabSegment = __webpack_require__(17);
 var Factory = __webpack_require__(2);
-var commonEventNames = __webpack_require__(1);
-var windowsTransport = __webpack_require__(4);
 
 module.exports = SettingView;
 
+/**
+ * Simple view with some data/widgets
+ * @param track
+ * @constructor
+ */
 function SettingView(track){
     TabSegment.call(this, "setting-view");
 
     this.track = null;
-    this.oscillatorData = null;
-    this.envelopeData = null;
 
-    this.frequencyRange = Factory.rangeElement("frequency-range", 0, 1000, function(value){
-        // setFrequencyValue apply with PLAY button !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    });
+    this.table = $("<div class='two column stackable ui grid'>"); // create grid with two columns
+
+    this.waveTypeRadioBox = Factory.radioButtonRow("sixteen wide column wave-type-block",
+                                                    ["sine", "square", "triangle", "sawtooth"],
+                                                    this.setTypeValue.bind(this));
+    this.volumeRangeLabel = $("<div class='column'>volume</div>");
+    this.volumeRange = Factory.rangeElement("column volume-range", -50, 50, this.setVolumeValue.bind(this));
+    this.frequencyRangeLabel = $("<div class='column'>frequency</div>");
+    this.frequencyRange = Factory.rangeElement("column frequency-range", 0, 1000, this.setFrequencyValue.bind(this));
+    this.attackRangeLabel = $("<div class='column'>attack</div>");
+    this.attackRange = Factory.rangeElement("column attack-range", 0.0, 1.0, this.setAttackValue.bind(this), 0.01);
+    this.decayRangeLabel = $("<div class='column'>decay</div>");
+    this.decayRange = Factory.rangeElement("column decay-range", 0.0, 1.0, this.setDecayValue.bind(this), 0.01);
+    this.sustainRangeLabel = $("<div class='column'>sustain</div>");
+    this.sustainRange = Factory.rangeElement("column sustain-range", 0.0, 1.0, this.setSustainValue.bind(this), 0.01);
+    this.releaseRangeLabel = $("<div class='column'>release</div>");
+    this.releaseRange = Factory.rangeElement("column release-range", 0.0, 1.0, this.setReleaseValue.bind(this), 0.01);
 
     this.setTrack(track);
 
@@ -2419,28 +2515,71 @@ function SettingView(track){
 inherit(SettingView, TabSegment);
 
 SettingView.prototype._build = function(){
-    var self = this;
     var container = this.getContainer();
 
-    container.append(this.frequencyRange);
+    this.table.append(this.waveTypeRadioBox);
+    this.table.append(this.volumeRangeLabel);
+    this.table.append(this.volumeRange);
+    this.table.append(this.frequencyRangeLabel);
+    this.table.append(this.frequencyRange);
+    this.table.append(this.attackRangeLabel);
+    this.table.append(this.attackRange);
+    this.table.append(this.decayRangeLabel);
+    this.table.append(this.decayRange);
+    this.table.append(this.sustainRangeLabel);
+    this.table.append(this.sustainRange);
+    this.table.append(this.releaseRangeLabel);
+    this.table.append(this.releaseRange);
+
+    container.append(this.table);
 };
 
 SettingView.prototype.setTrack = function(track){
+    var oscillatorData;
+    var envelopeData;
     if(track){
-        console.log(track);
         this.track = track;
-        this.oscillatorData = this.track.trackObject.oscillator;
-        this.envelopeData = this.track.trackObject.envelope;
+        console.log(track.trackObject);
+        oscillatorData = this.track.trackObject.oscillator;
+        envelopeData = this.track.trackObject.envelope;
         // set starting values from model:
-        console.log(this.track.trackObject.frequency.value);
+        this.waveTypeRadioBox.find('#' + oscillatorData.type).prop("checked", true);
+        Factory.setBeginValueToRangeElement(this.volumeRange, this.track.trackObject.volume.value);
         Factory.setBeginValueToRangeElement(this.frequencyRange, this.track.trackObject.frequency.value);
+        Factory.setBeginValueToRangeElement(this.attackRange, envelopeData.attack);
+        Factory.setBeginValueToRangeElement(this.decayRange, envelopeData.decay);
+        Factory.setBeginValueToRangeElement(this.sustainRange, envelopeData.sustain);
+        Factory.setBeginValueToRangeElement(this.releaseRange, envelopeData.release);
     }
 };
 
-SettingView.prototype.setFrequencyValue = function(value){
-    this.track.trackObject.oscillator.frequency = value;
+SettingView.prototype.setTypeValue = function(value){
+    this.track.trackObject.oscillator.type = value;
 };
 
+SettingView.prototype.setVolumeValue = function(value){
+    this.track.trackObject.volume.value = value;
+};
+
+SettingView.prototype.setFrequencyValue = function(value){
+    this.track.trackObject.frequency.value = value;
+};
+
+SettingView.prototype.setAttackValue = function(value){
+    this.track.trackObject.envelope.attack = value;
+};
+
+SettingView.prototype.setDecayValue = function(value){
+    this.track.trackObject.envelope.decay = value;
+};
+
+SettingView.prototype.setSustainValue = function(value){
+    this.track.trackObject.envelope.sustain = value;
+};
+
+SettingView.prototype.setReleaseValue = function(value){
+    this.track.trackObject.envelope.release = value;
+};
 
 
 /***/ }),
