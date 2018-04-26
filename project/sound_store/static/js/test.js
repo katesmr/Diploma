@@ -1019,7 +1019,7 @@ function BaseTrackModel(id, data){
     this.setting = data.setting || {};
     this.instrument = data.instrument || "synth";
     this.playSetting = data["play-setting"] || [];
-    this.postSetting = data["post-setting"] || [];
+    this.postSetting = data["post-setting"] || {};
     this.postProcessSettings = new PostProcessSettings(this.postSetting);
     this.trackObject = this._generate();
 }
@@ -1062,6 +1062,14 @@ BaseTrackModel.prototype.setSetting = function(){
         this.setting.envelope.sustain = this.trackObject.envelope.sustain;
         this.setting.envelope.release = this.trackObject.envelope.release;
     }
+};
+
+BaseTrackModel.prototype.setEnvelope = function(){
+
+};
+
+BaseTrackModel.prototype.setEnvelopeAttack = function(){
+
 };
 
 /**
@@ -1927,12 +1935,31 @@ BaseModel.prototype.remove = null;
 "use strict";
 
 
+var VibratoFilter = __webpack_require__(51);
+
 module.exports = PostProcessSettings;
 
 function PostProcessSettings(options){
-    this.volume = 1;
-    this.vibrato = {};
+    this.vibrato = new VibratoFilter(options.vibrato); // ???
+    this.bitCrusher = null;
+    this.freeverb = null;
+    this.reverb = null;
+    this.tremolo = null;
 }
+
+PostProcessSettings.prototype.getPostProcessSettings = function(){
+    var filter;
+    var result = {};
+    var filterName;
+    for(filterName in this){
+        filter = this[filterName];
+        if(filter.isUsed === true){
+            // save only used filters
+            result[filterName] = filter.getFilterSettings();
+        }
+    }
+    return result;
+};
 
 
 /***/ }),
@@ -2760,6 +2787,59 @@ UserModal.prototype._build = function(){
 
 UserModal.prototype.show = function(){
     this._container.modal("show");
+};
+
+
+/***/ }),
+/* 50 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = FilterModel;
+
+function FilterModel(){
+    this.isUsed = false;
+    this.filterObject = null;
+}
+
+FilterModel.prototype.generate = null;
+
+FilterModel.prototype.getFilterSettings = null;
+
+FilterModel.prototype.applyToTrack = function(track){};
+
+
+/***/ }),
+/* 51 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var FilterModel = __webpack_require__(50);
+var inherit = __webpack_require__(0);
+
+module.exports = VibratoFilter;
+
+function VibratoFilter(options){
+    this.frequency = options.frequency || 5;
+    this.depth = options.depth || 0.1;
+    this.type = options.type || "sine";
+}
+
+inherit(VibratoFilter, FilterModel);
+
+VibratoFilter.prototype.applyToTrack = function(track){
+    this.filterObject.toMaster();
+    track.connect(this.filterObject);
+};
+
+VibratoFilter.prototype.generate = function(){
+    if(this.isUsed === true){
+        this.filterObject = new Tone.Vibrato({"frequency": this.frequency, "type": this.type, "depth": this.depth});
+    }
 };
 
 
