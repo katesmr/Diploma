@@ -114,6 +114,7 @@ module.exports = {
     "buttonsPopup": buttonsPopup,
     "createButton": createButton,
     "radioButtonRow": radioButtonRow,
+    "dropDownElement": dropDownElement,
     "createDivButton": createDivButton,
     "createIconButton": createIconButton,
     "deleteCircleButton": deleteCircleButton,
@@ -211,6 +212,32 @@ function radioButtonRow(className, radioNameList, callback, beginValue){
         // set begin value if it exist in name list
         $('#' + beginValue).prop("checked", true);
     }
+    return $result;
+}
+
+/**
+ *
+ * @param className
+ * @param dataObject - Object - key-element name, value-data-value
+ * @param callback
+ * @param defaultValue
+ * @returns {string}
+ */
+function dropDownElement(className, dataObject, callback, defaultValue){
+    var key;
+    var value = defaultValue || 1;
+    var $menu = $("<div class='menu'>");
+    var $dropdown = $("<div class='ui selection dropdown'>");
+    var $result = $("<div class='" + className + "'></div>");
+    $dropdown.append("<input name='choice' value='" + value + "' type='hidden'>");
+    $dropdown.append("<i class='dropdown icon'>");
+    for(key in dataObject){
+        $menu.append("<div class='item' data-value='" + dataObject[key] + "'>" + key + "</div>");
+        console.log($menu);
+    }
+    $dropdown.append($menu);
+    $dropdown.dropdown();
+    $result.append($dropdown);
     return $result;
 }
 
@@ -1005,7 +1032,9 @@ BaseWindow.prototype.back = null;
 "use strict";
 
 
-var PostProcessSettings = __webpack_require__(29);
+var SettingsList = __webpack_require__(54);
+var FiltersList = __webpack_require__(56);
+var ProxyTrackManager = __webpack_require__(30);
 var generateUID = __webpack_require__(27);
 
 module.exports = BaseTrackModel;
@@ -1016,12 +1045,16 @@ function BaseTrackModel(id, data){
     this.isDeleted = false;
     this.id = id || -generateUID();
     this.length = data.length || 1;
-    this.setting = data.setting || {};
+    this.setting = data.setting || {}; // this
     this.instrument = data.instrument || "synth";
     this.playSetting = data["play-setting"] || [];
-    this.postSetting = data["post-setting"] || {};
-    this.postProcessSettings = new PostProcessSettings(this.postSetting);
-    this.trackObject = this._generate();
+    this.filterSetting = data["post-setting"] || {};
+
+    this.trackObject = this._generate(); // this
+    //this.filterObject = this.generateFilters();
+
+    //ProxyTrackManager.updateFromTrack(SettingsList, this);
+    //ProxyTrackManager.updateFromTrack(FiltersList, this);
 }
 
 BaseTrackModel.prototype.createFormData = function(){
@@ -1461,7 +1494,7 @@ function toAudioBuffer(blob, getAudioBuffer){
 
 
 var ObservableList = __webpack_require__(12);
-var ProjectModel = __webpack_require__(30);
+var ProjectModel = __webpack_require__(29);
 var inherit = __webpack_require__(0);
 
 module.exports = ProjectListModel;
@@ -1935,40 +1968,6 @@ BaseModel.prototype.remove = null;
 "use strict";
 
 
-var VibratoFilter = __webpack_require__(51);
-
-module.exports = PostProcessSettings;
-
-function PostProcessSettings(options){
-    this.vibrato = new VibratoFilter(options.vibrato); // ???
-    this.bitCrusher = null;
-    this.freeverb = null;
-    this.reverb = null;
-    this.tremolo = null;
-}
-
-PostProcessSettings.prototype.getPostProcessSettings = function(){
-    var filter;
-    var result = {};
-    var filterName;
-    for(filterName in this){
-        filter = this[filterName];
-        if(filter.isUsed === true){
-            // save only used filters
-            result[filterName] = filter.getFilterSettings();
-        }
-    }
-    return result;
-};
-
-
-/***/ }),
-/* 30 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
 var ObservableList = __webpack_require__(12);
 var inherit = __webpack_require__(0);
 var TrackSynthesizer = __webpack_require__(32);
@@ -2049,6 +2048,36 @@ ProjectModel.prototype.getData = function(){
 
 ProjectModel.prototype.toJson = function(){
     return JSON.stringify(this.getData());
+};
+
+
+/***/ }),
+/* 30 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+// ProxyTrackManager
+
+module.exports = {
+    "updateFromTrack": function(trackSettingsSet, track){ // SettingList OR FilterList
+        var i;
+        var key;
+        var tokenSetting;
+        var list = trackSettingsSet.list;
+        for(i = 0; i < list.length; ++i){
+            tokenSetting = list[i]; // BaseTrackSetting
+            console.log(tokenSetting.name);
+            console.log("---------");
+            for(key in tokenSetting.options){
+                console.log(tokenSetting.options[key]);
+            }
+        }
+    },
+    "setToTrack": function (list, track) {
+
+    }
 };
 
 
@@ -2501,6 +2530,10 @@ PlayerView.prototype._build = function(){
 
 var inherit = __webpack_require__(0);
 var TabSegment = __webpack_require__(17);
+var BaseOptionNumber = __webpack_require__(52);
+var BaseOptionList = __webpack_require__(51);
+var SettingsList = __webpack_require__(54);
+var ProxyTrackManager = __webpack_require__(30);
 var Factory = __webpack_require__(2);
 
 module.exports = SettingView;
@@ -2513,25 +2546,14 @@ module.exports = SettingView;
 function SettingView(track){
     TabSegment.call(this, "setting-view");
 
-    this.track = null;
+    this.track = track;
+    this.list = SettingsList.list;
 
     this.table = $("<div class='two column stackable ui grid'>"); // create grid with two columns
 
     this.waveTypeRadioBox = Factory.radioButtonRow("sixteen wide column wave-type-block",
                                                     ["sine", "square", "triangle", "sawtooth"],
                                                     this.setTypeValue.bind(this));
-    this.volumeRangeLabel = $("<div class='column'>volume</div>");
-    this.volumeRange = Factory.rangeElement("column volume-range", -50, 50, this.setVolumeValue.bind(this));
-    this.frequencyRangeLabel = $("<div class='column'>frequency</div>");
-    this.frequencyRange = Factory.rangeElement("column frequency-range", 0, 1000, this.setFrequencyValue.bind(this));
-    this.attackRangeLabel = $("<div class='column'>attack</div>");
-    this.attackRange = Factory.rangeElement("column attack-range", 0.0, 1.0, this.setAttackValue.bind(this), 0.01);
-    this.decayRangeLabel = $("<div class='column'>decay</div>");
-    this.decayRange = Factory.rangeElement("column decay-range", 0.0, 1.0, this.setDecayValue.bind(this), 0.01);
-    this.sustainRangeLabel = $("<div class='column'>sustain</div>");
-    this.sustainRange = Factory.rangeElement("column sustain-range", 0.0, 1.0, this.setSustainValue.bind(this), 0.01);
-    this.releaseRangeLabel = $("<div class='column'>release</div>");
-    this.releaseRange = Factory.rangeElement("column release-range", 0.0, 1.0, this.setReleaseValue.bind(this), 0.01);
 
     this.setTrack(track);
 
@@ -2544,19 +2566,8 @@ inherit(SettingView, TabSegment);
 SettingView.prototype._build = function(){
     var container = this.getContainer();
 
-    this.table.append(this.waveTypeRadioBox);
-    this.table.append(this.volumeRangeLabel);
-    this.table.append(this.volumeRange);
-    this.table.append(this.frequencyRangeLabel);
-    this.table.append(this.frequencyRange);
-    this.table.append(this.attackRangeLabel);
-    this.table.append(this.attackRange);
-    this.table.append(this.decayRangeLabel);
-    this.table.append(this.decayRange);
-    this.table.append(this.sustainRangeLabel);
-    this.table.append(this.sustainRange);
-    this.table.append(this.releaseRangeLabel);
-    this.table.append(this.releaseRange);
+
+    this.createSettingTools();
 
     container.append(this.table);
 };
@@ -2566,17 +2577,36 @@ SettingView.prototype.setTrack = function(track){
     var envelopeData;
     if(track){
         this.track = track;
-        console.log(track.trackObject);
         oscillatorData = this.track.trackObject.oscillator;
         envelopeData = this.track.trackObject.envelope;
         // set starting values from model:
-        this.waveTypeRadioBox.find('#' + oscillatorData.type).prop("checked", true);
-        Factory.setBeginValueToRangeElement(this.volumeRange, this.track.trackObject.volume.value);
-        Factory.setBeginValueToRangeElement(this.frequencyRange, this.track.trackObject.frequency.value);
-        Factory.setBeginValueToRangeElement(this.attackRange, envelopeData.attack);
-        Factory.setBeginValueToRangeElement(this.decayRange, envelopeData.decay);
-        Factory.setBeginValueToRangeElement(this.sustainRange, envelopeData.sustain);
-        Factory.setBeginValueToRangeElement(this.releaseRange, envelopeData.release);
+    }
+};
+
+SettingView.prototype.createSettingTools = function(){
+    var i;
+    var token;
+    var value;
+    var options;
+    var $element;
+    var $elementName;
+    var settingName;
+    console.log("+");
+    for(i = 0; i < this.list.length; ++i){
+        token = this.list[i];
+        options = token.options;
+        value = options.value;
+        settingName = token.name;
+        $elementName = $("<div class='column'>" + settingName + "</div>");
+        if(value instanceof BaseOptionNumber){
+            $element = Factory.rangeElement("column " + settingName + "-range", value.min, value.max,
+                                            undefined, value.step, value.value);
+        } else if(value instanceof BaseOptionList){
+            $element = Factory.dropDownElement("column " + settingName, value.options,
+                                               undefined, value.value);
+        }
+        this.table.append($elementName);
+        this.table.append($element);
     }
 };
 
@@ -2797,18 +2827,43 @@ UserModal.prototype.show = function(){
 "use strict";
 
 
-module.exports = FilterModel;
+module.exports = BaseOption;
 
-function FilterModel(){
-    this.isUsed = false;
-    this.filterObject = null;
+/**
+ * Base class for all kind of options
+ * @param {Number} value - current value
+ * @constructor
+ */
+function BaseOption(value){
+    Object.defineProperties(this, {
+        "__initialValue": {
+            "value": value,
+            "writable": false,
+            "enumerable": false
+        },
+        "value": {
+            "value": value, // initial value
+            "writable": true, // is able to be changed
+            "enumerable": true // is it possible to see this variable when doing for..in or JSON.stringify
+        }
+    });
 }
 
-FilterModel.prototype.generate = null;
+BaseOption.prototype.reset = function(){
+    this.value = this.__initialValue;
+};
 
-FilterModel.prototype.getFilterSettings = null;
+BaseOption.prototype.set = function(){
+    this.value = value;
+};
 
-FilterModel.prototype.applyToTrack = function(track){};
+BaseOption.prototype.valueOf = function(){
+    return this.value;
+};
+
+BaseOption.prototype.toString = function(){
+    return "[object BaseOption]";
+};
 
 
 /***/ }),
@@ -2818,29 +2873,213 @@ FilterModel.prototype.applyToTrack = function(track){};
 "use strict";
 
 
-var FilterModel = __webpack_require__(50);
 var inherit = __webpack_require__(0);
+var BaseOption = __webpack_require__(50);
 
-module.exports = VibratoFilter;
+module.exports = BaseOptionList;
 
-function VibratoFilter(options){
-    this.frequency = options.frequency || 5;
-    this.depth = options.depth || 0.1;
-    this.type = options.type || "sine";
+/**
+ *
+ * @param {Object} options - list of all possible options
+ * @param {*} defaultValue - default one from the options list
+ * @constructor
+ */
+function BaseOptionList(options, defaultValue){
+    BaseOption.call(this, defaultValue);
+    Object.defineProperties(this, {
+        "options": {
+            "value": options, // initial value
+            "writable": false, // is able to be changed
+            "enumerable": false // is it possible to see this variable when doing for..in or JSON.stringify
+        }
+    });
 }
 
-inherit(VibratoFilter, FilterModel);
+inherit(BaseOptionList, BaseOption);
 
-VibratoFilter.prototype.applyToTrack = function(track){
-    this.filterObject.toMaster();
-    track.connect(this.filterObject);
-};
-
-VibratoFilter.prototype.generate = function(){
-    if(this.isUsed === true){
-        this.filterObject = new Tone.Vibrato({"frequency": this.frequency, "type": this.type, "depth": this.depth});
+BaseOptionList.prototype.set = function(value){
+    if (value in this.options){
+        BaseOption.prototype.set.call(this, value);
     }
 };
+
+
+/***/ }),
+/* 52 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var BaseOption = __webpack_require__(50);
+
+module.exports = BaseOptionNumber;
+
+/**
+ *
+ * @param {*} defaultValue - default one from the options list
+ * @constructor
+ */
+function BaseOptionNumber(defaultValue, minValue, maxValue, step){
+    BaseOption.call(this, defaultValue);
+    this.min = minValue;
+    this.max = maxValue;
+    this.step = step;
+}
+
+inherit(BaseOptionNumber, BaseOption);
+
+
+/***/ }),
+/* 53 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = BaseTrackSetting;
+
+/**
+ */
+function BaseTrackSetting(name, isEnabled, options){
+    Object.defineProperties(this, {
+        "name": {
+            "value": name,
+            "writable": false,
+            "enumerable": true
+        },
+        "isEnabled": {
+            "value": !!isEnabled, // initial value
+            "writable": true, // is able to be changed
+            "enumerable": true // is it possible to see this variable when doing for..in or JSON.stringify
+        },
+        "options": {
+            "value": options,
+            "writable": false,
+            "enumerable": true
+        }
+    });
+}
+
+BaseTrackSetting.prototype.reset = function(){
+    var key;
+    var target = this.options;
+    for (key in target){
+        if (target.hasOwnProperty(key)){
+            target[key].reset();
+        }
+    }
+};
+
+BaseTrackSetting.prototype.set = function(optionName, value){
+    this.options[optionName].set(value);
+};
+
+BaseTrackSetting.prototype.valueOf = function(){
+    var key;
+    var result = {};
+    var target = this.options;
+    for (key in target){
+        if (target.hasOwnProperty(key)){
+            result[key] = target[key].valueOf();
+        }
+    }
+    return result;
+};
+
+BaseTrackSetting.prototype.toString = function(){
+    return "[object BaseTrackSettingSingleOption]";
+};
+
+
+/***/ }),
+/* 54 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var BaseOptionList = __webpack_require__(51);
+var BaseOptionNumber = __webpack_require__(52);
+var BaseTrackSetting = __webpack_require__(53);
+var TrackSettingsSet = __webpack_require__(55);
+
+module.exports = new TrackSettingsSet([
+    new BaseTrackSetting("volume", true, {
+        "value": new BaseOptionNumber(0, -50, 50, 0.5)
+    }),
+    new BaseTrackSetting("type", true, {
+        "value": new BaseOptionList({
+            "sine": 1,
+            "square": 2,
+            "triangle": 3,
+            "sawtooth": 4
+        }, 1)
+    }),
+    new BaseTrackSetting("frequency", true, {
+        "value": new BaseOptionNumber(440, 0, 1000, 1)
+    })
+]);
+
+
+/***/ }),
+/* 55 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = TrackSettingsSet;
+
+function TrackSettingsSet(list){
+    this.list = list;
+}
+
+TrackSettingsSet.prototype.reset = function(){
+    var i;
+    for (i = 0; i < this.list.length; ++i){
+        this.list[i].reset();
+    }
+};
+
+
+/***/ }),
+/* 56 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var BaseOptionList = __webpack_require__(51);
+var BaseOptionNumber = __webpack_require__(52);
+var BaseTrackSetting = __webpack_require__(53);
+var TrackSettingsSet = __webpack_require__(55);
+
+module.exports = new TrackSettingsSet([
+    new BaseTrackSetting("tremolo", true, {
+        "frequency": new BaseOptionNumber(1),
+        "depth": new BaseOptionNumber(0.1),
+        "spread": new BaseOptionNumber(0),
+        "type": new BaseOptionList({
+            "sine": 1,
+            "square": 2,
+            "triangle": 3,
+            "sawtooth": 4
+        }, 1)
+    }),
+    new BaseTrackSetting("vibrato", true, {
+        "frequency": new BaseOptionNumber(1),
+        "depth": new BaseOptionNumber(0.1),
+        "type": new BaseOptionList({
+            "sine": 1,
+            "square": 2,
+            "triangle": 3,
+            "sawtooth": 4
+        }, 1)
+    })
+
+]);
 
 
 /***/ })
