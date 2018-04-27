@@ -146,6 +146,7 @@ function deleteCircleButton(buttonId, callback){
 /**
  * Create range element (equalizer) with label with value of it
  * @param className
+ * @param id
  * @param minValue
  * @param maxValue
  * @param callback
@@ -153,13 +154,13 @@ function deleteCircleButton(buttonId, callback){
  * @param beginValue
  * @returns {*|jQuery|HTMLElement}
  */
-function rangeElement(className, minValue, maxValue, callback, stepValue, beginValue){
+function rangeElement(className, id, minValue, maxValue, callback, stepValue, beginValue){
     var value;
     var step = stepValue || 1;
     var begin = beginValue || 0;
     var $result = $("<div class='" + className + "'>");
     var $label = $("<div class='ui label'>" + begin + "</div>");
-    var $element = $("<input type='range' step='" + step + "' min='" + minValue +
+    var $element = $("<input id='" + id + "' type='range' step='" + step + "' min='" + minValue +
                      "' max='" + maxValue + "' value='" + begin + "'>");
     $element.on("input", function(){
         value = $(this).val();
@@ -176,8 +177,8 @@ function rangeElement(className, minValue, maxValue, callback, stepValue, beginV
  * @param rangeElement
  * @param beginValue
  */
-function setBeginValueToRangeElement(rangeElement, beginValue){
-    rangeElement.find("input").value = beginValue; // set input range value
+function setBeginValueToRangeElement(rangeElement, id, beginValue){
+    rangeElement.find('#' + id).value = beginValue; // set input range value
     rangeElement.find(".ui.label").text(beginValue); // set label value
 }
 
@@ -226,13 +227,20 @@ function radioButtonRow(className, radioNameList, callback, beginValue){
 function dropDownElement(className, dataObject, callback, defaultValue){
     var key;
     var value = defaultValue || 1;
+    var $item;
     var $menu = $("<div class='menu'>");
     var $dropdown = $("<div class='ui selection dropdown'>");
     var $result = $("<div class='" + className + "'></div>");
+    $dropdown.append("<div class='default text'>default</div>");
     $dropdown.append("<input name='choice' value='" + value + "' type='hidden'>");
     $dropdown.append("<i class='dropdown icon'>");
     for(key in dataObject){
-        $menu.append("<div class='item' data-value='" + dataObject[key] + "'>" + key + "</div>");
+        $item = $("<div class='item' data-value='" + dataObject[key] + "'>" + key + "</div>");
+        $item.on("click", function(){
+            console.log($(this).attr("data-value"));
+            console.log($(this).text());
+        });
+        $menu.append($item);
         console.log($menu);
     }
     $dropdown.append($menu);
@@ -1076,6 +1084,18 @@ BaseTrackModel.prototype.getAudioBuffer = function(){
 
 };
 
+BaseTrackModel.prototype.getFrequency = function(){
+    return this.trackObject.frequency.value;
+};
+
+BaseTrackModel.prototype.getVolume = function(){
+    return this.trackObject.volume.value;
+};
+
+BaseTrackModel.prototype.getType = function(){
+    return this.trackObject.oscillator.type;
+};
+
 // CALL THIS BEFORE SAVE ON SERVER !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 /**
  * Update or create oscillator && envelope data
@@ -1087,9 +1107,9 @@ BaseTrackModel.prototype.setSetting = function(){
         } else if(this.setting.envelope === undefined){
             this.setting.envelope = {};
         }
-        this.setting.oscillator.valume = this.trackObject.volume.value;
-        this.setting.oscillator.frequency = this.trackObject.frequency.value;
-        this.setting.oscillator.type = this.trackObject.oscillator.type;
+        this.setting.oscillator.valume = this.getVolume();
+        this.setting.oscillator.frequency = this.getFrequency();
+        this.setting.oscillator.type = this.getType();
         this.setting.envelope.attack = this.trackObject.envelope.attack;
         this.setting.envelope.decay = this.trackObject.envelope.decay;
         this.setting.envelope.sustain = this.trackObject.envelope.sustain;
@@ -2063,15 +2083,23 @@ ProjectModel.prototype.toJson = function(){
 module.exports = {
     "updateFromTrack": function(trackSettingsSet, track){ // SettingList OR FilterList
         var i;
-        var key;
+        var name;
         var tokenSetting;
         var list = trackSettingsSet.list;
         for(i = 0; i < list.length; ++i){
             tokenSetting = list[i]; // BaseTrackSetting
-            console.log(tokenSetting.name);
-            console.log("---------");
-            for(key in tokenSetting.options){
-                console.log(tokenSetting.options[key]);
+            name = tokenSetting.name;
+            switch(name){
+                case "frequency":
+                    tokenSetting.set(name, track.getFrequency());
+                    break;
+                case "volume":
+                    console.log("+");
+                    tokenSetting.set(name, track.getVolume());
+                    break;
+                case "type":
+                    tokenSetting.set(name, track.getType());
+                    break;
             }
         }
     },
@@ -2530,7 +2558,7 @@ PlayerView.prototype._build = function(){
 
 var inherit = __webpack_require__(0);
 var TabSegment = __webpack_require__(17);
-var BaseOptionNumber = __webpack_require__(52);
+var BaseOptionNumber = __webpack_require__(57);
 var BaseOptionList = __webpack_require__(51);
 var SettingsList = __webpack_require__(54);
 var ProxyTrackManager = __webpack_require__(30);
@@ -2547,13 +2575,8 @@ function SettingView(track){
     TabSegment.call(this, "setting-view");
 
     this.track = track;
-    this.list = SettingsList.list;
 
     this.table = $("<div class='two column stackable ui grid'>"); // create grid with two columns
-
-    this.waveTypeRadioBox = Factory.radioButtonRow("sixteen wide column wave-type-block",
-                                                    ["sine", "square", "triangle", "sawtooth"],
-                                                    this.setTypeValue.bind(this));
 
     this.setTrack(track);
 
@@ -2566,77 +2589,48 @@ inherit(SettingView, TabSegment);
 SettingView.prototype._build = function(){
     var container = this.getContainer();
 
-
-    this.createSettingTools();
-
     container.append(this.table);
 };
 
 SettingView.prototype.setTrack = function(track){
-    var oscillatorData;
-    var envelopeData;
     if(track){
         this.track = track;
-        oscillatorData = this.track.trackObject.oscillator;
-        envelopeData = this.track.trackObject.envelope;
-        // set starting values from model:
+        ProxyTrackManager.updateFromTrack(SettingsList, this.track);
+        this.createSettingTools(); // OR CREATE UPDATE METHOD FOR rangeElement AND dropDownElement ???
     }
 };
 
 SettingView.prototype.createSettingTools = function(){
     var i;
-    var token;
     var value;
     var options;
     var $element;
     var $elementName;
+    var tokenSetting;
     var settingName;
-    console.log("+");
-    for(i = 0; i < this.list.length; ++i){
-        token = this.list[i];
-        options = token.options;
+    for(i = 0; i < SettingsList.list.length; ++i){
+        tokenSetting = SettingsList.list[i];
+        options = tokenSetting.options;
         value = options.value;
-        settingName = token.name;
+        settingName = tokenSetting.name;
         $elementName = $("<div class='column'>" + settingName + "</div>");
-        if(value instanceof BaseOptionNumber){
-            $element = Factory.rangeElement("column " + settingName + "-range", value.min, value.max,
-                                            undefined, value.step, value.value);
-        } else if(value instanceof BaseOptionList){
-            $element = Factory.dropDownElement("column " + settingName, value.options,
-                                               undefined, value.value);
-        }
+        $element = createElement(settingName, value);
         this.table.append($elementName);
         this.table.append($element);
     }
 };
 
-SettingView.prototype.setTypeValue = function(value){
-    this.track.trackObject.oscillator.type = value;
-};
-
-SettingView.prototype.setVolumeValue = function(value){
-    this.track.trackObject.volume.value = value;
-};
-
-SettingView.prototype.setFrequencyValue = function(value){
-    this.track.trackObject.frequency.value = value;
-};
-
-SettingView.prototype.setAttackValue = function(value){
-    this.track.trackObject.envelope.attack = value;
-};
-
-SettingView.prototype.setDecayValue = function(value){
-    this.track.trackObject.envelope.decay = value;
-};
-
-SettingView.prototype.setSustainValue = function(value){
-    this.track.trackObject.envelope.sustain = value;
-};
-
-SettingView.prototype.setReleaseValue = function(value){
-    this.track.trackObject.envelope.release = value;
-};
+function createElement(name, value){
+    var $element;
+    if(value instanceof BaseOptionNumber){
+        $element = Factory.rangeElement("column " + name + "-range", name, value.min, value.max,
+                                         undefined, value.step, value.value);
+    } else if(value instanceof BaseOptionList){
+        $element = Factory.dropDownElement("column " + name, value.options,
+                                            undefined, value.value);
+    }
+    return $element;
+}
 
 
 /***/ }),
@@ -2853,7 +2847,7 @@ BaseOption.prototype.reset = function(){
     this.value = this.__initialValue;
 };
 
-BaseOption.prototype.set = function(){
+BaseOption.prototype.set = function(value){
     this.value = value;
 };
 
@@ -2898,40 +2892,14 @@ function BaseOptionList(options, defaultValue){
 inherit(BaseOptionList, BaseOption);
 
 BaseOptionList.prototype.set = function(value){
-    if (value in this.options){
+    if(value in this.options){
         BaseOption.prototype.set.call(this, value);
     }
 };
 
 
 /***/ }),
-/* 52 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var inherit = __webpack_require__(0);
-var BaseOption = __webpack_require__(50);
-
-module.exports = BaseOptionNumber;
-
-/**
- *
- * @param {*} defaultValue - default one from the options list
- * @constructor
- */
-function BaseOptionNumber(defaultValue, minValue, maxValue, step){
-    BaseOption.call(this, defaultValue);
-    this.min = minValue;
-    this.max = maxValue;
-    this.step = step;
-}
-
-inherit(BaseOptionNumber, BaseOption);
-
-
-/***/ }),
+/* 52 */,
 /* 53 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -2973,7 +2941,10 @@ BaseTrackSetting.prototype.reset = function(){
 };
 
 BaseTrackSetting.prototype.set = function(optionName, value){
-    this.options[optionName].set(value);
+    console.log(this.name);
+    console.log(this.options);
+    //this.options[optionName].set(value);
+    this.options.value.set(value);
 };
 
 BaseTrackSetting.prototype.valueOf = function(){
@@ -3001,7 +2972,7 @@ BaseTrackSetting.prototype.toString = function(){
 
 
 var BaseOptionList = __webpack_require__(51);
-var BaseOptionNumber = __webpack_require__(52);
+var BaseOptionNumber = __webpack_require__(57);
 var BaseTrackSetting = __webpack_require__(53);
 var TrackSettingsSet = __webpack_require__(55);
 
@@ -3052,7 +3023,7 @@ TrackSettingsSet.prototype.reset = function(){
 
 
 var BaseOptionList = __webpack_require__(51);
-var BaseOptionNumber = __webpack_require__(52);
+var BaseOptionNumber = __webpack_require__(57);
 var BaseTrackSetting = __webpack_require__(53);
 var TrackSettingsSet = __webpack_require__(55);
 
@@ -3080,6 +3051,33 @@ module.exports = new TrackSettingsSet([
     })
 
 ]);
+
+
+/***/ }),
+/* 57 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var BaseOption = __webpack_require__(50);
+
+module.exports = BaseRange;
+
+/**
+ *
+ * @param {*} defaultValue - default one from the options list
+ * @constructor
+ */
+function BaseRange(defaultValue, minValue, maxValue, step){
+    BaseOption.call(this, defaultValue);
+    this.min = minValue;
+    this.max = maxValue;
+    this.step = step;
+}
+
+inherit(BaseRange, BaseOption);
 
 
 /***/ })
