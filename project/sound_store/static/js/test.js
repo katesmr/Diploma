@@ -113,7 +113,6 @@ module.exports = {
     "rangeElement": rangeElement,
     "buttonsPopup": buttonsPopup,
     "createButton": createButton,
-    "radioButtonRow": radioButtonRow,
     "dropDownElement": dropDownElement,
     "createDivButton": createDivButton,
     "createIconButton": createIconButton,
@@ -146,7 +145,7 @@ function deleteCircleButton(buttonId, callback){
 /**
  * Create range element (equalizer) with label with value of it
  * @param className
- * @param id
+ * @param name
  * @param minValue
  * @param maxValue
  * @param callback
@@ -154,18 +153,18 @@ function deleteCircleButton(buttonId, callback){
  * @param beginValue
  * @returns {*|jQuery|HTMLElement}
  */
-function rangeElement(className, id, minValue, maxValue, callback, stepValue, beginValue){
+function rangeElement(className, name, minValue, maxValue, callback, stepValue, beginValue){
     var value;
     var step = stepValue || 1;
     var begin = beginValue || 0;
     var $result = $("<div class='" + className + "'>");
     var $label = $("<div class='ui label'>" + begin + "</div>");
-    var $element = $("<input id='" + id + "' type='range' step='" + step + "' min='" + minValue +
+    var $element = $("<input id='" + name + "' type='range' step='" + step + "' min='" + minValue +
                      "' max='" + maxValue + "' value='" + begin + "'>");
     $element.on("input", function(){
         value = $(this).val();
         $label.text(value);
-        callback(value);
+        callback(name, value);
     });
     $result.append($element);
     $result.append($label);
@@ -183,48 +182,15 @@ function setBeginValueToRangeElement(rangeElement, id, beginValue){
 }
 
 /**
- * Create div-block with radiobutton set with same callback for each other
- * @param className
- * @param radioNameList
- * @param callback
- * @param beginValue
- * @returns {*|jQuery|HTMLElement}
- */
-function radioButtonRow(className, radioNameList, callback, beginValue){
-    var i;
-    var value;
-    var $text;
-    var $input;
-    var $radioBox;
-    var $result = $("<div class='" + className + "'>");
-    for(i = 0; i < radioNameList.length; ++i){
-        value = radioNameList[i];
-        $radioBox = $("<div class='radiobutton'>");
-        $text = $("<label>" + value + "</label>");
-        $input = $("<input id='" + value +"' type='radio' name='radiobutton'>");
-        $input.on("click", function(){
-            callback($(this).attr("id"));
-        });
-        $radioBox.append($text);
-        $radioBox.append($input);
-        $result.append($radioBox);
-    }
-    if(radioNameList.indexOf(beginValue) > -1){
-        // set begin value if it exist in name list
-        $('#' + beginValue).prop("checked", true);
-    }
-    return $result;
-}
-
-/**
  *
  * @param className
+ * @param name
  * @param dataObject - Object - key-element name, value-data-value
  * @param callback
  * @param defaultValue
  * @returns {string}
  */
-function dropDownElement(className, dataObject, callback, defaultValue){
+function dropDownElement(className, name, dataObject, callback, defaultValue){
     var key;
     var value = defaultValue || 1;
     var $item;
@@ -235,10 +201,11 @@ function dropDownElement(className, dataObject, callback, defaultValue){
     $dropdown.append("<input name='choice' value='" + value + "' type='hidden'>");
     $dropdown.append("<i class='dropdown icon'>");
     for(key in dataObject){
-        $item = $("<div class='item' data-value='" + dataObject[key] + "'>" + key + "</div>");
+        $item = $("<div id='" + name + "' class='item' data-value='" + dataObject[key] + "'>" + key + "</div>");
         $item.on("click", function(){
             console.log($(this).attr("data-value"));
             console.log($(this).text());
+            callback($(this).attr("id"), $(this).text());
         });
         $menu.append($item);
         console.log($menu);
@@ -1096,6 +1063,22 @@ BaseTrackModel.prototype.getType = function(){
     return this.trackObject.oscillator.type;
 };
 
+BaseTrackModel.prototype.getAttack = function(){
+    return this.trackObject.envelope.attack;
+};
+
+BaseTrackModel.prototype.getDecay = function(){
+    return this.trackObject.envelope.decay;
+};
+
+BaseTrackModel.prototype.getSustain = function(){
+    return this.trackObject.envelope.sustain;
+};
+
+BaseTrackModel.prototype.getRelease = function(){
+    return this.trackObject.envelope.release;
+};
+
 // CALL THIS BEFORE SAVE ON SERVER !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 /**
  * Update or create oscillator && envelope data
@@ -1110,10 +1093,10 @@ BaseTrackModel.prototype.setSetting = function(){
         this.setting.oscillator.valume = this.getVolume();
         this.setting.oscillator.frequency = this.getFrequency();
         this.setting.oscillator.type = this.getType();
-        this.setting.envelope.attack = this.trackObject.envelope.attack;
-        this.setting.envelope.decay = this.trackObject.envelope.decay;
-        this.setting.envelope.sustain = this.trackObject.envelope.sustain;
-        this.setting.envelope.release = this.trackObject.envelope.release;
+        this.setting.envelope.attack = this.getAttack();
+        this.setting.envelope.decay = this.getDecay();
+        this.setting.envelope.sustain = this.getSustain();
+        this.setting.envelope.release = this.getRelease();
     }
 };
 
@@ -2100,10 +2083,25 @@ module.exports = {
                 case "type":
                     tokenSetting.set(name, track.getType());
                     break;
+                case "attack":
+                    tokenSetting.set(name, track.getAttack());
+                    break;
+                case "decay":
+                    tokenSetting.set(name, track.getDecay());
+                    break;
+                case "sustain":
+                    tokenSetting.set(name, track.getSustain());
+                    break;
+                case "release":
+                    tokenSetting.set(name, track.getRelease());
+                    break;
             }
         }
     },
-    "setToTrack": function (list, track) {
+    "setToTrack": function(list, track){
+
+    },
+    "set": function(list, track, settingName, value){
 
     }
 };
@@ -2558,7 +2556,7 @@ PlayerView.prototype._build = function(){
 
 var inherit = __webpack_require__(0);
 var TabSegment = __webpack_require__(17);
-var BaseOptionNumber = __webpack_require__(57);
+var BaseRange = __webpack_require__(57);
 var BaseOptionList = __webpack_require__(51);
 var SettingsList = __webpack_require__(54);
 var ProxyTrackManager = __webpack_require__(30);
@@ -2611,7 +2609,7 @@ SettingView.prototype.createSettingTools = function(){
     for(i = 0; i < SettingsList.list.length; ++i){
         tokenSetting = SettingsList.list[i];
         options = tokenSetting.options;
-        value = options.value;
+        value = options.value; // BaseOption
         settingName = tokenSetting.name;
         $elementName = $("<div class='column'>" + settingName + "</div>");
         $element = createElement(settingName, value);
@@ -2622,12 +2620,13 @@ SettingView.prototype.createSettingTools = function(){
 
 function createElement(name, value){
     var $element;
-    if(value instanceof BaseOptionNumber){
+    if(value instanceof BaseRange){
+        // or ProxyTrackManager.set(list, track, optionName, value)
         $element = Factory.rangeElement("column " + name + "-range", name, value.min, value.max,
-                                         undefined, value.step, value.value);
+                                        SettingsList.set.bind(SettingsList), value.step, value.value);
     } else if(value instanceof BaseOptionList){
-        $element = Factory.dropDownElement("column " + name, value.options,
-                                            undefined, value.value);
+        $element = Factory.dropDownElement("column " + name, name, value.options,
+                                            SettingsList.set.bind(SettingsList), value.value);
     }
     return $element;
 }
@@ -2941,8 +2940,6 @@ BaseTrackSetting.prototype.reset = function(){
 };
 
 BaseTrackSetting.prototype.set = function(optionName, value){
-    console.log(this.name);
-    console.log(this.options);
     //this.options[optionName].set(value);
     this.options.value.set(value);
 };
@@ -2972,14 +2969,11 @@ BaseTrackSetting.prototype.toString = function(){
 
 
 var BaseOptionList = __webpack_require__(51);
-var BaseOptionNumber = __webpack_require__(57);
+var BaseRange = __webpack_require__(57);
 var BaseTrackSetting = __webpack_require__(53);
 var TrackSettingsSet = __webpack_require__(55);
 
 module.exports = new TrackSettingsSet([
-    new BaseTrackSetting("volume", true, {
-        "value": new BaseOptionNumber(0, -50, 50, 0.5)
-    }),
     new BaseTrackSetting("type", true, {
         "value": new BaseOptionList({
             "sine": 1,
@@ -2988,10 +2982,37 @@ module.exports = new TrackSettingsSet([
             "sawtooth": 4
         }, 1)
     }),
+    new BaseTrackSetting("volume", true, {
+        "value": new BaseRange(0, -50, 50, 0.5)
+    }),
     new BaseTrackSetting("frequency", true, {
-        "value": new BaseOptionNumber(440, 0, 1000, 1)
+        "value": new BaseRange(440, 0, 1000, 1)
+    }),
+    new BaseTrackSetting("attack", true, {
+        "value": new BaseRange(0, 0, 1, 0.005)
+    }),
+    new BaseTrackSetting("decay", true, {
+        "value": new BaseRange(0, 0, 1, 0.005)
+    }),
+    new BaseTrackSetting("sustain", true, {
+        "value": new BaseRange(0, 0, 1, 0.005)
+    }),
+    new BaseTrackSetting("relay", true, {
+        "value": new BaseRange(0, 0, 1, 0.005)
     })
 ]);
+
+TrackSettingsSet.prototype.set = function(optionName, value){
+    var i;
+    var tokenSetting;
+    for(i = 0; i < this.list.length; ++i){
+        tokenSetting = this.list[i];
+        console.log(tokenSetting);
+        if(tokenSetting.name === optionName){
+            tokenSetting.set(optionName, value);
+        }
+    }
+};
 
 
 /***/ }),
