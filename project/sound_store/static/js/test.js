@@ -208,7 +208,6 @@ function dropDownElement(className, name, dataObject, callback, defaultValue){
             callback($(this).attr("id"), $(this).text());
         });
         $menu.append($item);
-        console.log($menu);
     }
     $dropdown.append($menu);
     $dropdown.dropdown();
@@ -1023,7 +1022,7 @@ function BaseTrackModel(id, data){
     this.setting = data.setting || {}; // this
     this.instrument = data.instrument || "synth";
     this.playSetting = data["play-setting"] || [];
-    this.filterSetting = data["post-setting"] || {};
+    //this.filterSetting = data["post-setting"] || {};
 
     this.trackObject = this._generate(); // this
     //this.filterObject = this.generateFilters();
@@ -1079,6 +1078,54 @@ BaseTrackModel.prototype.getRelease = function(){
     return this.trackObject.envelope.release;
 };
 
+/**
+ * Return object of track setting in right format for transfer or saving
+ * @returns {{}}
+ */
+BaseTrackModel.prototype.getData = function(){
+    var result = {};
+    result.id = this.id;
+    result.isDeleted = this.isDeleted;
+    result.instrument = this.instrument;
+    result.length = this.length;
+    result.setting = this.setting;
+    result["play-setting"] = this.playSetting;
+    result["post-setting"] = this.filterObjects.getOptions();
+    return result;
+};
+
+BaseTrackModel.prototype.toJson = function(){
+    return JSON.stringify(this);
+};
+
+BaseTrackModel.prototype.setFrequency = function(value){
+    this.trackObject.frequency.value = value;
+};
+
+BaseTrackModel.prototype.setVolume = function(value){
+    this.trackObject.volume.value = value;
+};
+
+BaseTrackModel.prototype.setType = function(value){
+    this.trackObject.oscillator.type = value;
+};
+
+BaseTrackModel.prototype.setAttack = function(value){
+    this.trackObject.envelope.attack = value;
+};
+
+BaseTrackModel.prototype.setDecay = function(value){
+    this.trackObject.envelope.decay = value;
+};
+
+BaseTrackModel.prototype.setSustain = function(value){
+    this.trackObject.envelope.sustain = value;
+};
+
+BaseTrackModel.prototype.setRelease = function(value){
+    this.trackObject.envelope.release = value;
+};
+
 // CALL THIS BEFORE SAVE ON SERVER !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 /**
  * Update or create oscillator && envelope data
@@ -1098,14 +1145,6 @@ BaseTrackModel.prototype.setSetting = function(){
         this.setting.envelope.sustain = this.getSustain();
         this.setting.envelope.release = this.getRelease();
     }
-};
-
-BaseTrackModel.prototype.setEnvelope = function(){
-
-};
-
-BaseTrackModel.prototype.setEnvelopeAttack = function(){
-
 };
 
 /**
@@ -1131,22 +1170,6 @@ BaseTrackModel.prototype._generate = null;
 BaseTrackModel.prototype.play = null;
 
 BaseTrackModel.prototype.playCompomponent = null;
-
-BaseTrackModel.prototype.toJson = function(){
-    return JSON.stringify(this);
-};
-
-BaseTrackModel.prototype.getData = function(){
-    var result = {};
-    result.isDeleted = this.isDeleted;
-    result.id = this.id;
-    result.instrument = this.instrument;
-    result.length = this.length;
-    result.setting = this.setting;
-    result["play-setting"] = this.playSetting;
-    result["post-setting"] = this.postSetting;
-    return result;
-};
 
 
 /***/ }),
@@ -2064,37 +2087,18 @@ ProjectModel.prototype.toJson = function(){
 // ProxyTrackManager
 
 module.exports = {
-    "updateFromTrack": function(trackSettingsSet, track){ // SettingList OR FilterList
+    "updateFromTrack": function(listInstance, track){ // SettingList OR FilterList
         var i;
         var name;
         var tokenSetting;
-        var list = trackSettingsSet.list;
+        var list = listInstance.list;
         for(i = 0; i < list.length; ++i){
-            tokenSetting = list[i]; // BaseTrackSetting
+            tokenSetting = list[i]; // BaseTrackSetting type
             name = tokenSetting.name;
-            switch(name){
-                case "frequency":
-                    tokenSetting.set(name, track.getFrequency());
-                    break;
-                case "volume":
-                    console.log("+");
-                    tokenSetting.set(name, track.getVolume());
-                    break;
-                case "type":
-                    tokenSetting.set(name, track.getType());
-                    break;
-                case "attack":
-                    tokenSetting.set(name, track.getAttack());
-                    break;
-                case "decay":
-                    tokenSetting.set(name, track.getDecay());
-                    break;
-                case "sustain":
-                    tokenSetting.set(name, track.getSustain());
-                    break;
-                case "release":
-                    tokenSetting.set(name, track.getRelease());
-                    break;
+            if(listInstance instanceof SettingList){ // ?????????
+                setToSettingList(tokenSetting, track, name);
+            } else if(listInstance instanceof FilterList){ // ????????
+                setToFilterList(tokenSetting, track, name);
             }
         }
     },
@@ -2105,6 +2109,63 @@ module.exports = {
 
     }
 };
+
+function setToSettingList(listElement, track, optionName){
+    switch(optionName){
+        case "frequency":
+            listElement.set(track.getFrequency());
+            break;
+        case "volume":
+            listElement.set( track.getVolume());
+            break;
+        case "type":
+            listElement.set(track.getType());
+            break;
+        case "attack":
+            listElement.set(track.getAttack());
+            break;
+        case "decay":
+            listElement.set(track.getDecay());
+            break;
+        case "sustain":
+            listElement.set(track.getSustain());
+            break;
+        case "release":
+            listElement.set(track.getRelease());
+            break;
+    }
+}
+
+function setToFilterList(listElement, track, filterName){
+
+}
+
+function setToTrackSetting(track, settingName, value){
+    switch(settingName){
+        case "frequency":
+            track.setFrequency(value);
+            break;
+        case "volume":
+            track.setVolume(value);
+            break;
+        case "type":
+            track.setType(value);
+            break;
+        case "attack":
+            track.setAttack(value);
+            break;
+        case "decay":
+            track.setDecay(value);
+            break;
+        case "sustain":
+            track.setSustain(value);
+            break;
+        case "release":
+            track.setRelease(value);
+            break;
+    }
+    track.setSetting(); // write to model parameter for saving to server
+}
 
 
 /***/ }),
@@ -2608,6 +2669,7 @@ SettingView.prototype.createSettingTools = function(){
     var settingName;
     for(i = 0; i < SettingsList.list.length; ++i){
         tokenSetting = SettingsList.list[i];
+        tokenSetting.reset();
         options = tokenSetting.options;
         value = options.value; // BaseOption
         settingName = tokenSetting.name;
@@ -2939,7 +3001,7 @@ BaseTrackSetting.prototype.reset = function(){
     }
 };
 
-BaseTrackSetting.prototype.set = function(optionName, value){
+BaseTrackSetting.prototype.set = function(value){
     //this.options[optionName].set(value);
     this.options.value.set(value);
 };
@@ -2989,16 +3051,16 @@ module.exports = new TrackSettingsSet([
         "value": new BaseRange(440, 0, 1000, 1)
     }),
     new BaseTrackSetting("attack", true, {
-        "value": new BaseRange(0, 0, 1, 0.005)
+        "value": new BaseRange(0, 0, 1, 0.001)
     }),
     new BaseTrackSetting("decay", true, {
-        "value": new BaseRange(0, 0, 1, 0.005)
+        "value": new BaseRange(0, 0, 1, 0.001)
     }),
     new BaseTrackSetting("sustain", true, {
-        "value": new BaseRange(0, 0, 1, 0.005)
+        "value": new BaseRange(0, 0, 1, 0.001)
     }),
     new BaseTrackSetting("relay", true, {
-        "value": new BaseRange(0, 0, 1, 0.005)
+        "value": new BaseRange(0, 0, 1, 0.001)
     })
 ]);
 
@@ -3007,7 +3069,6 @@ TrackSettingsSet.prototype.set = function(optionName, value){
     var tokenSetting;
     for(i = 0; i < this.list.length; ++i){
         tokenSetting = this.list[i];
-        console.log(tokenSetting);
         if(tokenSetting.name === optionName){
             tokenSetting.set(optionName, value);
         }
@@ -3044,15 +3105,15 @@ TrackSettingsSet.prototype.reset = function(){
 
 
 var BaseOptionList = __webpack_require__(51);
-var BaseOptionNumber = __webpack_require__(57);
+var BaseRange = __webpack_require__(57);
 var BaseTrackSetting = __webpack_require__(53);
 var TrackSettingsSet = __webpack_require__(55);
 
 module.exports = new TrackSettingsSet([
-    new BaseTrackSetting("tremolo", true, {
-        "frequency": new BaseOptionNumber(1),
-        "depth": new BaseOptionNumber(0.1),
-        "spread": new BaseOptionNumber(0),
+    new BaseTrackSetting("tremolo", false, {
+        "frequency": new BaseRange(1),
+        "depth": new BaseRange(0.1),
+        "spread": new BaseRange(0),
         "type": new BaseOptionList({
             "sine": 1,
             "square": 2,
@@ -3060,17 +3121,29 @@ module.exports = new TrackSettingsSet([
             "sawtooth": 4
         }, 1)
     }),
-    new BaseTrackSetting("vibrato", true, {
-        "frequency": new BaseOptionNumber(1),
-        "depth": new BaseOptionNumber(0.1),
+    new BaseTrackSetting("vibrato", false, {
+        "frequency": new BaseRange(1),
+        "depth": new BaseRange(0.1),
         "type": new BaseOptionList({
             "sine": 1,
             "square": 2,
             "triangle": 3,
             "sawtooth": 4
         }, 1)
+    }),
+    new BaseTrackSetting("crusher", false, {
+        "bits": new BaseRange(1, 1, 8, 1)
+    }),
+    new BaseTrackSetting("phaser", false, {
+        "octaves": new BaseRange(1, 0, 1000, 1),
+        "frequency": new BaseRange(0, 0, 1, 0.1), // ???
+        "baseFrequency": new BaseRange(1, 0, 1000, 1)
+    }),
+    new BaseTrackSetting("freeverd", false, {
+        "dampening": new BaseRange(1, 0, 1000, 1),
+        "roomSize": new BaseRange(0, 0, 1, 1), // or step = 0.001
+        "wet": new BaseRange(1, 0, 1, 1)
     })
-
 ]);
 
 

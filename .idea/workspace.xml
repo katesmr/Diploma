@@ -10,10 +10,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b869e63b-9454-4773-9649-2a5fbab85264" name="Default" comment="">
+      <change beforePath="" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/FilterModel.js" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/FreeverbFilter.js" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/PostSettings.js" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change beforePath="$PROJECT_DIR$/project/sound_store/static/js/test.js" afterPath="$PROJECT_DIR$/project/sound_store/static/js/test.js" />
       <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/BaseTrackModel.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/BaseTrackModel.js" />
       <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/BaseTrackSetting.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/BaseTrackSetting.js" />
+      <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/FiltersList.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/FiltersList.js" />
+      <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/PostProcessSettings.js" afterPath="" />
       <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/ProxyTrackManager.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/ProxyTrackManager.js" />
       <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/SettingsList.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/SettingsList.js" />
       <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/Factory.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/Factory.js" />
@@ -32,28 +37,68 @@
       <file leaf-file-name="SettingView.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/SettingView.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="656">
-              <caret line="67" column="66" lean-forward="false" selection-start-line="67" selection-start-column="66" selection-end-line="67" selection-end-column="66" />
+            <state relative-caret-position="198">
+              <caret line="38" column="27" lean-forward="false" selection-start-line="38" selection-start-column="27" selection-end-line="38" selection-end-column="27" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Factory.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/Factory.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="216">
-              <caret line="75" column="14" lean-forward="false" selection-start-line="75" selection-start-column="14" selection-end-line="75" selection-end-column="14" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="BaseTrackModel.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="BaseTrackModel.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/BaseTrackModel.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1430">
-              <caret line="89" column="57" lean-forward="false" selection-start-line="89" selection-start-column="57" selection-end-line="89" selection-end-column="57" />
+            <state relative-caret-position="2232">
+              <caret line="124" column="35" lean-forward="false" selection-start-line="124" selection-start-column="25" selection-end-line="124" selection-end-column="35" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="FiltersList.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/FiltersList.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="90">
+              <caret line="5" column="37" lean-forward="false" selection-start-line="5" selection-start-column="21" selection-end-line="5" selection-end-column="37" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="PostSettings.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/PostSettings.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="152">
+              <caret line="59" column="49" lean-forward="false" selection-start-line="59" selection-start-column="49" selection-end-line="59" selection-end-column="49" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="FreeverbFilter.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/FreeverbFilter.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="792">
+              <caret line="47" column="29" lean-forward="false" selection-start-line="47" selection-start-column="29" selection-end-line="47" selection-end-column="29" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ProxyTrackManager.js" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/ProxyTrackManager.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="234">
+              <caret line="13" column="70" lean-forward="false" selection-start-line="13" selection-start-column="70" selection-end-line="13" selection-end-column="70" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="FilterModel.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/FilterModel.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="180">
+              <caret line="10" column="0" lean-forward="true" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -62,48 +107,8 @@
       <file leaf-file-name="SettingsList.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/SettingsList.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="234">
-              <caret line="13" column="7" lean-forward="false" selection-start-line="13" selection-start-column="7" selection-end-line="13" selection-end-column="7" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="BaseTrackSetting.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/BaseTrackSetting.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="612">
-              <caret line="34" column="61" lean-forward="false" selection-start-line="34" selection-start-column="61" selection-end-line="34" selection-end-column="61" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ProxyTrackManager.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/ProxyTrackManager.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="594">
-              <caret line="33" column="26" lean-forward="false" selection-start-line="33" selection-start-column="26" selection-end-line="33" selection-end-column="26" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="BaseRange.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/BaseRange.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="324">
-              <caret line="18" column="0" lean-forward="false" selection-start-line="18" selection-start-column="0" selection-end-line="18" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="BaseOption.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/BaseOption.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
-              <caret line="0" column="28" lean-forward="false" selection-start-line="0" selection-start-column="28" selection-end-line="0" selection-end-column="28" />
+            <state relative-caret-position="684">
+              <caret line="38" column="36" lean-forward="false" selection-start-line="38" selection-start-column="36" selection-end-line="38" selection-end-column="36" />
               <folding />
             </state>
           </provider>
@@ -139,9 +144,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/project/sound_store/views.py" />
-        <option value="$PROJECT_DIR$/project/sound_store/models.py" />
-        <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/TrackNoise.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/TrackSynthesizer.js" />
         <option value="$PROJECT_DIR$/project/sound_store/src/DataManager.py" />
         <option value="$PROJECT_DIR$/project/sound_store/src/utils/helper.py" />
@@ -177,19 +179,22 @@
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/TrackView.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/controller/BaseController.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/VibratoFilter.js" />
-        <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/FilterModel.js" />
-        <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/PostProcessSettings.js" />
-        <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/FiltersList.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/BaseOptionNumber.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/BaseRange.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/BaseOption.js" />
+        <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/BaseOptionList.js" />
+        <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/TremoloFilter.js" />
+        <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/FiltersList.js" />
+        <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/BaseTrackSetting.js" />
+        <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/PostProcessSettings.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/BaseTrackModel.js" />
+        <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/FilterModel.js" />
+        <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/PostSettings.js" />
+        <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/SettingView.js" />
+        <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/FreeverbFilter.js" />
+        <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/Factory.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/SettingsList.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/ProxyTrackManager.js" />
-        <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/BaseTrackSetting.js" />
-        <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/Factory.js" />
-        <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/BaseOptionList.js" />
-        <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/SettingView.js" />
       </list>
     </option>
   </component>
@@ -439,12 +444,12 @@
       <workItem from="1523966681286" duration="9991000" />
       <workItem from="1524078612877" duration="63856000" />
       <workItem from="1524504160845" duration="46485000" />
-      <workItem from="1524821595337" duration="37681000" />
+      <workItem from="1524821595337" duration="61048000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="676202000" />
+    <option name="totallyTimeSpent" value="699569000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="67" y="-4" width="1853" height="1084" extended-state="6" />
@@ -477,18 +482,11 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="27" />
+      <option name="time" value="28" />
     </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/project/sound_store/src/DataManager.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="368">
-          <caret line="53" column="0" lean-forward="false" selection-start-line="53" selection-start-column="0" selection-end-line="53" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/project/sound_store/src/utils/helper.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="404">
@@ -723,22 +721,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/FilterModel.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="162">
-          <caret line="9" column="47" lean-forward="false" selection-start-line="9" selection-start-column="47" selection-end-line="9" selection-end-column="47" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/PostProcessSettings.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="450">
-          <caret line="25" column="0" lean-forward="false" selection-start-line="25" selection-start-column="0" selection-end-line="25" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/controller/BaseController.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -771,26 +753,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/FiltersList.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="126">
-          <caret line="7" column="43" lean-forward="true" selection-start-line="7" selection-start-column="43" selection-end-line="7" selection-end-column="43" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/ProjectModel.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="504">
           <caret line="49" column="5" lean-forward="true" selection-start-line="49" selection-start-column="5" selection-end-line="49" selection-end-column="5" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/ProxyTrackManager.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="594">
-          <caret line="33" column="26" lean-forward="false" selection-start-line="33" selection-start-column="26" selection-end-line="33" selection-end-column="26" />
           <folding />
         </state>
       </provider>
@@ -813,16 +779,48 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/BaseTrackSetting.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="612">
-          <caret line="34" column="61" lean-forward="false" selection-start-line="34" selection-start-column="61" selection-end-line="34" selection-end-column="61" />
+        <state relative-caret-position="180">
+          <caret line="10" column="10" lean-forward="true" selection-start-line="10" selection-start-column="10" selection-end-line="10" selection-end-column="10" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/BaseTrackModel.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2232">
+          <caret line="124" column="35" lean-forward="false" selection-start-line="124" selection-start-column="25" selection-end-line="124" selection-end-column="35" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/SettingView.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="198">
+          <caret line="38" column="27" lean-forward="false" selection-start-line="38" selection-start-column="27" selection-end-line="38" selection-end-column="27" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/Factory.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="216">
-          <caret line="75" column="14" lean-forward="false" selection-start-line="75" selection-start-column="14" selection-end-line="75" selection-end-column="14" />
+        <state relative-caret-position="630">
+          <caret line="98" column="28" lean-forward="false" selection-start-line="98" selection-start-column="28" selection-end-line="98" selection-end-column="28" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/SettingsList.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="684">
+          <caret line="38" column="36" lean-forward="false" selection-start-line="38" selection-start-column="36" selection-end-line="38" selection-end-column="36" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/FilterModel.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="10" column="0" lean-forward="true" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
           <folding />
         </state>
       </provider>
@@ -835,26 +833,34 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/SettingsList.js">
+    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/FiltersList.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="90">
+          <caret line="5" column="37" lean-forward="false" selection-start-line="5" selection-start-column="21" selection-end-line="5" selection-end-column="37" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/PostSettings.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="152">
+          <caret line="59" column="49" lean-forward="false" selection-start-line="59" selection-start-column="49" selection-end-line="59" selection-end-column="49" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/FreeverbFilter.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="792">
+          <caret line="47" column="29" lean-forward="false" selection-start-line="47" selection-start-column="29" selection-end-line="47" selection-end-column="29" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/ProxyTrackManager.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="234">
-          <caret line="13" column="7" lean-forward="false" selection-start-line="13" selection-start-column="7" selection-end-line="13" selection-end-column="7" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/SettingView.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="656">
-          <caret line="67" column="66" lean-forward="false" selection-start-line="67" selection-start-column="66" selection-end-line="67" selection-end-column="66" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/BaseTrackModel.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1430">
-          <caret line="89" column="57" lean-forward="false" selection-start-line="89" selection-start-column="57" selection-end-line="89" selection-end-column="57" />
+          <caret line="13" column="70" lean-forward="false" selection-start-line="13" selection-start-column="70" selection-end-line="13" selection-end-column="70" />
           <folding />
         </state>
       </provider>
