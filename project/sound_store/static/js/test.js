@@ -159,12 +159,12 @@ function rangeElement(className, name, minValue, maxValue, callback, stepValue, 
     var begin = beginValue || 0;
     var $result = $("<div class='" + className + "'>");
     var $label = $("<div class='ui label'>" + begin + "</div>");
-    var $element = $("<input id='" + name + "' type='range' step='" + step + "' min='" + minValue +
-                     "' max='" + maxValue + "' value='" + begin + "'>");
+    var $element = $("<input id='" + name + "' type='range' step=" + step + " min=" + minValue +
+                     " max=" + maxValue + " value=" + begin + ">");
     $element.on("input", function(){
         value = $(this).val();
         $label.text(value);
-        callback(name, value);
+        callback(name, Number(value));
     });
     $result.append($element);
     $result.append($label);
@@ -844,8 +844,11 @@ TrackView.prototype.showTabMenu = function(){
 };
 
 TrackView.prototype.back = function(){
+    this.settingTabSegment.table.empty();
     windowsTransport.notify(commonEventNames.E_ACTIVATE_WINDOW, "trackList");
 };
+
+
 
 function setTrack(eventName, track){
     this.settingTabSegment.setTrack(track);
@@ -1090,7 +1093,7 @@ BaseTrackModel.prototype.getData = function(){
     result.length = this.length;
     result.setting = this.setting;
     result["play-setting"] = this.playSetting;
-    result["post-setting"] = this.filterObjects.getOptions();
+    result["post-setting"] = {}; //this.filterObjects.getOptions();
     return result;
 };
 
@@ -1134,7 +1137,8 @@ BaseTrackModel.prototype.setSetting = function(){
     if(this.trackObject){
         if(this.setting.oscillator === undefined){
             this.setting.oscillator = {};
-        } else if(this.setting.envelope === undefined){
+        }
+        if(this.setting.envelope === undefined){
             this.setting.envelope = {};
         }
         this.setting.oscillator.valume = this.getVolume();
@@ -2087,60 +2091,109 @@ ProjectModel.prototype.toJson = function(){
 // ProxyTrackManager
 
 module.exports = {
-    "updateFromTrack": function(listInstance, track){ // SettingList OR FilterList
-        var i;
-        var name;
-        var tokenSetting;
-        var list = listInstance.list;
-        for(i = 0; i < list.length; ++i){
-            tokenSetting = list[i]; // BaseTrackSetting type
-            name = tokenSetting.name;
-            if(listInstance instanceof SettingList){ // ?????????
-                setToSettingList(tokenSetting, track, name);
-            } else if(listInstance instanceof FilterList){ // ????????
-                setToFilterList(tokenSetting, track, name);
-            }
-        }
+    "updateSettingListFromTrack": function(settingList, track){ // SettingList OR FilterList
+        updateList(settingList, track, setToSettingList)
     },
-    "setToTrack": function(list, track){
-
+    "updateFilterListFromFilter": function(filterList, filter) {
+        updateList(filterList, filter, setToFilterList);
     },
-    "set": function(list, track, settingName, value){
+    "setSetting": function(list, track, settingName, value){
+        setToTrackSetting(track, settingName, value);
+        setToSettingList(list, track, settingName);
+    },
+    "setFilter": function(list, filter, filterName, value){
 
     }
 };
 
-function setToSettingList(listElement, track, optionName){
+/**
+ *
+ * @param listInstance - Array - SettingList OR FilterList
+ * @param dataObject
+ * @param callback
+ */
+function updateList(listInstance, dataObject, callback){
+    var i;
+    var name;
+    var tokenSetting;
+    var list = listInstance.list;
+    for(i = 0; i < list.length; ++i) {
+        tokenSetting = list[i]; // BaseTrackSetting type
+        name = tokenSetting.name;
+        callback(tokenSetting, dataObject, name);
+    }
+}
+
+/**
+ * Get data from track object and put them to SettingList
+ * @param listElement
+ * @param trackObject
+ * @param optionName
+ */
+function setToSettingList(listElement, trackObject, optionName){
     switch(optionName){
         case "frequency":
-            listElement.set(track.getFrequency());
+            listElement.set(trackObject.getFrequency());
             break;
         case "volume":
-            listElement.set( track.getVolume());
+            listElement.set( trackObject.getVolume());
             break;
         case "type":
-            listElement.set(track.getType());
+            listElement.set(trackObject.getType());
             break;
         case "attack":
-            listElement.set(track.getAttack());
+            listElement.set(trackObject.getAttack());
             break;
         case "decay":
-            listElement.set(track.getDecay());
+            listElement.set(trackObject.getDecay());
             break;
         case "sustain":
-            listElement.set(track.getSustain());
+            listElement.set(trackObject.getSustain());
             break;
         case "release":
-            listElement.set(track.getRelease());
+            listElement.set(trackObject.getRelease());
             break;
     }
 }
 
-function setToFilterList(listElement, track, filterName){
+/**
+ * Get data from filter object and put them to FilterList
+ * @param listElement
+ * @param filterObject
+ * @param filterName
+ */
+function setToFilterList(listElement, filterObject, filterName){
 
 }
 
 function setToTrackSetting(track, settingName, value){
+    switch(settingName){
+        case "frequency":
+            track.setFrequency(value);
+            break;
+        case "volume":
+            track.setVolume(value);
+            break;
+        case "type":
+            track.setType(value);
+            break;
+        case "attack":
+            track.setAttack(value);
+            break;
+        case "decay":
+            track.setDecay(value);
+            break;
+        case "sustain":
+            track.setSustain(value);
+            break;
+        case "release":
+            track.setRelease(value);
+            break;
+    }
+    track.setSetting(); // write to model parameter for saving to server
+}
+
+function setTockSetting(track, settingName, value){
     switch(settingName){
         case "frequency":
             track.setFrequency(value);
@@ -2654,7 +2707,7 @@ SettingView.prototype._build = function(){
 SettingView.prototype.setTrack = function(track){
     if(track){
         this.track = track;
-        ProxyTrackManager.updateFromTrack(SettingsList, this.track);
+        ProxyTrackManager.updateSettingListFromTrack(SettingsList, this.track);
         this.createSettingTools(); // OR CREATE UPDATE METHOD FOR rangeElement AND dropDownElement ???
     }
 };
@@ -2669,29 +2722,34 @@ SettingView.prototype.createSettingTools = function(){
     var settingName;
     for(i = 0; i < SettingsList.list.length; ++i){
         tokenSetting = SettingsList.list[i];
-        tokenSetting.reset();
+        //tokenSetting.reset();
         options = tokenSetting.options;
         value = options.value; // BaseOption
         settingName = tokenSetting.name;
         $elementName = $("<div class='column'>" + settingName + "</div>");
-        $element = createElement(settingName, value);
+        $element = this.createElement(settingName, value);
         this.table.append($elementName);
         this.table.append($element);
     }
 };
 
-function createElement(name, value){
+SettingView.prototype.setEvent = function(settingName, value){
+    console.log(this.track);
+    ProxyTrackManager.setSetting(SettingsList, this.track, settingName, value);
+};
+
+SettingView.prototype.createElement = function(name, value){
     var $element;
     if(value instanceof BaseRange){
         // or ProxyTrackManager.set(list, track, optionName, value)
         $element = Factory.rangeElement("column " + name + "-range", name, value.min, value.max,
-                                        SettingsList.set.bind(SettingsList), value.step, value.value);
+                                        this.setEvent.bind(this), value.step, value.value);
     } else if(value instanceof BaseOptionList){
         $element = Factory.dropDownElement("column " + name, name, value.options,
-                                            SettingsList.set.bind(SettingsList), value.value);
+                                           this.setEvent, value.value);
     }
     return $element;
-}
+};
 
 
 /***/ }),
