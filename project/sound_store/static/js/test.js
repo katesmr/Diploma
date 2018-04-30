@@ -848,11 +848,9 @@ TrackView.prototype.back = function(){
     windowsTransport.notify(commonEventNames.E_ACTIVATE_WINDOW, "trackList");
 };
 
-
-
 function setTrack(eventName, track){
     this.settingTabSegment.setTrack(track);
-    this.filterTabSegment.setTrack(track);
+    this.filterTabSegment.setFilter(track);
 }
 
 
@@ -1009,9 +1007,7 @@ BaseWindow.prototype.back = null;
 "use strict";
 
 
-var SettingsList = __webpack_require__(54);
-var FiltersList = __webpack_require__(56);
-var ProxyTrackManager = __webpack_require__(30);
+var PostSettings = __webpack_require__(60);
 var generateUID = __webpack_require__(27);
 
 module.exports = BaseTrackModel;
@@ -1028,7 +1024,7 @@ function BaseTrackModel(id, data){
     //this.filterSetting = data["post-setting"] || {};
 
     this.trackObject = this._generate(); // this
-    //this.filterObject = this.generateFilters();
+    this.filterObject = new PostSettings(data["post-setting"]);
 
     //ProxyTrackManager.updateFromTrack(SettingsList, this);
     //ProxyTrackManager.updateFromTrack(FiltersList, this);
@@ -2096,6 +2092,7 @@ module.exports = {
     },
     "updateFilterListFromFilter": function(filterList, filter) {
         updateList(filterList, filter, setToFilterList);
+        console.log(filterList);
     },
     "setSetting": function(list, track, settingName, value){
         setToTrackSetting(track, settingName, value);
@@ -2121,6 +2118,19 @@ function updateList(listInstance, dataObject, callback){
         tokenSetting = list[i]; // BaseTrackSetting type
         name = tokenSetting.name;
         callback(tokenSetting, dataObject, name);
+    }
+}
+
+/**
+ * Set all parameters from FilterObject to FilterList
+ * @param filterElement
+ * @param options
+ */
+function setOptionsToFilterList(filterElement, options){
+    var optionName;
+    for(optionName in options){
+        filterElement.isEnabled = true; // switch flag for using this filter
+        filterElement.options[optionName].set(options[optionName]);
     }
 }
 
@@ -2163,7 +2173,19 @@ function setToSettingList(listElement, trackObject, optionName){
  * @param filterName
  */
 function setToFilterList(listElement, filterObject, filterName){
-
+    switch(filterName){
+        case "tremolo":
+            break;
+        case "vibrato":
+            break;
+        case "crusher":
+            break;
+        case "phaser":
+            break;
+        case "freeverd":
+            setOptionsToFilterList(listElement, filterObject);
+            break;
+    }
 }
 
 function setToTrackSetting(track, settingName, value){
@@ -2457,16 +2479,20 @@ function fetch(url, resolve){
 
 var inherit = __webpack_require__(0);
 var TabSegment = __webpack_require__(17);
+var BaseRange = __webpack_require__(57);
+var BaseOptionList = __webpack_require__(51);
+var FiltersList = __webpack_require__(56);
+var ProxyTrackManager = __webpack_require__(30);
 var Factory = __webpack_require__(2);
 
 module.exports = FilterView;
 
-function FilterView(track){
+function FilterView(filter){
     TabSegment.call(this, "instrument-view");
 
-    this.track = track;
-    this.block = $("<div class='button-block'>");
-    this.listButtonName = ["synth", "noise", "oscillator"]; // must be correspond to instrument in ToneJS
+    this.filter = null;
+
+    this.setFilter(filter);
 
     this._build();
     this.show();
@@ -2476,22 +2502,15 @@ inherit(FilterView, TabSegment);
 
 FilterView.prototype._build = function(){
     var container = this.getContainer();
-    var $button;
-    var i;
-
-    for(i = 0; i < this.listButtonName.length; ++i){
-        $button = Factory.createButton('', this.listButtonName[i]);
-        $button.on("click", function(event){
-            this.track.instrument = this.val();
-        });
-        this.block.append($button);
-    }
 
     container.append(this.block);
 };
 
-FilterView.prototype.setTrack = function(track){
-    this.track = track;
+FilterView.prototype.setFilter = function(track){
+    if(track){
+        this.filter = track.filterObject;
+        ProxyTrackManager.updateFilterListFromFilter(FiltersList, this.filter.postSettings);
+    }
 };
 
 
@@ -2686,7 +2705,7 @@ module.exports = SettingView;
 function SettingView(track){
     TabSegment.call(this, "setting-view");
 
-    this.track = track;
+    this.track = null;
 
     this.table = $("<div class='two column stackable ui grid'>"); // create grid with two columns
 
@@ -2746,7 +2765,7 @@ SettingView.prototype.createElement = function(name, value){
                                         this.setEvent.bind(this), value.step, value.value);
     } else if(value instanceof BaseOptionList){
         $element = Factory.dropDownElement("column " + name, name, value.options,
-                                           this.setEvent, value.value);
+                                           this.setEvent.bind(this), value.value);
     }
     return $element;
 };
@@ -3122,17 +3141,6 @@ module.exports = new TrackSettingsSet([
     })
 ]);
 
-TrackSettingsSet.prototype.set = function(optionName, value){
-    var i;
-    var tokenSetting;
-    for(i = 0; i < this.list.length; ++i){
-        tokenSetting = this.list[i];
-        if(tokenSetting.name === optionName){
-            tokenSetting.set(optionName, value);
-        }
-    }
-};
-
 
 /***/ }),
 /* 55 */
@@ -3151,6 +3159,17 @@ TrackSettingsSet.prototype.reset = function(){
     var i;
     for (i = 0; i < this.list.length; ++i){
         this.list[i].reset();
+    }
+};
+
+TrackSettingsSet.prototype.set = function(optionName, value){
+    var i;
+    var tokenSetting;
+    for(i = 0; i < this.list.length; ++i){
+        tokenSetting = this.list[i];
+        if(tokenSetting.name === optionName){
+            tokenSetting.set(optionName, value);
+        }
     }
 };
 
@@ -3230,6 +3249,199 @@ function BaseRange(defaultValue, minValue, maxValue, step){
 }
 
 inherit(BaseRange, BaseOption);
+
+
+/***/ }),
+/* 58 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = BaseFilterModel;
+
+function BaseFilterModel(){
+    this.isUsed = false;
+    this.filterObject = this.generate();
+}
+
+BaseFilterModel.prototype.generate = function(){};
+
+BaseFilterModel.prototype.getOptions = function(){};
+
+BaseFilterModel.prototype.setOptions = function(){};
+
+BaseFilterModel.prototype.applyToTrack = function(track){
+    this.filterObject.toMaster();
+    track.connect(this.filterObject);
+};
+
+
+/***/ }),
+/* 59 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var BaseFilterModel = __webpack_require__(58);
+
+module.exports = FreeverbFilter;
+
+function FreeverbFilter(options){
+    BaseFilterModel.call(this);
+    this.options = options || {};
+}
+
+inherit(FreeverbFilter, BaseFilterModel);
+
+FreeverbFilter.prototype.generate = function(){
+    this.filterObject = new Tone.Freeverb(this.options);
+};
+
+FreeverbFilter.prototype.getDampening = function(){
+    return this.filterObject.dampening.value;
+};
+
+FreeverbFilter.prototype.getRoomSize = function(){
+    return this.filterObject.roomSize.value; // ???
+};
+
+FreeverbFilter.prototype.getWet = function(){
+    return this.filterObject.wet.value; // ???
+};
+
+FreeverbFilter.prototype.getOptions = function(){
+    var result = {};
+    result.dampening = this.getDampening();
+    result.roomSize = this.getRoomSize();
+    result.wet = this.getWet();
+    return result;
+};
+
+FreeverbFilter.prototype.setDampening = function(value){
+    this.filterObject.dampening.value = value;
+};
+
+FreeverbFilter.prototype.setRoomSize = function(value){
+    this.filterObject.roomSize.value = value; // ???
+};
+
+FreeverbFilter.prototype.setWet = function(value){
+    this.filterObject.wet.value = value; // ???
+};
+
+FreeverbFilter.prototype.setOptions = function(options){
+    this.setDampening(options.dampening);
+    this.setRoomSize(options.roomSize);
+    this.setWet(options.wet);
+};
+
+
+/***/ }),
+/* 60 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var FreeverbFilter = __webpack_require__(59);
+
+module.exports = PostSettings;
+
+/**
+ * Contain set of FilterModel objects.
+ * Wait object with filters from server.
+ * Or if track was created from the client set empty object for future settings.
+ * @param postSettings - object
+ * @constructor
+ */
+function PostSettings(postSettings){
+    this.postSettings = postSettings || {};
+    this.filterObjects = {};
+    this.fullFilterObjects();
+}
+
+/**
+ * Create corresponding filter object
+ * @param filterName
+ * @param filterSetting
+ */
+PostSettings.prototype.createFilterObjects = function(filterName, filterSetting){
+    switch(filterName){
+        case "tremolo":
+            break;
+        case "vibrato":
+            break;
+        case "crusher":
+            break;
+        case "phaser":
+            break;
+        case "freeverd":
+            this.filterObjects[filterName] = new FreeverbFilter(filterSetting);
+            break;
+    }
+};
+
+/**
+ * Create list of filter objects with settings from server.
+ * Call when init PostSettings.
+ */
+PostSettings.prototype.fullFilterObjects = function(){
+    var filterName;
+    for(filterName in this.postSettings){
+        this.createFilterObjects(filterName, this.postSettings[filterName])
+    }
+};
+
+/**
+ * Return object with applying filters only
+ * @returns {{}}
+ */
+PostSettings.prototype.getPostSettings = function(){
+    var filter;
+    var filterName;
+    var result = {};
+    for(filterName in this.filterObjects){
+        filter = this.filterObjects[filterName];
+        result[filterName] = filter.getOptions();
+        /*if(filter.isUsed === true){
+            // save only used filters
+            result[filterName] = filter.getOptions();
+        }*/
+    }
+    return result;
+};
+
+/**
+ * Set new filter settings in corresponding filter object and switch isUsed flag
+ * @param filterList - TrackSettingsSet - FilterList
+ */
+PostSettings.prototype.setPostSettings = function(filterList){
+    var i;
+    var name;
+    var tokenSetting;
+    var list = filterList.list;
+    for(i = 0; i < list.length; ++i){
+        tokenSetting = list[i];
+        name = tokenSetting.name;
+        if(name in this.filterObjects){
+            if(tokenSetting.isEnabled === true){
+                // update existing filter
+                this.filterObjects[name].setOptions(tokenSetting.options);
+            } else{
+                //delete no using filter in track
+                delete this.filterObjects[name];
+            }
+        } else{
+            //create new filter
+            if(tokenSetting.isEnabled === true){
+                this.createFilterObjects(name, tokenSetting.options); // tokenSetting.options ?????
+            }
+        }
+    }
+};
 
 
 /***/ })
