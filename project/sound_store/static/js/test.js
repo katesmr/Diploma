@@ -114,6 +114,7 @@ module.exports = {
     "buttonsPopup": buttonsPopup,
     "createButton": createButton,
     "dropDownElement": dropDownElement,
+    "createCheckBox": createCheckBox,
     "createDivButton": createDivButton,
     "createIconButton": createIconButton,
     "deleteCircleButton": deleteCircleButton,
@@ -179,6 +180,34 @@ function rangeElement(className, name, minValue, maxValue, callback, stepValue, 
 function setBeginValueToRangeElement(rangeElement, id, beginValue){
     rangeElement.find('#' + id).value = beginValue; // set input range value
     rangeElement.find(".ui.label").text(beginValue); // set label value
+}
+
+/**
+ *
+ * @param className
+ * @param id
+ * @param text
+ * @param checkCallback
+ * @param uncheckCallback
+ * @param isActive
+ * @returns {*|jQuery|HTMLElement}
+ */
+function createCheckBox(className, id, text, checkCallback, uncheckCallback, isActive){
+    var checked = isActive || false;
+    var $result = $("<div class='ui checkbox " + className + "'>");
+    var $input = $("<input id='" + id + "' type='checkbox'>");
+    var $text = $("<label>" + text + "</label>");
+    $input.checked = checked;
+    $input.change(function(){
+        if($(this).checked){
+            checkCallback($(this).attr("id"));
+        } else{
+            uncheckCallback($(this).attr("id"));
+        }
+    });
+    $result.append($input);
+    $result.append($text);
+    return $result;
 }
 
 /**
@@ -796,7 +825,6 @@ var inherit = __webpack_require__(0);
 var BaseWindow = __webpack_require__(13);
 var FilterView = __webpack_require__(42);
 var SettingView = __webpack_require__(46);
-var Factory = __webpack_require__(2);
 var commonEventNames = __webpack_require__(1);
 var windowsTransport = __webpack_require__(4);
 
@@ -813,7 +841,7 @@ function TrackView(controller){
     this.settingTabSegment = new SettingView(null);
     this.filterTabSegment = new FilterView(null);
 
-    this.settingTitle = $("<a class='item active' data-tab='" + this.settingTabSegment.dataTab + "'>setting</a>");
+    this.settingTitle = $("<a class='item' data-tab='" + this.settingTabSegment.dataTab + "'>setting</a>");
     this.filterTitle = $("<a class='item active' data-tab='" + this.filterTabSegment.dataTab + "'>filter</a>");
 
     this._build();
@@ -824,10 +852,10 @@ function TrackView(controller){
 inherit(TrackView, BaseWindow);
 
 TrackView.prototype._build = function(){
-    var self = this;
     var container = this.getContainer();
 
-    this.settingTabSegment.setActive(); // set Setting tab in active state
+    //this.settingTabSegment.setActive(); // set Setting tab in active state
+    this.filterTabSegment.setActive(); // set Setting tab in active state
 
     this.controller.observer.subscribe(commonEventNames.E_SET_TRACK, setTrack.bind(this));
 
@@ -840,7 +868,7 @@ TrackView.prototype._build = function(){
 };
 
 TrackView.prototype.showTabMenu = function(){
-    this.tabBlock.tab();
+    $(".tabular.menu .item").tab();
 };
 
 TrackView.prototype.back = function(){
@@ -2123,11 +2151,12 @@ function updateList(listInstance, dataObject, callback){
 
 /**
  * Set all parameters from FilterObject to FilterList
- * @param filterElement
- * @param options
+ * @param filterElement - BaseTrackSetting
+ * @param options - object
  */
 function setOptionsToFilterList(filterElement, options){
     var optionName;
+    console.log(options);
     for(optionName in options){
         filterElement.isEnabled = true; // switch flag for using this filter
         filterElement.options[optionName].set(options[optionName]);
@@ -2182,8 +2211,8 @@ function setToFilterList(listElement, filterObject, filterName){
             break;
         case "phaser":
             break;
-        case "freeverd":
-            setOptionsToFilterList(listElement, filterObject);
+        case "freeverb":
+            setOptionsToFilterList(listElement, filterObject[filterName]);
             break;
     }
 }
@@ -2215,7 +2244,7 @@ function setToTrackSetting(track, settingName, value){
     track.setSetting(); // write to model parameter for saving to server
 }
 
-function setTockSetting(track, settingName, value){
+function setTrackSetting(track, settingName, value){
     switch(settingName){
         case "frequency":
             track.setFrequency(value);
@@ -2478,9 +2507,7 @@ function fetch(url, resolve){
 
 
 var inherit = __webpack_require__(0);
-var TabSegment = __webpack_require__(17);
-var BaseRange = __webpack_require__(57);
-var BaseOptionList = __webpack_require__(51);
+var ToolView = __webpack_require__(61);
 var FiltersList = __webpack_require__(56);
 var ProxyTrackManager = __webpack_require__(30);
 var Factory = __webpack_require__(2);
@@ -2488,7 +2515,7 @@ var Factory = __webpack_require__(2);
 module.exports = FilterView;
 
 function FilterView(filter){
-    TabSegment.call(this, "instrument-view");
+    ToolView.call(this, "filter-view", "two column stackable ui grid");
 
     this.filter = null;
 
@@ -2498,20 +2525,67 @@ function FilterView(filter){
     this.show();
 }
 
-inherit(FilterView, TabSegment);
+inherit(FilterView, ToolView);
 
-FilterView.prototype._build = function(){
-    var container = this.getContainer();
-
-    container.append(this.block);
-};
 
 FilterView.prototype.setFilter = function(track){
     if(track){
         this.filter = track.filterObject;
         ProxyTrackManager.updateFilterListFromFilter(FiltersList, this.filter.postSettings);
+        this.createFilterTools();
     }
 };
+
+FilterView.prototype.createFilterTools = function(){
+    var i;
+    var value;
+    var options;
+    var filterName;
+    var optionName;
+    var tokenFilter;
+    var $element;
+    var $elementName;
+    var $mainDiv;
+    var $checkBox;
+    var $settingDiv;
+    for(i = 0; i < FiltersList.list.length; ++i){
+        tokenFilter = FiltersList.list[i];
+        options = tokenFilter.options;
+        filterName = tokenFilter.name;
+        $mainDiv = $("<div class='column " + filterName + "'>");
+        for(optionName in options){
+            value = options[optionName]; // BaseOption
+            $settingDiv = $("<div class='filter-setting'>");
+            $elementName = $("<label>" + optionName + "</label>");
+            $element = this.createElement(optionName, value);
+            $settingDiv.append($elementName);
+            $settingDiv.append($element);
+            $settingDiv.hide();
+        }
+        $checkBox = Factory.createCheckBox(filterName, filterName, filterName, function(name){
+            checkEvent($settingDiv);
+        }, function(name){
+            uncheckEvent($settingDiv);
+        }, tokenFilter.isEnabled);
+        $mainDiv.append($checkBox);
+        $mainDiv.append($settingDiv);
+        this.table.append($mainDiv);
+    }
+};
+
+FilterView.prototype.setEvent = function(optionName, value){
+    console.log(this.track);
+    ProxyTrackManager.setSetting(FiltersList, this.filter, optionName, value);
+};
+
+function checkEvent(settingDiv){
+    console.log("+");
+    settingDiv.show();
+}
+
+function uncheckEvent(settingDiv) {
+    settingDiv.hide();
+}
 
 
 /***/ }),
@@ -2688,9 +2762,7 @@ PlayerView.prototype._build = function(){
 
 
 var inherit = __webpack_require__(0);
-var TabSegment = __webpack_require__(17);
-var BaseRange = __webpack_require__(57);
-var BaseOptionList = __webpack_require__(51);
+var ToolView = __webpack_require__(61);
 var SettingsList = __webpack_require__(54);
 var ProxyTrackManager = __webpack_require__(30);
 var Factory = __webpack_require__(2);
@@ -2703,11 +2775,9 @@ module.exports = SettingView;
  * @constructor
  */
 function SettingView(track){
-    TabSegment.call(this, "setting-view");
+    ToolView.call(this, "setting-view", "two column stackable ui grid");
 
     this.track = null;
-
-    this.table = $("<div class='two column stackable ui grid'>"); // create grid with two columns
 
     this.setTrack(track);
 
@@ -2715,13 +2785,8 @@ function SettingView(track){
     this.show();
 }
 
-inherit(SettingView, TabSegment);
+inherit(SettingView, ToolView);
 
-SettingView.prototype._build = function(){
-    var container = this.getContainer();
-
-    container.append(this.table);
-};
 
 SettingView.prototype.setTrack = function(track){
     if(track){
@@ -2752,22 +2817,9 @@ SettingView.prototype.createSettingTools = function(){
     }
 };
 
-SettingView.prototype.setEvent = function(settingName, value){
+SettingView.prototype.setEvent = function(optionName, value){
     console.log(this.track);
-    ProxyTrackManager.setSetting(SettingsList, this.track, settingName, value);
-};
-
-SettingView.prototype.createElement = function(name, value){
-    var $element;
-    if(value instanceof BaseRange){
-        // or ProxyTrackManager.set(list, track, optionName, value)
-        $element = Factory.rangeElement("column " + name + "-range", name, value.min, value.max,
-                                        this.setEvent.bind(this), value.step, value.value);
-    } else if(value instanceof BaseOptionList){
-        $element = Factory.dropDownElement("column " + name, name, value.options,
-                                           this.setEvent.bind(this), value.value);
-    }
-    return $element;
+    ProxyTrackManager.setSetting(SettingsList, this.track, optionName, value);
 };
 
 
@@ -3216,7 +3268,7 @@ module.exports = new TrackSettingsSet([
         "frequency": new BaseRange(0, 0, 1, 0.1), // ???
         "baseFrequency": new BaseRange(1, 0, 1000, 1)
     }),
-    new BaseTrackSetting("freeverd", false, {
+    new BaseTrackSetting("freeverb", false, {
         "dampening": new BaseRange(1, 0, 1000, 1),
         "roomSize": new BaseRange(0, 0, 1, 1), // or step = 0.001
         "wet": new BaseRange(1, 0, 1, 1)
@@ -3441,6 +3493,51 @@ PostSettings.prototype.setPostSettings = function(filterList){
             }
         }
     }
+};
+
+
+/***/ }),
+/* 61 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var TabSegment = __webpack_require__(17);
+var BaseRange = __webpack_require__(57);
+var BaseOptionList = __webpack_require__(51);
+var Factory = __webpack_require__(2);
+
+module.exports = ToolView;
+
+function ToolView(className, tableClass){
+    TabSegment.call(this, className);
+
+    this.table = $("<div class='" + tableClass + "'>");
+
+    this._build();
+    this.show();
+}
+
+inherit(ToolView, TabSegment);
+
+ToolView.prototype._build = function(){
+    this.getContainer().append(this.table);
+};
+
+ToolView.prototype.setEvent = function(){};
+
+ToolView.prototype.createElement = function(name, value){
+    var $element;
+    if(value instanceof BaseRange){
+        $element = Factory.rangeElement("column " + name + "-range", name, value.min, value.max,
+                                        this.setEvent.bind(this), value.step, value.value);
+    } else if(value instanceof BaseOptionList){
+        $element = Factory.dropDownElement("column " + name, name, value.options,
+                                           this.setEvent.bind(this), value.value);
+    }
+    return $element;
 };
 
 
