@@ -146,7 +146,7 @@ function deleteCircleButton(buttonId, callback){
 /**
  * Create range element (equalizer) with label with value of it
  * @param className
- * @param name
+ * @param id - String - element name
  * @param minValue
  * @param maxValue
  * @param callback
@@ -154,18 +154,18 @@ function deleteCircleButton(buttonId, callback){
  * @param beginValue
  * @returns {*|jQuery|HTMLElement}
  */
-function rangeElement(className, name, minValue, maxValue, callback, stepValue, beginValue){
+function rangeElement(className, id, minValue, maxValue, callback, stepValue, beginValue){
     var value;
     var step = stepValue || 1;
     var begin = beginValue || 0;
     var $result = $("<div class='" + className + "'>");
     var $label = $("<div class='ui label'>" + begin + "</div>");
-    var $element = $("<input id='" + name + "' type='range' step=" + step + " min=" + minValue +
+    var $element = $("<input id='" + id + "' type='range' step=" + step + " min=" + minValue +
                      " max=" + maxValue + " value=" + begin + ">");
     $element.on("input", function(){
         value = $(this).val();
         $label.text(value);
-        callback(name, Number(value));
+        callback(id, Number(value));
     });
     $result.append($element);
     $result.append($label);
@@ -175,6 +175,7 @@ function rangeElement(className, name, minValue, maxValue, callback, stepValue, 
 /**
  * Set value to range element and its label
  * @param rangeElement
+ * @param id
  * @param beginValue
  */
 function setBeginValueToRangeElement(rangeElement, id, beginValue){
@@ -200,9 +201,9 @@ function createCheckBox(className, id, text, checkCallback, uncheckCallback, isA
     $input.prop("checked", checked);
     $input.change(function(){
         if($(this).prop("checked") === true){
-            checkCallback($(this).attr("id"));
+            checkCallback($(this).attr("id"), $(this).prop("checked"));
         } else{
-            uncheckCallback($(this).attr("id"));
+            uncheckCallback($(this).attr("id"), $(this).prop("checked"));
         }
     });
     $result.append($input);
@@ -1389,20 +1390,26 @@ module.exports = {
     },
     "updateFilterListFromFilter": function(filterList, filter) {
         updateList(filterList, filter, setToFilterList);
-        console.log(filterList);
     },
     "setSetting": function(list, track, settingName, value){
         setToTrackSetting(track, settingName, value);
         setToSettingList(list, track, settingName);
     },
-    "setFilter": function(list, filter, filterName, value){
-
+    "setFilter": function(filterList, filter, filterName, value){
+        setOptionToFilterList(filterList, filter, filterName, value);
+        console.log(filterList);
+        console.log(filter);
+    },
+    "addFilter": function(filterList, filter, filterName, isEnabled){
+        addFilter(filterList, filter, filterName, isEnabled);
+        console.log(filterList);
+        console.log(filter);
     }
 };
 
 /**
- *
- * @param listInstance - Array - SettingList OR FilterList
+ * Set data from BaseTrackModel/PostSettings to corresponding list
+ * @param listInstance - TrackSettingsSet - SettingList OR FilterList
  * @param dataObject
  * @param callback
  */
@@ -1423,12 +1430,51 @@ function updateList(listInstance, dataObject, callback){
  * @param filterElement - BaseTrackSetting
  * @param options - object
  */
-function setOptionsToFilterList(filterElement, options){
+function setFilterOptionsToFilterList(filterElement, options){
     var optionName;
-    console.log(options);
     for(optionName in options){
         filterElement.isEnabled = true; // switch flag for using this filter
         filterElement.options[optionName].set(options[optionName]);
+    }
+}
+
+/**
+ * Set one option in filter options
+ * @param filterList - TrackSettingsSet
+ * @param filterObject - PostSettings
+ * @param optionName
+ * @param value
+ */
+function setOptionToFilterList(filterList, filterObject, optionName, value){
+    var i;
+    var tokenFilter;
+    var list = filterList.list;
+    for(i = 0; i < list.length; ++i){
+        tokenFilter = list[i];
+        if(optionName in tokenFilter.options){
+            tokenFilter.options[optionName].set(value);
+            filterObject.setValueToFilter(tokenFilter.name, optionName, value);
+        }
+    }
+}
+
+/**
+ * Put all settings from FilterList to FilterObject
+ * @param filterList - TrackSettingsSet
+ * @param filterObject - PostSettings
+ * @param filterName
+ * @param isEnabled
+ */
+function addFilter(filterList, filterObject, filterName, isEnabled){
+    var i;
+    var tokenFilter;
+    var list = filterList.list;
+    for(i = 0; i < list.length; ++i){
+        tokenFilter = list[i];
+        if(tokenFilter.name === filterName){
+            tokenFilter.isEnabled = isEnabled;
+            filterObject.setFilter(tokenFilter);
+        }
     }
 }
 
@@ -1444,7 +1490,7 @@ function setToSettingList(listElement, trackObject, optionName){
             listElement.set(trackObject.getFrequency());
             break;
         case "volume":
-            listElement.set( trackObject.getVolume());
+            listElement.set(trackObject.getVolume());
             break;
         case "type":
             listElement.set(trackObject.getType());
@@ -1481,39 +1527,12 @@ function setToFilterList(listElement, filterObject, filterName){
         case "phaser":
             break;
         case "freeverb":
-            setOptionsToFilterList(listElement, filterObject[filterName]);
+            setFilterOptionsToFilterList(listElement, filterObject[filterName]);
             break;
     }
 }
 
 function setToTrackSetting(track, settingName, value){
-    switch(settingName){
-        case "frequency":
-            track.setFrequency(value);
-            break;
-        case "volume":
-            track.setVolume(value);
-            break;
-        case "type":
-            track.setType(value);
-            break;
-        case "attack":
-            track.setAttack(value);
-            break;
-        case "decay":
-            track.setDecay(value);
-            break;
-        case "sustain":
-            track.setSustain(value);
-            break;
-        case "release":
-            track.setRelease(value);
-            break;
-    }
-    track.setSetting(); // write to model parameter for saving to server
-}
-
-function setTrackSetting(track, settingName, value){
     switch(settingName){
         case "frequency":
             track.setFrequency(value);
@@ -2370,11 +2389,13 @@ function BaseFilterModel(){
     this.filterObject = this.generate();
 }
 
-BaseFilterModel.prototype.generate = function(){};
+BaseFilterModel.prototype.generate = null;
 
 BaseFilterModel.prototype.getOptions = function(){};
 
 BaseFilterModel.prototype.setOptions = function(){};
+
+BaseFilterModel.prototype.setByName = function(){};
 
 BaseFilterModel.prototype.applyToTrack = function(track){
     this.filterObject.toMaster();
@@ -2520,22 +2541,21 @@ FreeverbFilter.prototype.getWet = function(){
 };
 
 FreeverbFilter.prototype.getOptions = function(){
-    var result = {};
-    result.dampening = this.getDampening();
-    result.roomSize = this.getRoomSize();
-    result.wet = this.getWet();
-    return result;
+    return this.options;
 };
 
 FreeverbFilter.prototype.setDampening = function(value){
+    this.options.dampening = value;
     this.filterObject.dampening.value = value;
 };
 
 FreeverbFilter.prototype.setRoomSize = function(value){
+    this.options.roomSize = value;
     this.filterObject.roomSize.value = value; // ???
 };
 
 FreeverbFilter.prototype.setWet = function(value){
+    this.options.wet = value;
     this.filterObject.wet.value = value; // ???
 };
 
@@ -2543,6 +2563,20 @@ FreeverbFilter.prototype.setOptions = function(options){
     this.setDampening(options.dampening);
     this.setRoomSize(options.roomSize);
     this.setWet(options.wet);
+};
+
+FreeverbFilter.prototype.setByName = function(optionName, value){
+    switch(optionName){
+        case "dampening":
+            this.setDampening(value);
+            break;
+        case "roomSize":
+            this.setRoomSize(value);
+            break;
+        case "wet":
+            this.setWet(value);
+            break;
+    }
 };
 
 
@@ -2554,6 +2588,7 @@ FreeverbFilter.prototype.setOptions = function(options){
 
 
 var FreeverbFilter = __webpack_require__(37);
+var CrusherFilter = __webpack_require__(61);
 
 module.exports = PostSettings;
 
@@ -2582,10 +2617,11 @@ PostSettings.prototype.createFilterObjects = function(filterName, filterSetting)
         case "vibrato":
             break;
         case "crusher":
+            this.filterObjects[filterName] = new CrusherFilter(filterSetting);
             break;
         case "phaser":
             break;
-        case "freeverd":
+        case "freeverb":
             this.filterObjects[filterName] = new FreeverbFilter(filterSetting);
             break;
     }
@@ -2598,7 +2634,7 @@ PostSettings.prototype.createFilterObjects = function(filterName, filterSetting)
 PostSettings.prototype.fullFilterObjects = function(){
     var filterName;
     for(filterName in this.postSettings){
-        this.createFilterObjects(filterName, this.postSettings[filterName])
+        this.createFilterObjects(filterName, this.postSettings[filterName]);
     }
 };
 
@@ -2627,25 +2663,42 @@ PostSettings.prototype.getPostSettings = function(){
  */
 PostSettings.prototype.setPostSettings = function(filterList){
     var i;
-    var name;
     var tokenSetting;
     var list = filterList.list;
     for(i = 0; i < list.length; ++i){
         tokenSetting = list[i];
-        name = tokenSetting.name;
-        if(name in this.filterObjects){
-            if(tokenSetting.isEnabled === true){
-                // update existing filter
-                this.filterObjects[name].setOptions(tokenSetting.options);
-            } else{
-                //delete no using filter in track
-                delete this.filterObjects[name];
-            }
+        this.setFilter(tokenSetting);
+    }
+};
+
+/**
+ * Add or delete filter from filterObjects
+ * @param filter
+ */
+PostSettings.prototype.setFilter = function(filter){
+    var name = filter.name;
+    if(name in this.filterObjects){
+        if(filter.isEnabled === true){
+            // update existing filter
+            this.filterObjects[name].setOptions(filter.options);
         } else{
-            //create new filter
-            if(tokenSetting.isEnabled === true){
-                this.createFilterObjects(name, tokenSetting.options); // tokenSetting.options ?????
-            }
+            //delete no using filter in track
+            delete this.filterObjects[name];
+        }
+    } else{
+        //create new filter
+        if(filter.isEnabled === true){
+            this.createFilterObjects(name, filter.options); // tokenSetting.options ?????
+        }
+    }
+};
+
+PostSettings.prototype.setValueToFilter = function(filterName, optionName, value){
+    var filter;
+    if(filterName in this.filterObjects){
+        filter = this.filterObjects[filterName];
+        if(optionName in filter.options){
+            filter.setByName(optionName, value);
         }
     }
 };
@@ -3042,6 +3095,8 @@ inherit(FilterView, ToolView);
 FilterView.prototype.setFilter = function(track){
     if(track){
         this.filter = track.filterObject;
+        console.log(this.filter);
+        console.log("---");
         ProxyTrackManager.updateFilterListFromFilter(FiltersList, this.filter.postSettings);
         this.createFilterTools();
     }
@@ -3088,16 +3143,17 @@ FilterView.prototype.createFilterTools = function(){
 };
 
 FilterView.prototype.setEvent = function(optionName, value){
-    console.log(this.track);
-    ProxyTrackManager.setSetting(FiltersList, this.filter, optionName, value);
+    ProxyTrackManager.setFilter(FiltersList, this.filter, optionName, value);
 };
 
-function checkEvent(filterName){
+function checkEvent(filterName, isChecked){
     this.table.find(".filter-setting-" + filterName).show();
+    ProxyTrackManager.addFilter(FiltersList, this.filter, filterName, isChecked);
 }
 
-function uncheckEvent(filterName) {
+function uncheckEvent(filterName, isChecked){
     this.table.find(".filter-setting-" + filterName).hide();
+    ProxyTrackManager.addFilter(FiltersList, this.filter, filterName, isChecked);
 }
 
 
@@ -3539,6 +3595,57 @@ UserModal.prototype._build = function(){
 
 UserModal.prototype.show = function(){
     this._container.modal("show");
+};
+
+
+/***/ }),
+/* 61 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+//CrusherFilter
+
+var inherit = __webpack_require__(0);
+var BaseFilterModel = __webpack_require__(34);
+
+module.exports = CrusherFilter;
+
+function CrusherFilter(options){
+    BaseFilterModel.call(this);
+    this.options = options || {};
+}
+
+inherit(CrusherFilter, BaseFilterModel);
+
+CrusherFilter.prototype.generate = function(){
+    this.filterObject = new Tone.BitCrusher(this.options);
+};
+
+CrusherFilter.prototype.getBit = function(){
+    return this.filterObject.dampening.value;
+};
+
+CrusherFilter.prototype.getOptions = function(){
+    return this.options;
+};
+
+CrusherFilter.prototype.setBit = function(value){
+    this.options.bit = value;
+    this.filterObject.bit.value = value;
+};
+
+CrusherFilter.prototype.setOptions = function(options){
+    this.setBit(options.bit);
+};
+
+CrusherFilter.prototype.setByName = function(optionName, value){
+    switch(optionName){
+        case "bit":
+            this.setBit(value);
+            break;
+    }
 };
 
 
