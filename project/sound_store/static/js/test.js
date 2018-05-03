@@ -874,7 +874,9 @@ TrackView.prototype.showTabMenu = function(){
 
 TrackView.prototype.back = function(){
     this.settingTabSegment.table.empty();
+    this.filterTabSegment.table.empty();
     windowsTransport.notify(commonEventNames.E_ACTIVATE_WINDOW, "trackList");
+    this.filterTabSegment.resetFilters(); // reset previous filter of track
 };
 
 function setTrack(eventName, track){
@@ -1164,7 +1166,7 @@ function BaseTrackModel(id, data){
     //this.filterSetting = data["post-setting"] || {};
 
     this.trackObject = this._generate(); // this
-    this.filterObject = new PostSettings(data["post-setting"]);
+    this.postSettings = new PostSettings(data["post-setting"]);
 
     //ProxyTrackManager.updateFromTrack(SettingsList, this);
     //ProxyTrackManager.updateFromTrack(FiltersList, this);
@@ -1229,7 +1231,7 @@ BaseTrackModel.prototype.getData = function(){
     result.length = this.length;
     result.setting = this.setting;
     result["play-setting"] = this.playSetting;
-    result["post-setting"] = {}; //this.filterObjects.getOptions();
+    result["post-setting"] = this.postSettings.getPostSettings();
     return result;
 };
 
@@ -1363,7 +1365,7 @@ BaseTrackSetting.prototype.valueOf = function(){
     var result = {};
     var target = this.options;
     for (key in target){
-        if (target.hasOwnProperty(key)){
+        if(target.hasOwnProperty(key)){
             result[key] = target[key].valueOf();
         }
     }
@@ -1388,7 +1390,7 @@ module.exports = {
     "updateSettingListFromTrack": function(settingList, track){ // SettingList OR FilterList
         updateList(settingList, track, setToSettingList)
     },
-    "updateFilterListFromFilter": function(filterList, filter) {
+    "updateFilterListFromFilter": function(filterList, filter){
         updateList(filterList, filter, setToFilterList);
     },
     "setSetting": function(list, track, settingName, value){
@@ -1397,13 +1399,12 @@ module.exports = {
     },
     "setFilter": function(filterList, filter, filterName, value){
         setOptionToFilterList(filterList, filter, filterName, value);
-        console.log(filterList);
-        console.log(filter);
     },
     "addFilter": function(filterList, filter, filterName, isEnabled){
         addFilter(filterList, filter, filterName, isEnabled);
-        console.log(filterList);
-        console.log(filter);
+    },
+    "resetFilters": function(filterList){
+        setFilterListToDefault(filterList);
     }
 };
 
@@ -1436,6 +1437,16 @@ function setFilterOptionsToFilterList(filterElement, options){
         filterElement.isEnabled = true; // switch flag for using this filter
         filterElement.options[optionName].set(options[optionName]);
     }
+}
+
+/**
+ * Get data from filter object and put them to FilterList
+ * @param listElement
+ * @param filterObject
+ * @param filterName
+ */
+function setToFilterList(listElement, filterObject, filterName){
+    setFilterOptionsToFilterList(listElement, filterObject[filterName]);
 }
 
 /**
@@ -1478,6 +1489,23 @@ function addFilter(filterList, filterObject, filterName, isEnabled){
     }
 }
 
+function setFilterListToDefault(filterList) {
+    var i;
+    var option;
+    var options;
+    var tokenFilter;
+    var list = filterList.list;
+    for (i = 0; i < list.length; ++i) {
+        tokenFilter = list[i];
+        tokenFilter.isEnabled = false;
+        options = tokenFilter.options;
+        for(option in options){
+            //options[option].value = options[option].__initialValue;
+            options[option].reset();
+        }
+    }
+}
+
 /**
  * Get data from track object and put them to SettingList
  * @param listElement
@@ -1506,28 +1534,6 @@ function setToSettingList(listElement, trackObject, optionName){
             break;
         case "release":
             listElement.set(trackObject.getRelease());
-            break;
-    }
-}
-
-/**
- * Get data from filter object and put them to FilterList
- * @param listElement
- * @param filterObject
- * @param filterName
- */
-function setToFilterList(listElement, filterObject, filterName){
-    switch(filterName){
-        case "tremolo":
-            break;
-        case "vibrato":
-            break;
-        case "crusher":
-            break;
-        case "phaser":
-            break;
-        case "freeverb":
-            setFilterOptionsToFilterList(listElement, filterObject[filterName]);
             break;
     }
 }
@@ -2385,8 +2391,8 @@ module.exports = function(){
 module.exports = BaseFilterModel;
 
 function BaseFilterModel(){
-    this.isUsed = false;
-    this.filterObject = this.generate();
+    this.filter = null;
+    this.generate();
 }
 
 BaseFilterModel.prototype.generate = null;
@@ -2398,8 +2404,8 @@ BaseFilterModel.prototype.setOptions = function(){};
 BaseFilterModel.prototype.setByName = function(){};
 
 BaseFilterModel.prototype.applyToTrack = function(track){
-    this.filterObject.toMaster();
-    track.connect(this.filterObject);
+    this.filter.toMaster();
+    track.connect(this.filter);
 };
 
 
@@ -2490,7 +2496,7 @@ module.exports = new TrackSettingsSet([
         }, 1)
     }),
     new BaseTrackSetting("crusher", false, {
-        "bits": new BaseRange(1, 1, 8, 1)
+        "bits": new BaseRange(4, 1, 8, 1)
     }),
     new BaseTrackSetting("phaser", false, {
         "octaves": new BaseRange(1, 0, 1000, 1),
@@ -2525,19 +2531,19 @@ function FreeverbFilter(options){
 inherit(FreeverbFilter, BaseFilterModel);
 
 FreeverbFilter.prototype.generate = function(){
-    this.filterObject = new Tone.Freeverb(this.options);
+    this.filter = new Tone.Freeverb(this.options);
 };
 
 FreeverbFilter.prototype.getDampening = function(){
-    return this.filterObject.dampening.value;
+    return this.filter.dampening.value;
 };
 
 FreeverbFilter.prototype.getRoomSize = function(){
-    return this.filterObject.roomSize.value; // ???
+    return this.filter.roomSize.value;
 };
 
 FreeverbFilter.prototype.getWet = function(){
-    return this.filterObject.wet.value; // ???
+    return this.filter.wet.value;
 };
 
 FreeverbFilter.prototype.getOptions = function(){
@@ -2546,17 +2552,17 @@ FreeverbFilter.prototype.getOptions = function(){
 
 FreeverbFilter.prototype.setDampening = function(value){
     this.options.dampening = value;
-    this.filterObject.dampening.value = value;
+    this.filter.dampening.value = value;
 };
 
 FreeverbFilter.prototype.setRoomSize = function(value){
     this.options.roomSize = value;
-    this.filterObject.roomSize.value = value; // ???
+    this.filter.roomSize.value = value;
 };
 
 FreeverbFilter.prototype.setWet = function(value){
     this.options.wet = value;
-    this.filterObject.wet.value = value; // ???
+    this.filter.wet.value = value;
 };
 
 FreeverbFilter.prototype.setOptions = function(options){
@@ -2680,7 +2686,7 @@ PostSettings.prototype.setFilter = function(filter){
     if(name in this.filterObjects){
         if(filter.isEnabled === true){
             // update existing filter
-            this.filterObjects[name].setOptions(filter.options);
+            this.filterObjects[name].setOptions(filter.valueOf());
         } else{
             //delete no using filter in track
             delete this.filterObjects[name];
@@ -2688,7 +2694,7 @@ PostSettings.prototype.setFilter = function(filter){
     } else{
         //create new filter
         if(filter.isEnabled === true){
-            this.createFilterObjects(name, filter.options); // tokenSetting.options ?????
+            this.createFilterObjects(name, filter.valueOf());
         }
     }
 };
@@ -2696,6 +2702,9 @@ PostSettings.prototype.setFilter = function(filter){
 PostSettings.prototype.setValueToFilter = function(filterName, optionName, value){
     var filter;
     if(filterName in this.filterObjects){
+        console.log(filterName);
+        console.log(optionName);
+        console.log(value);
         filter = this.filterObjects[filterName];
         if(optionName in filter.options){
             filter.setByName(optionName, value);
@@ -3091,13 +3100,17 @@ function FilterView(filter){
 
 inherit(FilterView, ToolView);
 
+FilterView.prototype.resetFilters = function(){
+    ProxyTrackManager.resetFilters(FiltersList);
+};
 
 FilterView.prototype.setFilter = function(track){
     if(track){
-        this.filter = track.filterObject;
-        console.log(this.filter);
-        console.log("---");
-        ProxyTrackManager.updateFilterListFromFilter(FiltersList, this.filter.postSettings);
+        this.filter = track.postSettings;
+        console.log(FiltersList);
+        console.log("token filter");
+        console.log(this.filter.getPostSettings());
+        ProxyTrackManager.updateFilterListFromFilter(FiltersList, this.filter.getPostSettings());
         this.createFilterTools();
     }
 };
@@ -3620,11 +3633,11 @@ function CrusherFilter(options){
 inherit(CrusherFilter, BaseFilterModel);
 
 CrusherFilter.prototype.generate = function(){
-    this.filterObject = new Tone.BitCrusher(this.options);
+    this.filter = new Tone.BitCrusher(this.options);
 };
 
 CrusherFilter.prototype.getBit = function(){
-    return this.filterObject.dampening.value;
+    return this.filter.bits;
 };
 
 CrusherFilter.prototype.getOptions = function(){
@@ -3632,17 +3645,17 @@ CrusherFilter.prototype.getOptions = function(){
 };
 
 CrusherFilter.prototype.setBit = function(value){
-    this.options.bit = value;
-    this.filterObject.bit.value = value;
+    this.options.bits = value;
+    this.filter.bits = value;
 };
 
 CrusherFilter.prototype.setOptions = function(options){
-    this.setBit(options.bit);
+    this.setBit(options.bits);
 };
 
 CrusherFilter.prototype.setByName = function(optionName, value){
     switch(optionName){
-        case "bit":
+        case "bits":
             this.setBit(value);
             break;
     }
