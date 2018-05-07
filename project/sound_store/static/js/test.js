@@ -64,7 +64,7 @@ var test =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 31);
+/******/ 	return __webpack_require__(__webpack_require__.s = 32);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -351,17 +351,17 @@ module.exports = function(method, dataType, url, callback){
 "use strict";
 
 
-var transportAudioFile = __webpack_require__(51);
-var TrackManager = __webpack_require__(22);
+var transportAudioFile = __webpack_require__(56);
+var TrackManager = __webpack_require__(23);
 
-var changeSound = __webpack_require__(44);
-var changeRequest = __webpack_require__(43);
-var getSound = __webpack_require__(48);
-var getProject = __webpack_require__(47);
-var projectList = __webpack_require__(50);
-var deleteProject = __webpack_require__(45);
-var deleteTrack = __webpack_require__(46);
-var getUser = __webpack_require__(49);
+var changeSound = __webpack_require__(48);
+var changeRequest = __webpack_require__(47);
+var getSound = __webpack_require__(52);
+var getProject = __webpack_require__(51);
+var projectList = __webpack_require__(54);
+var deleteProject = __webpack_require__(49);
+var deleteTrack = __webpack_require__(50);
+var getUser = __webpack_require__(53);
 
 
 module.exports = {
@@ -691,7 +691,7 @@ function onRemoveButtonClicked($element){
 
 var inherit = __webpack_require__(0);
 var BaseWindow = __webpack_require__(15);
-var TrackDataView = __webpack_require__(58);
+var TrackDataView = __webpack_require__(63);
 var Factory = __webpack_require__(2);
 var commonEventNames = __webpack_require__(1);
 var windowsTransport = __webpack_require__(4);
@@ -824,10 +824,13 @@ function setTrackInstrument(value){
 
 var inherit = __webpack_require__(0);
 var BaseWindow = __webpack_require__(15);
-var FilterView = __webpack_require__(52);
-var SettingView = __webpack_require__(56);
+var FilterView = __webpack_require__(57);
+var SettingView = __webpack_require__(61);
+var PianoModel = __webpack_require__(41);
 var commonEventNames = __webpack_require__(1);
 var windowsTransport = __webpack_require__(4);
+
+var eventHandler = __webpack_require__(66);
 
 module.exports = TrackView;
 
@@ -845,6 +848,11 @@ function TrackView(controller){
     this.settingTitle = $("<a class='item' data-tab='" + this.settingTabSegment.dataTab + "'>setting</a>");
     this.filterTitle = $("<a class='item active' data-tab='" + this.filterTabSegment.dataTab + "'>filter</a>");
 
+    this.pianoModel = new PianoModel("piano");
+    this.piano = this.pianoModel.piano(function(obj){
+        console.log(obj);
+    });
+
     this._build();
     this.hide();
     this.showTabMenu();
@@ -856,7 +864,7 @@ TrackView.prototype._build = function(){
     var container = this.getContainer();
 
     //this.settingTabSegment.setActive(); // set Setting tab in active state
-    this.filterTabSegment.setActive(); // set Setting tab in active state
+    this.filterTabSegment.setActive();
 
     this.controller.observer.subscribe(commonEventNames.E_SET_TRACK, setTrack.bind(this));
 
@@ -866,6 +874,8 @@ TrackView.prototype._build = function(){
     container.append(this.tabBlock);
     container.append(this.settingTabSegment.getContainer());
     container.append(this.filterTabSegment.getContainer());
+
+    container.append(this.piano);
 };
 
 TrackView.prototype.showTabMenu = function(){
@@ -879,9 +889,25 @@ TrackView.prototype.back = function(){
     this.filterTabSegment.resetFilters(); // reset previous filter of track
 };
 
+TrackView.prototype.bindKeyEvent = function(){
+    eventHandler.keyPressEvent(keyDownEvent.bind(this));
+    eventHandler.keyUpEvent(keyUpEvent.bind(this));
+};
+
 function setTrack(eventName, track){
     this.settingTabSegment.setTrack(track);
     this.filterTabSegment.setFilter(track);
+}
+
+function keyDownEvent(pressedKey){
+    var className = this.pianoModel.getClassKeyElement(pressedKey);
+    console.log(className);
+    $(className).css("background-color", "grey");
+}
+
+function keyUpEvent(upKey){
+    var className = this.pianoModel.getClassKeyElement(upKey);
+    $(className).css("background-color", "");
 }
 
 
@@ -892,7 +918,7 @@ function setTrack(eventName, track){
 "use strict";
 
 
-var BaseController = __webpack_require__(32);
+var BaseController = __webpack_require__(33);
 var inherit = __webpack_require__(0);
 var ObservableList = __webpack_require__(14);
 
@@ -923,7 +949,7 @@ ListController.prototype.attachModel = function(model){
 
 
 var inherit = __webpack_require__(0);
-var BaseOption = __webpack_require__(16);
+var BaseOption = __webpack_require__(17);
 
 module.exports = BaseOptionList;
 
@@ -961,7 +987,7 @@ BaseOptionList.prototype.set = function(value){
 
 
 var inherit = __webpack_require__(0);
-var BaseOption = __webpack_require__(16);
+var BaseOption = __webpack_require__(17);
 
 module.exports = BaseRange;
 
@@ -1103,6 +1129,34 @@ BaseWindow.prototype.back = null;
 "use strict";
 
 
+module.exports = BaseFilterModel;
+
+function BaseFilterModel(){
+    this.filter = null;
+    this.generate();
+}
+
+BaseFilterModel.prototype.generate = null;
+
+BaseFilterModel.prototype.getOptions = function(){};
+
+BaseFilterModel.prototype.setOptions = function(){};
+
+BaseFilterModel.prototype.setByName = function(){};
+
+BaseFilterModel.prototype.applyToTrack = function(track){
+    this.filter.toMaster();
+    track.connect(this.filter);
+};
+
+
+/***/ }),
+/* 17 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
 module.exports = BaseOption;
 
 /**
@@ -1143,14 +1197,14 @@ BaseOption.prototype.toString = function(){
 
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var PostSettings = __webpack_require__(38);
-var generateUID = __webpack_require__(33);
+var PostSettings = __webpack_require__(42);
+var generateUID = __webpack_require__(34);
 
 module.exports = BaseTrackModel;
 
@@ -1311,11 +1365,13 @@ BaseTrackModel.prototype._generate = null;
  */
 BaseTrackModel.prototype.play = null;
 
-BaseTrackModel.prototype.playCompomponent = null;
+BaseTrackModel.prototype.record = null;
+
+BaseTrackModel.prototype.playComponent = null;
 
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1378,13 +1434,13 @@ BaseTrackSetting.prototype.toString = function(){
 
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-// ProxyTrackManager
+var capitalize = __webpack_require__(55);
 
 module.exports = {
     "updateSettingListFromTrack": function(settingList, track){ // SettingList OR FilterList
@@ -1513,61 +1569,19 @@ function setFilterListToDefault(filterList) {
  * @param optionName
  */
 function setToSettingList(listElement, trackObject, optionName){
-    switch(optionName){
-        case "frequency":
-            listElement.set(trackObject.getFrequency());
-            break;
-        case "volume":
-            listElement.set(trackObject.getVolume());
-            break;
-        case "type":
-            listElement.set(trackObject.getType());
-            break;
-        case "attack":
-            listElement.set(trackObject.getAttack());
-            break;
-        case "decay":
-            listElement.set(trackObject.getDecay());
-            break;
-        case "sustain":
-            listElement.set(trackObject.getSustain());
-            break;
-        case "release":
-            listElement.set(trackObject.getRelease());
-            break;
-    }
+    var methodName = "get" + capitalize(optionName);
+    listElement.set(trackObject[methodName]());
 }
 
 function setToTrackSetting(track, settingName, value){
-    switch(settingName){
-        case "frequency":
-            track.setFrequency(value);
-            break;
-        case "volume":
-            track.setVolume(value);
-            break;
-        case "type":
-            track.setType(value);
-            break;
-        case "attack":
-            track.setAttack(value);
-            break;
-        case "decay":
-            track.setDecay(value);
-            break;
-        case "sustain":
-            track.setSustain(value);
-            break;
-        case "release":
-            track.setRelease(value);
-            break;
-    }
+    var methodName = "set" + capitalize(settingName);
+    track[methodName](value);
     track.setSetting(); // write to model parameter for saving to server
 }
 
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1599,13 +1613,13 @@ TrackSettingsSet.prototype.set = function(optionName, value){
 
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var toWav = __webpack_require__(30);
+var toWav = __webpack_require__(31);
 
 module.exports = {
     "getAudioContextBuffer": getAudioContextBuffer,
@@ -1665,13 +1679,13 @@ function AudioContextToBlob(audioContext){
 
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var AudioHelper = __webpack_require__(21);
+var AudioHelper = __webpack_require__(22);
 
 module.exports = TrackManager;
 
@@ -1725,14 +1739,14 @@ TrackManager.save = (function(){
 
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var TabSegment = __webpack_require__(57);
+var TabSegment = __webpack_require__(62);
 var BaseRange = __webpack_require__(13);
 var BaseOptionList = __webpack_require__(12);
 var Factory = __webpack_require__(2);
@@ -1770,7 +1784,7 @@ ToolView.prototype.createElement = function(className, name, value){
 
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1814,7 +1828,7 @@ ProjectController.prototype.removeById = function(id){
 
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1858,7 +1872,7 @@ ProjectListController.prototype._removeHandler = function(id){
 
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1888,15 +1902,15 @@ TrackController.prototype.sendTrack = function(){
 
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 //var audioBufferUtils = require("audio-buffer-utils");
-var AudioHelper = __webpack_require__(21);
-var TrackManager = __webpack_require__(22);
+var AudioHelper = __webpack_require__(22);
+var TrackManager = __webpack_require__(23);
 
 var sounds = [];
 
@@ -1959,14 +1973,14 @@ function toAudioBuffer(blob, getAudioBuffer){
 
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var ObservableList = __webpack_require__(14);
-var ProjectModel = __webpack_require__(39);
+var ProjectModel = __webpack_require__(43);
 var inherit = __webpack_require__(0);
 
 module.exports = ProjectListModel;
@@ -2005,7 +2019,7 @@ ProjectListModel.prototype.clearActiveProject = function(){
 
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2013,11 +2027,11 @@ ProjectListModel.prototype.clearActiveProject = function(){
 
 var inherit = __webpack_require__(0);
 var BaseView = __webpack_require__(3);
-var MessageModal = __webpack_require__(54);
+var MessageModal = __webpack_require__(59);
 var ProjectListView = __webpack_require__(8);
 var TrackListView = __webpack_require__(9);
 var TrackView = __webpack_require__(10);
-var MenuBar = __webpack_require__(53);
+var MenuBar = __webpack_require__(58);
 var windowsTransport = __webpack_require__(4);
 var commonEventNames = __webpack_require__(1);
 
@@ -2121,6 +2135,7 @@ WindowManager.prototype.setActiveWindow = function(newActiveWindow){
         this.isProjectListView = true;
         this.__activeWindow.controller.model.clearActiveProject();
     } else if(this.__activeWindow instanceof TrackView){
+        this.__activeWindow.bindKeyEvent();
         this.__activeWindow.controller.attachModel(this.__windows["trackList"].controller.model.getActiveTrack());
         // send track settings to view
         this.__activeWindow.controller.sendTrack();
@@ -2137,7 +2152,7 @@ WindowManager.prototype.setActiveWindow = function(newActiveWindow){
 
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2240,23 +2255,23 @@ function writeString (view, offset, string) {
 
 
 /***/ }),
-/* 31 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var merger_test = __webpack_require__(27);
+var merger_test = __webpack_require__(28);
 
-var WindowManager = __webpack_require__(29);
+var WindowManager = __webpack_require__(30);
 var ProjectListView = __webpack_require__(8);
 var TrackListView = __webpack_require__(9);
 
-var ProjectListController = __webpack_require__(25);
-var ProjectController = __webpack_require__(24);
-var TrackController = __webpack_require__(26);
+var ProjectListController = __webpack_require__(26);
+var ProjectController = __webpack_require__(25);
+var TrackController = __webpack_require__(27);
 
-var ProjectListModel = __webpack_require__(28);
+var ProjectListModel = __webpack_require__(29);
 
 var TrackView = __webpack_require__(10);
 
@@ -2296,7 +2311,7 @@ projectListController.fetchData();
 
 
 /***/ }),
-/* 32 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2368,7 +2383,7 @@ BaseController.prototype.remove = null;
 
 
 /***/ }),
-/* 33 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2378,34 +2393,6 @@ var counterUID = 0;
 
 module.exports = function(){
     return ++counterUID;
-};
-
-
-/***/ }),
-/* 34 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = BaseFilterModel;
-
-function BaseFilterModel(){
-    this.filter = null;
-    this.generate();
-}
-
-BaseFilterModel.prototype.generate = null;
-
-BaseFilterModel.prototype.getOptions = function(){};
-
-BaseFilterModel.prototype.setOptions = function(){};
-
-BaseFilterModel.prototype.setByName = function(){};
-
-BaseFilterModel.prototype.applyToTrack = function(track){
-    this.filter.toMaster();
-    track.connect(this.filter);
 };
 
 
@@ -2468,10 +2455,93 @@ BaseModel.prototype.remove = null;
 "use strict";
 
 
+// BaseValue
+module.exports = BaseValue;
+
+function BaseValue(defaultValue, additionalValue, value){
+    this.value = value || defaultValue;
+    this.additionalValue = additionalValue || [];
+    this.defaultValue = defaultValue;
+}
+
+BaseValue.prototype.getValue = function(){
+    return this.value;
+};
+
+BaseValue.prototype.setValue = function(value){
+    this.value = value;
+};
+
+BaseValue.prototype.setValueFromAdditional = function(index){
+    var value = this.additionalValue[index];
+    if(value){
+        this.setValue(value);
+    }
+};
+
+
+/***/ }),
+/* 37 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+//CrusherFilter
+
+var inherit = __webpack_require__(0);
+var BaseFilterModel = __webpack_require__(16);
+
+module.exports = CrusherFilter;
+
+function CrusherFilter(options){
+    BaseFilterModel.call(this);
+    this.options = options || {};
+}
+
+inherit(CrusherFilter, BaseFilterModel);
+
+CrusherFilter.prototype.generate = function(){
+    this.filter = new Tone.BitCrusher(this.options);
+};
+
+CrusherFilter.prototype.getBit = function(){
+    return this.filter.bits;
+};
+
+CrusherFilter.prototype.getOptions = function(){
+    return this.options;
+};
+
+CrusherFilter.prototype.setBit = function(value){
+    this.options.bits = value;
+    this.filter.bits = value;
+};
+
+CrusherFilter.prototype.setOptions = function(options){
+    this.setBit(options.bits);
+};
+
+CrusherFilter.prototype.setByName = function(optionName, value){
+    switch(optionName){
+        case "bits":
+            this.setBit(value);
+            break;
+    }
+};
+
+
+/***/ }),
+/* 38 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
 var BaseOptionList = __webpack_require__(12);
 var BaseRange = __webpack_require__(13);
-var BaseTrackSetting = __webpack_require__(18);
-var TrackSettingsSet = __webpack_require__(20);
+var BaseTrackSetting = __webpack_require__(19);
+var TrackSettingsSet = __webpack_require__(21);
 
 module.exports = new TrackSettingsSet([
     new BaseTrackSetting("tremolo", false, {
@@ -2512,14 +2582,14 @@ module.exports = new TrackSettingsSet([
 
 
 /***/ }),
-/* 37 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var BaseFilterModel = __webpack_require__(34);
+var BaseFilterModel = __webpack_require__(16);
 
 module.exports = FreeverbFilter;
 
@@ -2587,14 +2657,196 @@ FreeverbFilter.prototype.setByName = function(optionName, value){
 
 
 /***/ }),
-/* 38 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var FreeverbFilter = __webpack_require__(37);
-var CrusherFilter = __webpack_require__(61);
+var BaseValue = __webpack_require__(36);
+
+// key - key of keyboard, value - object: value, defaultValue, list
+// English notation
+module.exports = {
+    "blackKeys": {
+        '0': new BaseValue("C2#", [], "C2#"),
+        '2': new BaseValue("D2#", [], "D2#"),
+        '4': new BaseValue("F2#", [], "F2#"),
+        '6': new BaseValue("G2#", [], "G2#"),
+        '8': new BaseValue("A2#", [], "A2#"),
+        'Q': new BaseValue("C3#", [], "C3#"),
+        'W': new BaseValue("D3#", [], "D3#"),
+        'E': new BaseValue("F3#", [], "F3#"),
+        'R': new BaseValue("G3#", [], "G3#"),
+        'T': new BaseValue("A3#", [], "A3#"),
+        'Y': new BaseValue("C4#", [], "C4#"),
+        'U': new BaseValue("D4#", [], "D4#"),
+        'I': new BaseValue("F4#", [], "F4#"),
+        'O': new BaseValue("G4#", [], "G4#"),
+        'P': new BaseValue("A4#", [], "A4#")
+    },
+    "whiteKeys": {
+        'A': new BaseValue("C2", [], "C2"),
+        'S': new BaseValue("D2", [], "D2"),
+        'D': new BaseValue("E2", [], "E2"),
+        'F': new BaseValue("F2", [], "F2"),
+        'G': new BaseValue("G2", [], "G2"),
+        'H': new BaseValue("A2", [], "A2"),
+        'J': new BaseValue("B2", [], "B2"),
+        'K': new BaseValue("C3", [], "E3"),
+        'L': new BaseValue("D3", [], "D3"),
+        ';': new BaseValue("E3", [], "E3"),
+        "'": new BaseValue("F3", [], "F3"),
+        "Z": new BaseValue("G3", [], "G3"),
+        "X": new BaseValue("A3", [], "A3"),
+        "C": new BaseValue("B3", [], "B3"),
+        'V': new BaseValue("C4", [], "C4"),
+        'B': new BaseValue("D4", [], "D4"),
+        'N': new BaseValue("E4", [], "E4"),
+        'M': new BaseValue("F4", [], "F4"),
+        ',': new BaseValue("G4", [], "G4"),
+        '.': new BaseValue("A4", [], "A4"),
+        '/': new BaseValue("B4", [], "B4")
+    }
+};
+
+
+/***/ }),
+/* 41 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var PianoKeyList = __webpack_require__(40);
+
+module.exports = PianoModel;
+
+function PianoModel(className, whiteKeyCount, blackKeyCount){
+    this.className = className;
+    this.blackKeyCount = blackKeyCount || 15;
+    this.whiteKeyCount = whiteKeyCount || 21;
+}
+
+PianoModel.prototype.keyContent = function(key, note){
+    var $result = $("<div class='key-content'>");
+    var $note = $("<label class='note'>" + note + "</label>");
+    var $key = $("<label class='keyboard " + key + "'>" + key + "</label>");
+    $result.append($note);
+    $result.append("<br>");
+    $result.append($key);
+    return $result;
+};
+
+PianoModel.prototype.key = function(className, style, key, note, callback) {
+    var $key = $("<div class='" + className + "' style='" + style + "'>");
+    $key.append(this.keyContent(key, note));
+    $key.click(function () {
+        callback(key, note);
+    });
+    return $key;
+};
+
+/**
+ * Return class name of KEY - .white/black.key
+ * @param key
+ * @returns
+ */
+PianoModel.prototype.getClassKeyElement = function(key){
+    console.log(".key." + key);
+    return $('.' + this.className).find(".key." + key);
+};
+
+PianoModel.prototype.isPianoKey = function(key){
+    return (key in PianoKeyList.blackKeys || key in PianoKeyList.whiteKeys);
+
+
+};
+
+PianoModel.prototype.piano = function(callback){
+    var i;
+    var j = 0;
+    var whiteKeyDistance = -40;
+    var keyDistance = 40;
+    var blackKeyDistance = 25;
+    var blackKey;
+    var whiteKey;
+    var isSpace = false;
+    var isTwoGroup = true;
+    var isThreeGroup = false;
+    var countTwoGroup = 2;
+    var countThreeGroup = 3;
+    var twoGroupCounter = 0;
+    var threeGroupCounter = 0;
+    var $result = $("<div class='" + this.className + "'>");
+    var blackKeys = Object.keys(PianoKeyList.blackKeys);
+    var whiteKeys = Object.keys(PianoKeyList.whiteKeys);
+    var blackKeysCount = blackKeys.length;
+    var summaryKeyCount = whiteKeys.length;
+
+    for(i = 0; i < summaryKeyCount; ++i){
+        whiteKey = whiteKeys[i];
+        whiteKeyDistance += keyDistance;
+        //add white key
+        $result.append(this.key("white key " + whiteKey, "left: " + whiteKeyDistance + ";",
+                                whiteKey, PianoKeyList.whiteKeys[whiteKey].getValue(), callback));
+        if(j < blackKeysCount){
+            if(isSpace === false){
+                blackKey = blackKeys[j];
+                if(isTwoGroup === true){
+                    // crete group of two keys
+                    $result.append(this.key("black key " + blackKey, "left: " + blackKeyDistance + ";",
+                        blackKey, PianoKeyList.blackKeys[blackKey].getValue(), callback));
+                    twoGroupCounter++;
+                    if(twoGroupCounter === countTwoGroup){
+                        // switch on three group keys and space between them
+                        isTwoGroup = false;
+                        isThreeGroup = true;
+                        isSpace = true;
+                        twoGroupCounter = 0;
+                    }
+                } else if(isThreeGroup === true){
+                    // crete group of three keys
+                    $result.append(this.key("black key " + blackKey, "left: " + blackKeyDistance + ";",
+                        blackKey, PianoKeyList.blackKeys[blackKey].getValue(), callback));
+                    threeGroupCounter++;
+                    if(threeGroupCounter === countThreeGroup){
+                        // switch on two group keys and space between them
+                        isThreeGroup = false;
+                        isTwoGroup = true;
+                        isSpace = true;
+                        threeGroupCounter = 0;
+                    }
+                }
+                blackKeyDistance += keyDistance;
+                j++;
+            } else{
+                // pass key
+                isSpace = false;
+                blackKeyDistance += keyDistance; // add distance for space between black keys group
+            }
+        }
+    }
+    return $result;
+};
+
+function switchFlags(flag1, flag2, flag3, counter){
+    flag1 = false;
+    flag2 = true;
+    flag3 = true;
+    counter = 0;
+}
+
+
+/***/ }),
+/* 42 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var FreeverbFilter = __webpack_require__(39);
+var CrusherFilter = __webpack_require__(37);
 
 module.exports = PostSettings;
 
@@ -2714,7 +2966,7 @@ PostSettings.prototype.setValueToFilter = function(filterName, optionName, value
 
 
 /***/ }),
-/* 39 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2722,8 +2974,8 @@ PostSettings.prototype.setValueToFilter = function(filterName, optionName, value
 
 var ObservableList = __webpack_require__(14);
 var inherit = __webpack_require__(0);
-var TrackSynthesizer = __webpack_require__(42);
-var TrackNoise = __webpack_require__(41);
+var TrackSynthesizer = __webpack_require__(46);
+var TrackNoise = __webpack_require__(45);
 var commonEventNames = __webpack_require__(1);
 
 module.exports = ProjectModel;
@@ -2804,7 +3056,7 @@ ProjectModel.prototype.toJson = function(){
 
 
 /***/ }),
-/* 40 */
+/* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2812,8 +3064,8 @@ ProjectModel.prototype.toJson = function(){
 
 var BaseOptionList = __webpack_require__(12);
 var BaseRange = __webpack_require__(13);
-var BaseTrackSetting = __webpack_require__(18);
-var TrackSettingsSet = __webpack_require__(20);
+var BaseTrackSetting = __webpack_require__(19);
+var TrackSettingsSet = __webpack_require__(21);
 
 module.exports = new TrackSettingsSet([
     new BaseTrackSetting("type", true, {
@@ -2839,20 +3091,20 @@ module.exports = new TrackSettingsSet([
     new BaseTrackSetting("sustain", true, {
         "value": new BaseRange(0, 0, 1, 0.001)
     }),
-    new BaseTrackSetting("relay", true, {
+    new BaseTrackSetting("release", true, {
         "value": new BaseRange(0, 0, 1, 0.001)
     })
 ]);
 
 
 /***/ }),
-/* 41 */
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var BaseTrackModel = __webpack_require__(17);
+var BaseTrackModel = __webpack_require__(18);
 var inherit = __webpack_require__(0);
 
 module.exports = TrackNoise;
@@ -2875,13 +3127,13 @@ TrackNoise.prototype.play = function(options){
 
 
 /***/ }),
-/* 42 */
+/* 46 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var BaseTrackModel = __webpack_require__(17);
+var BaseTrackModel = __webpack_require__(18);
 var inherit = __webpack_require__(0);
 
 module.exports = TrackSynthesizer;
@@ -2906,6 +3158,10 @@ TrackSynthesizer.prototype.play = function(options){
     }
 };
 
+TrackSynthesizer.prototype.playComponent = function(note){
+    this.trackObject.triggerAttackRelease(note);
+};
+
 TrackSynthesizer.prototype.saveTest = function(callback){
     var DURATION = 5; // seconds
     var self = this;
@@ -2924,7 +3180,7 @@ TrackSynthesizer.prototype.saveTest = function(callback){
 
 
 /***/ }),
-/* 43 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2948,7 +3204,7 @@ module.exports = function(url, data, dataType, callback){
 
 
 /***/ }),
-/* 44 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2973,54 +3229,6 @@ module.exports = function(url, formData){
 
 
 /***/ }),
-/* 45 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var baseRequest = __webpack_require__(5);
-
-module.exports = baseRequest.bind(null, "POST", "json");
-
-
-/***/ }),
-/* 46 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var baseRequest = __webpack_require__(5);
-
-module.exports = baseRequest.bind(null, "POST", "json");
-
-
-/***/ }),
-/* 47 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var baseRequest = __webpack_require__(5);
-
-module.exports = baseRequest.bind(null, "GET", "json");
-
-
-/***/ }),
-/* 48 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var baseRequest = __webpack_require__(5);
-
-module.exports = baseRequest.bind(null, "GET", "binary");
-
-
-/***/ }),
 /* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -3029,7 +3237,7 @@ module.exports = baseRequest.bind(null, "GET", "binary");
 
 var baseRequest = __webpack_require__(5);
 
-module.exports = baseRequest.bind(null, "GET", "json", "user/");
+module.exports = baseRequest.bind(null, "POST", "json");
 
 
 /***/ }),
@@ -3041,11 +3249,71 @@ module.exports = baseRequest.bind(null, "GET", "json", "user/");
 
 var baseRequest = __webpack_require__(5);
 
-module.exports = baseRequest.bind(null, "GET", "json", "projects/");
+module.exports = baseRequest.bind(null, "POST", "json");
 
 
 /***/ }),
 /* 51 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var baseRequest = __webpack_require__(5);
+
+module.exports = baseRequest.bind(null, "GET", "json");
+
+
+/***/ }),
+/* 52 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var baseRequest = __webpack_require__(5);
+
+module.exports = baseRequest.bind(null, "GET", "binary");
+
+
+/***/ }),
+/* 53 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var baseRequest = __webpack_require__(5);
+
+module.exports = baseRequest.bind(null, "GET", "json", "user/");
+
+
+/***/ }),
+/* 54 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var baseRequest = __webpack_require__(5);
+
+module.exports = baseRequest.bind(null, "GET", "json", "projects/");
+
+
+/***/ }),
+/* 55 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = function capitalize(str){
+    return str.charAt(0).toUpperCase() + str.slice(1);
+};
+
+
+/***/ }),
+/* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3073,16 +3341,16 @@ function fetch(url, resolve){
 
 
 /***/ }),
-/* 52 */
+/* 57 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var ToolView = __webpack_require__(23);
-var FiltersList = __webpack_require__(36);
-var ProxyTrackManager = __webpack_require__(19);
+var ToolView = __webpack_require__(24);
+var FiltersList = __webpack_require__(38);
+var ProxyTrackManager = __webpack_require__(20);
 var Factory = __webpack_require__(2);
 
 module.exports = FilterView;
@@ -3107,9 +3375,6 @@ FilterView.prototype.resetFilters = function(){
 FilterView.prototype.setFilter = function(track){
     if(track){
         this.filter = track.postSettings;
-        console.log(FiltersList);
-        console.log("token filter");
-        console.log(this.filter.getPostSettings());
         ProxyTrackManager.updateFilterListFromFilter(FiltersList, this.filter.getPostSettings());
         this.createFilterTools();
     }
@@ -3171,7 +3436,7 @@ function uncheckEvent(filterName, isChecked){
 
 
 /***/ }),
-/* 53 */
+/* 58 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3179,11 +3444,11 @@ function uncheckEvent(filterName, isChecked){
 
 var inherit = __webpack_require__(0);
 var BaseView = __webpack_require__(3);
-var UserInfoBar = __webpack_require__(59);
+var UserInfoBar = __webpack_require__(64);
 var TrackView = __webpack_require__(10);
 var TrackListView = __webpack_require__(9);
 var ProjectListView = __webpack_require__(8);
-var PlayerView = __webpack_require__(55);
+var PlayerView = __webpack_require__(60);
 var Factory = __webpack_require__(2);
 var commonEventNames = __webpack_require__(1);
 var windowsTransport = __webpack_require__(4);
@@ -3233,7 +3498,7 @@ MenuBar.prototype.adaptToActiveWindow = function(window){
 
 
 /***/ }),
-/* 54 */
+/* 59 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3297,7 +3562,7 @@ MessageModal.prototype.hide = function(){
 
 
 /***/ }),
-/* 55 */
+/* 60 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3337,16 +3602,16 @@ PlayerView.prototype._build = function(){
 };
 
 /***/ }),
-/* 56 */
+/* 61 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var ToolView = __webpack_require__(23);
-var SettingsList = __webpack_require__(40);
-var ProxyTrackManager = __webpack_require__(19);
+var ToolView = __webpack_require__(24);
+var SettingsList = __webpack_require__(44);
+var ProxyTrackManager = __webpack_require__(20);
 var Factory = __webpack_require__(2);
 
 module.exports = SettingView;
@@ -3406,7 +3671,7 @@ SettingView.prototype.setEvent = function(optionName, value){
 
 
 /***/ }),
-/* 57 */
+/* 62 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3431,7 +3696,7 @@ TabSegment.prototype.setActive = function(){
 
 
 /***/ }),
-/* 58 */
+/* 63 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3505,7 +3770,7 @@ TrackDataView.prototype.createWaveForm = function(){
 
 
 /***/ }),
-/* 59 */
+/* 64 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3514,7 +3779,7 @@ TrackDataView.prototype.createWaveForm = function(){
 var inherit = __webpack_require__(0);
 var Factory = __webpack_require__(2);
 var BaseView = __webpack_require__(3);
-var UserModal = __webpack_require__(60);
+var UserModal = __webpack_require__(65);
 var RequestManager = __webpack_require__(6);
 var commonEventNames = __webpack_require__(1);
 var windowsTransport = __webpack_require__(4);
@@ -3565,7 +3830,7 @@ UserInfoBar.prototype.setUserName = function(userName){
 
 
 /***/ }),
-/* 60 */
+/* 65 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3612,54 +3877,30 @@ UserModal.prototype.show = function(){
 
 
 /***/ }),
-/* 61 */
+/* 66 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-//CrusherFilter
+//eventHandler
 
-var inherit = __webpack_require__(0);
-var BaseFilterModel = __webpack_require__(34);
+module.exports = {
+    "keyPressEvent": keyPressEvent,
+    "keyUpEvent": keyUpEvent
+};
 
-module.exports = CrusherFilter;
-
-function CrusherFilter(options){
-    BaseFilterModel.call(this);
-    this.options = options || {};
+function keyPressEvent(callback){
+    $(document).keydown(function(event){
+        callback(String.fromCharCode(event.keyCode));
+    });
 }
 
-inherit(CrusherFilter, BaseFilterModel);
-
-CrusherFilter.prototype.generate = function(){
-    this.filter = new Tone.BitCrusher(this.options);
-};
-
-CrusherFilter.prototype.getBit = function(){
-    return this.filter.bits;
-};
-
-CrusherFilter.prototype.getOptions = function(){
-    return this.options;
-};
-
-CrusherFilter.prototype.setBit = function(value){
-    this.options.bits = value;
-    this.filter.bits = value;
-};
-
-CrusherFilter.prototype.setOptions = function(options){
-    this.setBit(options.bits);
-};
-
-CrusherFilter.prototype.setByName = function(optionName, value){
-    switch(optionName){
-        case "bits":
-            this.setBit(value);
-            break;
-    }
-};
+function keyUpEvent(callback){
+    $(document).keyup(function(event){
+        callback(String.fromCharCode(event.keyCode));
+    });
+}
 
 
 /***/ })
