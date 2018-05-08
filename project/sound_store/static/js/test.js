@@ -846,7 +846,7 @@ function TrackView(controller){
     this.filterTabSegment = new FilterView(null);
 
     this.settingTitle = $("<a class='item' data-tab='" + this.settingTabSegment.dataTab + "'>setting</a>");
-    this.filterTitle = $("<a class='item active' data-tab='" + this.filterTabSegment.dataTab + "'>filter</a>");
+    this.filterTitle = $("<a class='item' data-tab='" + this.filterTabSegment.dataTab + "'>filter</a>");
 
     this.instrumentView = null;
 
@@ -860,8 +860,7 @@ inherit(TrackView, BaseWindow);
 TrackView.prototype._build = function(){
     var container = this.getContainer();
 
-    //this.settingTabSegment.setActive(); // set Setting tab in active state
-    this.filterTabSegment.setActive();
+    this.setActiveSettingView();
 
     this.controller.observer.subscribe(commonEventNames.E_SET_TRACK, setTrack.bind(this));
 
@@ -875,7 +874,19 @@ TrackView.prototype._build = function(){
 };
 
 TrackView.prototype.showTabMenu = function(){
-    $(".tabular.menu .item").tab();
+    $(document).ready(function(){
+        $('.tabular.menu .item').tab({history:false});
+    });
+};
+
+TrackView.prototype.setActiveSettingView = function(){
+    this.settingTabSegment.setActive();
+    this.settingTitle.addClass("active");
+};
+
+TrackView.prototype.setActiveFilterView = function(){
+    this.filterTabSegment.setActive();
+    this.filterTitle.addClass("active");
 };
 
 TrackView.prototype.back = function(){
