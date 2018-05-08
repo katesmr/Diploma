@@ -826,7 +826,7 @@ var inherit = __webpack_require__(0);
 var BaseWindow = __webpack_require__(15);
 var FilterView = __webpack_require__(57);
 var SettingView = __webpack_require__(61);
-var PianoModel = __webpack_require__(41);
+var InstrumentView = __webpack_require__(67);
 var commonEventNames = __webpack_require__(1);
 var windowsTransport = __webpack_require__(4);
 
@@ -848,10 +848,7 @@ function TrackView(controller){
     this.settingTitle = $("<a class='item' data-tab='" + this.settingTabSegment.dataTab + "'>setting</a>");
     this.filterTitle = $("<a class='item active' data-tab='" + this.filterTabSegment.dataTab + "'>filter</a>");
 
-    this.pianoModel = new PianoModel("piano");
-    this.piano = this.pianoModel.piano(function(obj){
-        console.log(obj);
-    });
+    this.instrumentView = null;
 
     this._build();
     this.hide();
@@ -874,8 +871,7 @@ TrackView.prototype._build = function(){
     container.append(this.tabBlock);
     container.append(this.settingTabSegment.getContainer());
     container.append(this.filterTabSegment.getContainer());
-
-    container.append(this.piano);
+    container.append(this.instrumentView);
 };
 
 TrackView.prototype.showTabMenu = function(){
@@ -890,24 +886,16 @@ TrackView.prototype.back = function(){
 };
 
 TrackView.prototype.bindKeyEvent = function(){
-    eventHandler.keyPressEvent(keyDownEvent.bind(this));
-    eventHandler.keyUpEvent(keyUpEvent.bind(this));
+    eventHandler.keyPressEvent(this.instrumentView.keyDownEvent.bind(this.instrumentView));
+    eventHandler.keyUpEvent(this.instrumentView.keyUpEvent.bind(this.instrumentView));
 };
 
 function setTrack(eventName, track){
     this.settingTabSegment.setTrack(track);
     this.filterTabSegment.setFilter(track);
-}
 
-function keyDownEvent(pressedKey){
-    var className = this.pianoModel.getClassKeyElement(pressedKey);
-    console.log(className);
-    $(className).css("background-color", "grey");
-}
-
-function keyUpEvent(upKey){
-    var className = this.pianoModel.getClassKeyElement(upKey);
-    $(className).css("background-color", "");
+    this.instrumentView = new InstrumentView(track);
+    this.getContainer().append(this.instrumentView.instrument);
 }
 
 
@@ -2135,10 +2123,10 @@ WindowManager.prototype.setActiveWindow = function(newActiveWindow){
         this.isProjectListView = true;
         this.__activeWindow.controller.model.clearActiveProject();
     } else if(this.__activeWindow instanceof TrackView){
-        this.__activeWindow.bindKeyEvent();
         this.__activeWindow.controller.attachModel(this.__windows["trackList"].controller.model.getActiveTrack());
         // send track settings to view
         this.__activeWindow.controller.sendTrack();
+        this.__activeWindow.bindKeyEvent();
     }
 };
 
@@ -2742,7 +2730,8 @@ PianoModel.prototype.key = function(className, style, key, note, callback) {
     var $key = $("<div class='" + className + "' style='" + style + "'>");
     $key.append(this.keyContent(key, note));
     $key.click(function () {
-        callback(key, note);
+        this.setColorToKey(key, "grey");
+        callback(note);
     });
     return $key;
 };
@@ -2757,10 +2746,9 @@ PianoModel.prototype.getClassKeyElement = function(key){
     return $('.' + this.className).find(".key." + key);
 };
 
-PianoModel.prototype.isPianoKey = function(key){
-    return (key in PianoKeyList.blackKeys || key in PianoKeyList.whiteKeys);
-
-
+PianoModel.prototype.setColorToKey = function(key, color){
+    var className = this.instrumentModel.getClassKeyElement(key);
+    $(className).css("background-color", color);
 };
 
 PianoModel.prototype.piano = function(callback){
@@ -3901,6 +3889,65 @@ function keyUpEvent(callback){
         callback(String.fromCharCode(event.keyCode));
     });
 }
+
+
+/***/ }),
+/* 67 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var BaseView = __webpack_require__(3);
+var PianoModel = __webpack_require__(41);
+
+module.exports = InstrumentView;
+
+function InstrumentView(track){
+    BaseView.call(this, "instrument-view");
+    this.track = track;
+    this.instrument = null;
+    this.instrumentModel = null;
+    this.setInstrument();
+}
+
+inherit(InstrumentView, BaseView);
+
+InstrumentView.prototype._build = function(){
+    var container = this.getContainer();
+
+    container.append(this.instrument);
+};
+
+InstrumentView.prototype.setInstrument = function(){
+    switch(this.track.instrument){
+        case "synth":
+            this.instrumentModel = new PianoModel("piano");
+            this.instrument = this.instrumentModel.piano();
+            break;
+        case "oscillator":
+            break;
+    }
+};
+
+InstrumentView.prototype.keyDownEvent = function(pressedKey){
+    console.log(this.instrumentModel);
+    this.instrumentModel.setColorToKey(pressedKey, "grey");  // EDIT
+    // get note from className
+    // var note = $(className).find(".note").text();
+    // this.track.playComponent(note);
+
+};
+
+InstrumentView.prototype.keyUpEvent = function(upKey){
+    this.instrumentModel.setColorToKey(upKey, "")
+};
+
+InstrumentView.prototype.playEvent = function(note){
+    this.track.playComponent(note);
+};
+
 
 
 /***/ })
