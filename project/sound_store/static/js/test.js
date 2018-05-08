@@ -3364,37 +3364,49 @@ FilterView.prototype.setFilter = function(track){
     if(track){
         this.filter = track.postSettings;
         ProxyTrackManager.updateFilterListFromFilter(FiltersList, this.filter.getPostSettings());
-        this.createFilterTools();
+        this.createFilterColumns();
     }
 };
 
-FilterView.prototype.createFilterTools = function(){
-    var i;
+FilterView.prototype.setEvent = function(optionName, value){
+    ProxyTrackManager.setFilter(FiltersList, this.filter, optionName, value);
+};
+
+/**
+ * Full div with filter setting of rangeElement || dropDownElement
+ */
+FilterView.prototype.createFilterSettingElements = function(mainBlock, options){
     var value;
-    var options;
-    var filterName;
     var optionName;
-    var tokenFilter;
     var $element;
     var $elementName;
+    for(optionName in options){
+        value = options[optionName]; // BaseOption
+        $elementName = $("<label>" + optionName + "</label>");
+        $element = this.createElement(optionName, optionName, value);
+        mainBlock.append($elementName);
+        mainBlock.append($element);
+    }
+};
+
+FilterView.prototype.createFilterTools = function(count, startValue){
+    var i = startValue || 0;
+    var options;
+    var filterName;
+    var tokenFilter;
     var $mainDiv;
     var $checkBox;
     var $settingDiv;
-    for(i = 0; i < FiltersList.list.length; ++i){
+    var $result = $("<div>");
+    for(i; i < count; ++i){
         tokenFilter = FiltersList.list[i];
         options = tokenFilter.options;
         filterName = tokenFilter.name;
         // create main div for checkbox component and div with settings
-        $mainDiv = $("<div class='column " + filterName + "'>");
+        $mainDiv = $("<div class='item-" + filterName + "'>");
         $settingDiv = $("<div class='filter-setting-" + filterName + "'>");
         // create widgets for settings
-        for(optionName in options){
-            value = options[optionName]; // BaseOption
-            $elementName = $("<label>" + optionName + "</label>");
-            $element = this.createElement(optionName, optionName, value);
-            $settingDiv.append($elementName);
-            $settingDiv.append($element);
-        }
+        this.createFilterSettingElements($settingDiv, options);
         if(tokenFilter.isEnabled === true){
             $settingDiv.show();
         } else {
@@ -3404,12 +3416,19 @@ FilterView.prototype.createFilterTools = function(){
                                            uncheckEvent.bind(this), tokenFilter.isEnabled);
         $mainDiv.append($checkBox);
         $mainDiv.append($settingDiv);
-        this.table.append($mainDiv);
+        $result.append($mainDiv);
     }
+    return $result;
 };
 
-FilterView.prototype.setEvent = function(optionName, value){
-    ProxyTrackManager.setFilter(FiltersList, this.filter, optionName, value);
+FilterView.prototype.createFilterColumns = function(){
+    var $column1;
+    var $column2;
+    var elCountFirstCol = Math.ceil(FiltersList.list.length / 2);
+    $column1 = this.createFilterTools(elCountFirstCol);
+    $column2 = this.createFilterTools(FiltersList.list.length, elCountFirstCol);
+    this.table.append($column1);
+    this.table.append($column2);
 };
 
 function checkEvent(filterName, isChecked){
