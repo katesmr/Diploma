@@ -110,11 +110,13 @@ module.exports = {
 
 
 module.exports = {
+    "createKey": createKey,
     "rangeElement": rangeElement,
     "buttonsPopup": buttonsPopup,
     "createButton": createButton,
-    "dropDownElement": dropDownElement,
+    "setColorToKey": setColorToKey,
     "createCheckBox": createCheckBox,
+    "dropDownElement": dropDownElement,
     "createDivButton": createDivButton,
     "createIconButton": createIconButton,
     "deleteCircleButton": deleteCircleButton,
@@ -269,9 +271,31 @@ function buttonsPopup(buttonNameList, callback){
     return $result;
 }
 
-function createPiano(){
-    var $result = $("<div class='piano'>");
+function keyContent(key, note){
+    var $result = $("<div class='key-content'>");
+    var $note = $("<label class='note'>" + note + "</label>");
+    var $key = $("<label class='keyboard " + key + "'>" + key + "</label>");
+    $result.append($note);
+    $result.append("<br>");
+    $result.append($key);
+    return $result;
+}
 
+function createKey(className, style, key, note, callback){
+    var $key = $("<div class='" + className + "' style='" + style + "'>");
+    $key.append(keyContent(key, note));
+    $key.click(function(){
+        callback(key, note);
+    });
+    return $key;
+}
+
+function getClassKeyElement(className, key){
+    return $('.' + className).find(".key." + key);
+}
+
+function setColorToKey(key, color){
+    $(getClassKeyElement("piano", key)).css("background-color", color);
 }
 
 
@@ -830,8 +854,6 @@ var InstrumentView = __webpack_require__(67);
 var commonEventNames = __webpack_require__(1);
 var windowsTransport = __webpack_require__(4);
 
-var eventHandler = __webpack_require__(66);
-
 module.exports = TrackView;
 
 function TrackView(controller){
@@ -897,8 +919,8 @@ TrackView.prototype.back = function(){
 };
 
 TrackView.prototype.bindKeyEvent = function(){
-    eventHandler.keyPressEvent(this.instrumentView.keyDownEvent.bind(this.instrumentView));
-    eventHandler.keyUpEvent(this.instrumentView.keyUpEvent.bind(this.instrumentView));
+    this.instrumentView.instrument.keyDown();
+    this.instrumentView.instrument.keyUp();
 };
 
 function setTrack(eventName, track){
@@ -906,7 +928,7 @@ function setTrack(eventName, track){
     this.filterTabSegment.setFilter(track);
 
     this.instrumentView = new InstrumentView(track);
-    this.getContainer().append(this.instrumentView.instrument);
+    this.getContainer().append(this.instrumentView.getContainer());
 }
 
 
@@ -2448,38 +2470,7 @@ BaseModel.prototype.remove = null;
 
 
 /***/ }),
-/* 36 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-// BaseValue
-module.exports = BaseValue;
-
-function BaseValue(defaultValue, additionalValue, value){
-    this.value = value || defaultValue;
-    this.additionalValue = additionalValue || [];
-    this.defaultValue = defaultValue;
-}
-
-BaseValue.prototype.getValue = function(){
-    return this.value;
-};
-
-BaseValue.prototype.setValue = function(value){
-    this.value = value;
-};
-
-BaseValue.prototype.setValueFromAdditional = function(index){
-    var value = this.additionalValue[index];
-    if(value){
-        this.setValue(value);
-    }
-};
-
-
-/***/ }),
+/* 36 */,
 /* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -2656,185 +2647,123 @@ FreeverbFilter.prototype.setByName = function(optionName, value){
 
 
 /***/ }),
-/* 40 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var BaseValue = __webpack_require__(36);
-
-// key - key of keyboard, value - object: value, defaultValue, list
-// English notation
-module.exports = {
-    "blackKeys": {
-        '0': new BaseValue("C2#", [], "C2#"),
-        '2': new BaseValue("D2#", [], "D2#"),
-        '4': new BaseValue("F2#", [], "F2#"),
-        '6': new BaseValue("G2#", [], "G2#"),
-        '8': new BaseValue("A2#", [], "A2#"),
-        'Q': new BaseValue("C3#", [], "C3#"),
-        'W': new BaseValue("D3#", [], "D3#"),
-        'E': new BaseValue("F3#", [], "F3#"),
-        'R': new BaseValue("G3#", [], "G3#"),
-        'T': new BaseValue("A3#", [], "A3#"),
-        'Y': new BaseValue("C4#", [], "C4#"),
-        'U': new BaseValue("D4#", [], "D4#"),
-        'I': new BaseValue("F4#", [], "F4#"),
-        'O': new BaseValue("G4#", [], "G4#"),
-        'P': new BaseValue("A4#", [], "A4#")
-    },
-    "whiteKeys": {
-        'A': new BaseValue("C2", [], "C2"),
-        'S': new BaseValue("D2", [], "D2"),
-        'D': new BaseValue("E2", [], "E2"),
-        'F': new BaseValue("F2", [], "F2"),
-        'G': new BaseValue("G2", [], "G2"),
-        'H': new BaseValue("A2", [], "A2"),
-        'J': new BaseValue("B2", [], "B2"),
-        'K': new BaseValue("C3", [], "E3"),
-        'L': new BaseValue("D3", [], "D3"),
-        ';': new BaseValue("E3", [], "E3"),
-        "'": new BaseValue("F3", [], "F3"),
-        "Z": new BaseValue("G3", [], "G3"),
-        "X": new BaseValue("A3", [], "A3"),
-        "C": new BaseValue("B3", [], "B3"),
-        'V': new BaseValue("C4", [], "C4"),
-        'B': new BaseValue("D4", [], "D4"),
-        'N': new BaseValue("E4", [], "E4"),
-        'M': new BaseValue("F4", [], "F4"),
-        ',': new BaseValue("G4", [], "G4"),
-        '.': new BaseValue("A4", [], "A4"),
-        '/': new BaseValue("B4", [], "B4")
-    }
-};
-
-
-/***/ }),
+/* 40 */,
 /* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var PianoKeyList = __webpack_require__(40);
+var PianoNote = __webpack_require__(69);
 
-module.exports = PianoModel;
+module.exports = new PianoModel;
 
-function PianoModel(className, whiteKeyCount, blackKeyCount){
-    this.className = className;
-    this.blackKeyCount = blackKeyCount || 15;
-    this.whiteKeyCount = whiteKeyCount || 21;
+function PianoModel(){
+    this.notes = [
+        new PianoNote("C2", [], "C2"),
+        new PianoNote("C2#", [], "C2#"),
+        new PianoNote("D2", [], "D2"),
+        new PianoNote("D2#", [], "D2#"),
+        new PianoNote("E2", [], "E2"),
+        new PianoNote("F2", [], "F2"),
+        new PianoNote("F2#", [], "F2#"),
+        new PianoNote("G2", [], "G2"),
+        new PianoNote("G2#", [], "G2#"),
+        new PianoNote("A2", [], "A2"),
+        new PianoNote("A2#", [], "A2#"),
+        new PianoNote("B2", [], "B2"),
+        new PianoNote("C3", [], "E3"),
+        new PianoNote("C3#", [], "C3#"),
+        new PianoNote("D3", [], "D3"),
+        new PianoNote("D3#", [], "D3#"),
+        new PianoNote("E3", [], "E3"),
+        new PianoNote("F3", [], "F3"),
+        new PianoNote("F3#", [], "F3#"),
+        new PianoNote("G3", [], "G3"),
+        new PianoNote("G3#", [], "G3#"),
+        new PianoNote("A3", [], "A3"),
+        new PianoNote("A3#", [], "A3#"),
+        new PianoNote("B3", [], "B3"),
+        new PianoNote("C4", [], "C4"),
+        new PianoNote("C4#", [], "C4#"),
+        new PianoNote("D4", [], "D4"),
+        new PianoNote("D4#", [], "D4#"),
+        new PianoNote("E4", [], "E4"),
+        new PianoNote("F4", [], "F4"),
+        new PianoNote("F4#", [], "F4#"),
+        new PianoNote("G4", [], "G4"),
+        new PianoNote("G4#", [], "G4#"),
+        new PianoNote("A4", [], "A4"),
+        new PianoNote("A4#", [], "A4#"),
+        new PianoNote("B4", [], "B4")
+    ];
 }
 
-PianoModel.prototype.keyContent = function(key, note){
-    var $result = $("<div class='key-content'>");
-    var $note = $("<label class='note'>" + note + "</label>");
-    var $key = $("<label class='keyboard " + key + "'>" + key + "</label>");
-    $result.append($note);
-    $result.append("<br>");
-    $result.append($key);
-    return $result;
+PianoModel.prototype.getNoteForKey = function(keyCode){
+    var result = null;
+    switch(String.fromCharCode(keyCode)){
+        case '0': result = this.__findNoteByValue("C2#"); break;
+        case '2': result = this.__findNoteByValue("D2#"); break;
+        case '4': result = this.__findNoteByValue("F2#"); break;
+        case '6': result = this.__findNoteByValue("G2#"); break;
+        case '8': result = this.__findNoteByValue("A2#"); break;
+        case 'Q': result = this.__findNoteByValue("C3#"); break;
+        case 'W': result = this.__findNoteByValue("D3#"); break;
+        case 'E': result = this.__findNoteByValue("F3#"); break;
+        case 'R': result = this.__findNoteByValue("G3#"); break;
+        case 'T': result = this.__findNoteByValue("A3#"); break;
+        case 'Y': result = this.__findNoteByValue("C4#"); break;
+        case 'U': result = this.__findNoteByValue("D4#"); break;
+        case 'I': result = this.__findNoteByValue("F4#"); break;
+        case 'O': result = this.__findNoteByValue("G4#"); break;
+        case 'P': result = this.__findNoteByValue("A4#"); break;
+        case 'A': result = this.__findNoteByValue("C2"); break;
+        case 'S': result = this.__findNoteByValue("D2"); break;
+        case 'D': result = this.__findNoteByValue("E2"); break;
+        case 'F': result = this.__findNoteByValue("F2"); break;
+        case 'G': result = this.__findNoteByValue("G2"); break;
+        case 'H': result = this.__findNoteByValue("A2"); break;
+        case 'J': result = this.__findNoteByValue("B2"); break;
+        case 'K': result = this.__findNoteByValue("E3"); break;
+        case 'L': result = this.__findNoteByValue("D3"); break;
+        case ';': result = this.__findNoteByValue("E3"); break;
+        case "'": result = this.__findNoteByValue("F3"); break;
+        case 'Z': result = this.__findNoteByValue("G3"); break;
+        case 'X': result = this.__findNoteByValue("A3"); break;
+        case 'C': result = this.__findNoteByValue("B3"); break;
+        case 'V': result = this.__findNoteByValue("C4"); break;
+        case 'B': result = this.__findNoteByValue("D4"); break;
+        case 'N': result = this.__findNoteByValue("E4"); break;
+        case 'M': result = this.__findNoteByValue("F4"); break;
+        case ',': result = this.__findNoteByValue("G4"); break;
+        case '.': result = this.__findNoteByValue("A4"); break;
+        case '/': result = this.__findNoteByValue("B4"); break;
+        default: console.log("wrong key code: " + keyCode); break;
+    }
+    return result;
 };
 
-PianoModel.prototype.key = function(className, style, key, note, callback) {
-    var $key = $("<div class='" + className + "' style='" + style + "'>");
-    $key.append(this.keyContent(key, note));
-    $key.click(function () {
-        this.setColorToKey(key, "grey");
-        callback(note);
-    });
-    return $key;
-};
-
-/**
- * Return class name of KEY - .white/black.key
- * @param key
- * @returns
- */
-PianoModel.prototype.getClassKeyElement = function(key){
-    console.log(".key." + key);
-    return $('.' + this.className).find(".key." + key);
-};
-
-PianoModel.prototype.setColorToKey = function(key, color){
-    var className = this.instrumentModel.getClassKeyElement(key);
-    $(className).css("background-color", color);
-};
-
-PianoModel.prototype.piano = function(callback){
+PianoModel.prototype.__findNoteByValue = function(value){
     var i;
-    var j = 0;
-    var whiteKeyDistance = -40;
-    var keyDistance = 40;
-    var blackKeyDistance = 25;
-    var blackKey;
-    var whiteKey;
-    var isSpace = false;
-    var isTwoGroup = true;
-    var isThreeGroup = false;
-    var countTwoGroup = 2;
-    var countThreeGroup = 3;
-    var twoGroupCounter = 0;
-    var threeGroupCounter = 0;
-    var $result = $("<div class='" + this.className + "'>");
-    var blackKeys = Object.keys(PianoKeyList.blackKeys);
-    var whiteKeys = Object.keys(PianoKeyList.whiteKeys);
-    var blackKeysCount = blackKeys.length;
-    var summaryKeyCount = whiteKeys.length;
-
-    for(i = 0; i < summaryKeyCount; ++i){
-        whiteKey = whiteKeys[i];
-        whiteKeyDistance += keyDistance;
-        //add white key
-        $result.append(this.key("white key " + whiteKey, "left: " + whiteKeyDistance + ";",
-                                whiteKey, PianoKeyList.whiteKeys[whiteKey].getValue(), callback));
-        if(j < blackKeysCount){
-            if(isSpace === false){
-                blackKey = blackKeys[j];
-                if(isTwoGroup === true){
-                    // crete group of two keys
-                    $result.append(this.key("black key " + blackKey, "left: " + blackKeyDistance + ";",
-                        blackKey, PianoKeyList.blackKeys[blackKey].getValue(), callback));
-                    twoGroupCounter++;
-                    if(twoGroupCounter === countTwoGroup){
-                        // switch on three group keys and space between them
-                        isTwoGroup = false;
-                        isThreeGroup = true;
-                        isSpace = true;
-                        twoGroupCounter = 0;
-                    }
-                } else if(isThreeGroup === true){
-                    // crete group of three keys
-                    $result.append(this.key("black key " + blackKey, "left: " + blackKeyDistance + ";",
-                        blackKey, PianoKeyList.blackKeys[blackKey].getValue(), callback));
-                    threeGroupCounter++;
-                    if(threeGroupCounter === countThreeGroup){
-                        // switch on two group keys and space between them
-                        isThreeGroup = false;
-                        isTwoGroup = true;
-                        isSpace = true;
-                        threeGroupCounter = 0;
-                    }
-                }
-                blackKeyDistance += keyDistance;
-                j++;
-            } else{
-                // pass key
-                isSpace = false;
-                blackKeyDistance += keyDistance; // add distance for space between black keys group
-            }
+    for (i = 0; i < this.notes.length; ++i){
+        if (this.notes[i].value === value){
+            return this.notes[i];
         }
     }
-    return $result;
+    return null;
 };
 
-function switchFlags(flag1, flag2, flag3, counter){
-    flag1 = false;
-    flag2 = true;
-    flag3 = true;
-    counter = 0;
-}
+PianoModel.prototype.shift = function(shiftIndex){
+    var i;
+    for(i = 0; i < this.notes.length; ++i){
+        this.notes[i].setValueFromAdditional(shiftIndex);
+    }
+};
+
+PianoModel.prototype.keyList = function(){
+    return ['A', '0', 'S', '2', 'D', 'F', '4', 'G', '6', 'H', '8', 'J', 'K', 'Q', 'L', 'W', ';', "'",
+            'E', 'Z', 'R', 'X', 'T', 'C', 'V', 'Y', 'B', 'U', 'N', 'M', 'I', ',', 'O', '.', 'P', '/']
+};
 
 
 /***/ }),
@@ -3895,33 +3824,7 @@ UserModal.prototype.show = function(){
 
 
 /***/ }),
-/* 66 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-//eventHandler
-
-module.exports = {
-    "keyPressEvent": keyPressEvent,
-    "keyUpEvent": keyUpEvent
-};
-
-function keyPressEvent(callback){
-    $(document).keydown(function(event){
-        callback(String.fromCharCode(event.keyCode));
-    });
-}
-
-function keyUpEvent(callback){
-    $(document).keyup(function(event){
-        callback(String.fromCharCode(event.keyCode));
-    });
-}
-
-
-/***/ }),
+/* 66 */,
 /* 67 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -3930,7 +3833,7 @@ function keyUpEvent(callback){
 
 var inherit = __webpack_require__(0);
 var BaseView = __webpack_require__(3);
-var PianoModel = __webpack_require__(41);
+var Piano = __webpack_require__(70);
 
 module.exports = InstrumentView;
 
@@ -3938,8 +3841,9 @@ function InstrumentView(track){
     BaseView.call(this, "instrument-view");
     this.track = track;
     this.instrument = null;
-    this.instrumentModel = null;
     this.setInstrument();
+
+    this._build();
 }
 
 inherit(InstrumentView, BaseView);
@@ -3947,37 +3851,143 @@ inherit(InstrumentView, BaseView);
 InstrumentView.prototype._build = function(){
     var container = this.getContainer();
 
-    container.append(this.instrument);
+    container.append(this.instrument.getContainer());
 };
 
 InstrumentView.prototype.setInstrument = function(){
     switch(this.track.instrument){
         case "synth":
-            this.instrumentModel = new PianoModel("piano");
-            this.instrument = this.instrumentModel.piano();
+            this.instrument = new Piano();
             break;
         case "oscillator":
             break;
     }
 };
 
-InstrumentView.prototype.keyDownEvent = function(pressedKey){
-    console.log(this.instrumentModel);
-    this.instrumentModel.setColorToKey(pressedKey, "grey");  // EDIT
-    // get note from className
-    // var note = $(className).find(".note").text();
-    // this.track.playComponent(note);
 
+/***/ }),
+/* 68 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = BaseNote;
+
+function BaseNote(value){
+    this.value = value;
+}
+
+BaseNote.prototype.getValue = function(){
+    return this.value;
 };
 
-InstrumentView.prototype.keyUpEvent = function(upKey){
-    this.instrumentModel.setColorToKey(upKey, "")
+BaseNote.prototype.setValue = function(value){
+    this.value = value;
 };
 
-InstrumentView.prototype.playEvent = function(note){
-    this.track.playComponent(note);
+
+
+/***/ }),
+/* 69 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var BaseNote = __webpack_require__(68);
+
+module.exports = PianoNote;
+
+function PianoNote(defaultValue, additionalValue, value){
+    BaseNote.call(this, value);
+    this.additionalValue = additionalValue || [];
+    this.defaultValue = defaultValue;
+    this.__isBlack = defaultValue.indexOf('#') > -1;
+}
+
+inherit(PianoNote, BaseNote);
+
+PianoNote.prototype.isBlack = function(){
+    return this.__isBlack;
 };
 
+PianoNote.prototype.setValueFromAdditional = function(index){
+    var value = this.additionalValue[index];
+    if(value){
+        this.setValue(value);
+    }
+};
+
+
+/***/ }),
+/* 70 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var BaseView = __webpack_require__(3);
+var PianoModel = __webpack_require__(41);
+var Factory = __webpack_require__(2);
+
+module.exports = Piano;
+
+function Piano(){
+    BaseView.call(this, "piano");
+    this._build();
+}
+
+inherit(Piano, BaseView);
+
+Piano.prototype._build = function(){
+    var i, tokenNote, style, key;
+    var notes = PianoModel.notes;
+    var container = this.getContainer();
+    var keyDistance = 40;
+    var whiteKeyDistance = -40;
+    var blackKeyDistance = 25;
+    for (i = 0; i < notes.length; ++i){
+        tokenNote = notes[i];
+        key = PianoModel.keyList()[i];
+        if(tokenNote.isBlack() === true){
+            style = "background-color: rgb(32,32,32); width: 30px; height: 120px; z-index: 1; color: #ffffff;";
+            container.append(Factory.createKey("key " + key, "left: " + blackKeyDistance + "; " + style, key,
+                                               tokenNote.value, undefined));
+            blackKeyDistance += keyDistance;
+        } else{
+            whiteKeyDistance += keyDistance;
+            container.append(Factory.createKey("key " + key, "left: " + whiteKeyDistance + ";", key,
+                                               tokenNote.value, undefined));
+        }
+        //container.append(Factory.createKey(tokenNote.value, tokenNote.isBlack()));
+    }
+
+    /*window.onkeydown = function(e){
+        PianoModel.getNoteForKey(e.keyCode);
+    };*/
+};
+
+Piano.prototype.keyDown = function(){
+    $(document).keydown(function(event){
+        PianoModel.getNoteForKey(event.keyCode);
+        Factory.setColorToKey(String.fromCharCode(event.keyCode), "grey");
+    });
+};
+
+Piano.prototype.keyUp = function(){
+    var note;
+    $(document).keyup(function(event){
+        note = PianoModel.getNoteForKey(event.keyCode);
+        if(note.isBlack() === true){
+            Factory.setColorToKey(String.fromCharCode(event.keyCode), "black");
+        } else {
+            Factory.setColorToKey(String.fromCharCode(event.keyCode), "");
+        }
+    });
+};
 
 
 /***/ })
