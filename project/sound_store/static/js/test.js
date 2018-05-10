@@ -1170,6 +1170,10 @@ BaseFilterModel.prototype.applyToTrack = function(track){
     track.connect(this.filter);
 };
 
+BaseFilterModel.prototype.disconnectFilter = function(track){
+    track.disconnect(this.filter);
+};
+
 
 /***/ }),
 /* 17 */
@@ -2810,6 +2814,28 @@ PostSettings.prototype.createFilterObjects = function(filterName, filterSetting)
     }
 };
 
+PostSettings.prototype.getFilterModel = function(filterName){
+    var result = null;
+    if(filterName in this.filterObjects){
+        result = this.filterObjects[filterName];
+    }
+    return result;
+};
+
+PostSettings.prototype.setToTrack = function(filterName, trackModel){
+    var filter = this.getFilterModel(filterName);
+    if(filter !== null){
+        filter.applyToTrack(trackModel.trackObject);
+    }
+};
+
+PostSettings.prototype.removeFromTrack = function(filterName, trackModel){
+    var filter = this.getFilterModel(filterName);
+    if(filter !== null){
+        filter.disconnectFilter(trackModel.trackObject);
+    }
+};
+
 /**
  * Create list of filter objects with settings from server.
  * Call when init PostSettings.
@@ -3284,12 +3310,13 @@ var Factory = __webpack_require__(2);
 
 module.exports = FilterView;
 
-function FilterView(filter){
+function FilterView(track){
     ToolView.call(this, "filter-view", "two column stackable ui grid");
 
+    this.track = null;
     this.filter = null;
 
-    this.setFilter(filter);
+    this.setFilter(track);
 
     this._build();
     this.show();
@@ -3303,7 +3330,9 @@ FilterView.prototype.resetFilters = function(){
 
 FilterView.prototype.setFilter = function(track){
     if(track){
+        this.track = track;
         this.filter = track.postSettings;
+        // set filters settings from sound for to view on form
         ProxyTrackManager.updateFilterListFromFilter(FiltersList, this.filter.getPostSettings());
         this.createFilterColumns();
     }
@@ -3330,6 +3359,12 @@ FilterView.prototype.createFilterSettingElements = function(mainBlock, options){
     }
 };
 
+/**
+ * Create block (one column) with some filters
+ * @param count
+ * @param startValue
+ * @returns {*|jQuery|HTMLElement}
+ */
 FilterView.prototype.createFilterTools = function(count, startValue){
     var i = startValue || 0;
     var options;
@@ -3350,6 +3385,8 @@ FilterView.prototype.createFilterTools = function(count, startValue){
         this.createFilterSettingElements($settingDiv, options);
         if(tokenFilter.isEnabled === true){
             $settingDiv.show();
+            // apply filter to sound right away
+            this.filter.setToTrack(filterName, this.track);
         } else {
             $settingDiv.hide();
         }
@@ -3362,6 +3399,10 @@ FilterView.prototype.createFilterTools = function(count, startValue){
     return $result;
 };
 
+/**
+ * Create table with two columns.
+ * Each columns contain div with filter settings elements
+ */
 FilterView.prototype.createFilterColumns = function(){
     var $column1;
     var $column2;
@@ -3372,13 +3413,28 @@ FilterView.prototype.createFilterColumns = function(){
     this.table.append($column2);
 };
 
+/**
+ * Show and apply filter to view and to track
+ * @param filterName
+ * @param isChecked
+ */
 function checkEvent(filterName, isChecked){
     this.table.find(".filter-setting-" + filterName).show();
     ProxyTrackManager.addFilter(FiltersList, this.filter, filterName, isChecked);
+    // apply filter to sound
+    this.filter.setToTrack(filterName, this.track);
 }
 
+/**
+ * Hide and disconnect filter from view and track
+ * @param filterName
+ * @param isChecked
+ */
 function uncheckEvent(filterName, isChecked){
+    // delete filter from sound
+    this.filter.removeFromTrack(filterName, this.track);
     this.table.find(".filter-setting-" + filterName).hide();
+    // transfer disabled filter for to delete it from PostSettings and track
     ProxyTrackManager.addFilter(FiltersList, this.filter, filterName, isChecked);
 }
 
