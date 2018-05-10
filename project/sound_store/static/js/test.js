@@ -1388,7 +1388,7 @@ BaseTrackModel.prototype.play = null;
 
 BaseTrackModel.prototype.record = null;
 
-BaseTrackModel.prototype.playComponent = null;
+BaseTrackModel.prototype.playKeyNow = null;
 
 
 /***/ }),
@@ -2661,62 +2661,64 @@ module.exports = new PianoModel;
 function PianoModel(){
     this.notes = [
         new PianoNote("C2", [], "C2"),
-        new PianoNote("C2#", [], "C2#"),
+        new PianoNote("C#2", [], "C#2"),
         new PianoNote("D2", [], "D2"),
-        new PianoNote("D2#", [], "D2#"),
+        new PianoNote("D#2", [], "D#2"),
         new PianoNote("E2", [], "E2"),
         new PianoNote("F2", [], "F2"),
-        new PianoNote("F2#", [], "F2#"),
+        new PianoNote("F#2", [], "F#2"),
         new PianoNote("G2", [], "G2"),
-        new PianoNote("G2#", [], "G2#"),
+        new PianoNote("G#2", [], "G#2"),
         new PianoNote("A2", [], "A2"),
-        new PianoNote("A2#", [], "A2#"),
+        new PianoNote("A#2", [], "A#2"),
         new PianoNote("B2", [], "B2"),
         new PianoNote("C3", [], "E3"),
-        new PianoNote("C3#", [], "C3#"),
+        new PianoNote("C#3", [], "C#3"),
         new PianoNote("D3", [], "D3"),
-        new PianoNote("D3#", [], "D3#"),
+        new PianoNote("D#3", [], "D#3"),
         new PianoNote("E3", [], "E3"),
         new PianoNote("F3", [], "F3"),
-        new PianoNote("F3#", [], "F3#"),
+        new PianoNote("F#3", [], "F#3"),
         new PianoNote("G3", [], "G3"),
-        new PianoNote("G3#", [], "G3#"),
+        new PianoNote("G#3", [], "G#3"),
         new PianoNote("A3", [], "A3"),
-        new PianoNote("A3#", [], "A3#"),
+        new PianoNote("A#3", [], "A#3"),
         new PianoNote("B3", [], "B3"),
         new PianoNote("C4", [], "C4"),
-        new PianoNote("C4#", [], "C4#"),
+        new PianoNote("C#4", [], "C#4"),
         new PianoNote("D4", [], "D4"),
-        new PianoNote("D4#", [], "D4#"),
+        new PianoNote("D#4", [], "D#4"),
         new PianoNote("E4", [], "E4"),
         new PianoNote("F4", [], "F4"),
-        new PianoNote("F4#", [], "F4#"),
+        new PianoNote("F#4", [], "F#4"),
         new PianoNote("G4", [], "G4"),
-        new PianoNote("G4#", [], "G4#"),
+        new PianoNote("G#4", [], "G#4"),
         new PianoNote("A4", [], "A4"),
-        new PianoNote("A4#", [], "A4#"),
+        new PianoNote("A#4", [], "A#4"),
         new PianoNote("B4", [], "B4")
     ];
+    this.keyList = ['A', '0', 'S', '2', 'D', 'F', '4', 'G', '6', 'H', '8', 'J', 'K', 'Q', 'L', 'W', ';', "'",
+                    'E', 'Z', 'R', 'X', 'T', 'C', 'V', 'Y', 'B', 'U', 'N', 'M', 'I', ',', 'O', '.', 'P', '/']
 }
 
 PianoModel.prototype.getNoteForKey = function(keyCode){
     var result = null;
     switch(String.fromCharCode(keyCode)){
-        case '0': result = this.__findNoteByValue("C2#"); break;
-        case '2': result = this.__findNoteByValue("D2#"); break;
-        case '4': result = this.__findNoteByValue("F2#"); break;
-        case '6': result = this.__findNoteByValue("G2#"); break;
-        case '8': result = this.__findNoteByValue("A2#"); break;
-        case 'Q': result = this.__findNoteByValue("C3#"); break;
-        case 'W': result = this.__findNoteByValue("D3#"); break;
-        case 'E': result = this.__findNoteByValue("F3#"); break;
-        case 'R': result = this.__findNoteByValue("G3#"); break;
-        case 'T': result = this.__findNoteByValue("A3#"); break;
-        case 'Y': result = this.__findNoteByValue("C4#"); break;
-        case 'U': result = this.__findNoteByValue("D4#"); break;
-        case 'I': result = this.__findNoteByValue("F4#"); break;
-        case 'O': result = this.__findNoteByValue("G4#"); break;
-        case 'P': result = this.__findNoteByValue("A4#"); break;
+        case '0': result = this.__findNoteByValue("C#2"); break;
+        case '2': result = this.__findNoteByValue("D#2"); break;
+        case '4': result = this.__findNoteByValue("F#2"); break;
+        case '6': result = this.__findNoteByValue("G#2"); break;
+        case '8': result = this.__findNoteByValue("A#2"); break;
+        case 'Q': result = this.__findNoteByValue("C#3"); break;
+        case 'W': result = this.__findNoteByValue("D#3"); break;
+        case 'E': result = this.__findNoteByValue("F#3"); break;
+        case 'R': result = this.__findNoteByValue("G#3"); break;
+        case 'T': result = this.__findNoteByValue("A#3"); break;
+        case 'Y': result = this.__findNoteByValue("C#4"); break;
+        case 'U': result = this.__findNoteByValue("D#4"); break;
+        case 'I': result = this.__findNoteByValue("F#4"); break;
+        case 'O': result = this.__findNoteByValue("G#4"); break;
+        case 'P': result = this.__findNoteByValue("A#4"); break;
         case 'A': result = this.__findNoteByValue("C2"); break;
         case 'S': result = this.__findNoteByValue("D2"); break;
         case 'D': result = this.__findNoteByValue("E2"); break;
@@ -2758,11 +2760,6 @@ PianoModel.prototype.shift = function(shiftIndex){
     for(i = 0; i < this.notes.length; ++i){
         this.notes[i].setValueFromAdditional(shiftIndex);
     }
-};
-
-PianoModel.prototype.keyList = function(){
-    return ['A', '0', 'S', '2', 'D', 'F', '4', 'G', '6', 'H', '8', 'J', 'K', 'Q', 'L', 'W', ';', "'",
-            'E', 'Z', 'R', 'X', 'T', 'C', 'V', 'Y', 'B', 'U', 'N', 'M', 'I', ',', 'O', '.', 'P', '/']
 };
 
 
@@ -3086,8 +3083,12 @@ TrackSynthesizer.prototype.play = function(options){
     }
 };
 
-TrackSynthesizer.prototype.playComponent = function(note){
-    this.trackObject.triggerAttackRelease(note);
+TrackSynthesizer.prototype.playKeyNow = function(note){
+    this.trackObject.triggerAttack(note);
+};
+
+TrackSynthesizer.prototype.stopKeyNow = function(){
+    this.trackObject.triggerRelease();
 };
 
 TrackSynthesizer.prototype.saveTest = function(callback){
@@ -3857,7 +3858,7 @@ InstrumentView.prototype._build = function(){
 InstrumentView.prototype.setInstrument = function(){
     switch(this.track.instrument){
         case "synth":
-            this.instrument = new Piano();
+            this.instrument = new Piano(this.track);
             break;
         case "oscillator":
             break;
@@ -3935,8 +3936,9 @@ var Factory = __webpack_require__(2);
 
 module.exports = Piano;
 
-function Piano(){
+function Piano(track){
     BaseView.call(this, "piano");
+    this.track = track;
     this._build();
 }
 
@@ -3948,43 +3950,48 @@ Piano.prototype._build = function(){
     var container = this.getContainer();
     var keyDistance = 40;
     var whiteKeyDistance = -40;
-    var blackKeyDistance = 25;
+    var blackKeyDistance = -25;
     for (i = 0; i < notes.length; ++i){
         tokenNote = notes[i];
-        key = PianoModel.keyList()[i];
+        key = PianoModel.keyList[i];
         if(tokenNote.isBlack() === true){
             style = "background-color: rgb(32,32,32); width: 30px; height: 120px; z-index: 1; color: #ffffff;";
             container.append(Factory.createKey("key " + key, "left: " + blackKeyDistance + "; " + style, key,
                                                tokenNote.value, undefined));
-            blackKeyDistance += keyDistance;
         } else{
             whiteKeyDistance += keyDistance;
+            blackKeyDistance += keyDistance;
             container.append(Factory.createKey("key " + key, "left: " + whiteKeyDistance + ";", key,
                                                tokenNote.value, undefined));
         }
         //container.append(Factory.createKey(tokenNote.value, tokenNote.isBlack()));
     }
-
-    /*window.onkeydown = function(e){
-        PianoModel.getNoteForKey(e.keyCode);
-    };*/
 };
 
 Piano.prototype.keyDown = function(){
+    var note;
+    var self = this;
     $(document).keydown(function(event){
-        PianoModel.getNoteForKey(event.keyCode);
-        Factory.setColorToKey(String.fromCharCode(event.keyCode), "grey");
+        note = PianoModel.getNoteForKey(event.keyCode);
+        if(note !== null){
+            Factory.setColorToKey(String.fromCharCode(event.keyCode), "grey");
+            self.track.playKeyNow(note.getValue());
+        }
     });
 };
 
 Piano.prototype.keyUp = function(){
     var note;
+    var self = this;
     $(document).keyup(function(event){
         note = PianoModel.getNoteForKey(event.keyCode);
-        if(note.isBlack() === true){
-            Factory.setColorToKey(String.fromCharCode(event.keyCode), "black");
-        } else {
-            Factory.setColorToKey(String.fromCharCode(event.keyCode), "");
+        if(note !== null) {
+            if (note.isBlack() === true) {
+                Factory.setColorToKey(String.fromCharCode(event.keyCode), "black");
+            } else {
+                Factory.setColorToKey(String.fromCharCode(event.keyCode), "");
+            }
+            self.track.stopKeyNow();
         }
     });
 };
