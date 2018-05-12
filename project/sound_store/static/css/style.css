@@ -196,3 +196,23 @@ body {
     position: relative;
     float: right;
 }
+
+.button.record {
+    margin-left: 80%;
+    float: right;
+}
+
+.button.stop-record {
+    margin-left: 80%;
+    float: right;
+}
+
+.button.replay {
+    margin-left: 80%;
+    float: right;
+}
+
+.button.clear {
+    margin-left: 80%;
+    float: right;
+}
