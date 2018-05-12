@@ -224,7 +224,7 @@ function createCheckBox(className, id, text, checkCallback, uncheckCallback, isA
  */
 function dropDownElement(className, name, dataObject, callback, defaultValue){
     var key;
-    var value = defaultValue || 1;
+    var value = defaultValue || 0;
     var $item;
     var $menu = $("<div class='menu'>");
     var $dropdown = $("<div class='ui selection dropdown'>");
@@ -237,7 +237,7 @@ function dropDownElement(className, name, dataObject, callback, defaultValue){
         $item.on("click", function(){
             console.log($(this).attr("data-value"));
             console.log($(this).text());
-            callback($(this).attr("id"), $(this).text());
+            callback($(this).attr("id"), $(this).text(), $(this).attr("data-value"));
         });
         $menu.append($item);
     }
@@ -281,11 +281,14 @@ function keyContent(key, note){
     return $result;
 }
 
-function createKey(className, style, key, note, callback){
+function createKey(className, style, key, note, mouseDownCallback, mouseUpCallback){
     var $key = $("<div class='" + className + "' style='" + style + "'>");
     $key.append(keyContent(key, note));
-    $key.click(function(){
-        callback(key, note);
+    $key.mousedown(function(event){
+        mouseDownCallback(key);
+    });
+    $key.mouseup(function(event){
+        mouseUpCallback(key);
     });
     return $key;
 }
@@ -2708,47 +2711,48 @@ function PianoModel(){
                     '7', 'J', '8', 'K', '9', 'L', 'Z', 'Q', 'X', 'E', 'C', 'V', 'T', 'B', 'U', 'N', 'O', 'M']
 }
 
-PianoModel.prototype.getNoteForKey = function(keyCode){
+PianoModel.prototype.getNoteForKey = function(key){
     var result = null;
-    switch(String.fromCharCode(keyCode)){
-        case '0': result = this.__findNoteByValue("C#1"); break;
-        case '1': result = this.__findNoteByValue("D#1"); break;
-        case '2': result = this.__findNoteByValue("F#1"); break;
-        case '3': result = this.__findNoteByValue("G#1"); break;
-        case '4': result = this.__findNoteByValue("A#1"); break;
-        case '5': result = this.__findNoteByValue("C#2"); break;
-        case '6': result = this.__findNoteByValue("D#2"); break;
-        case '7': result = this.__findNoteByValue("F#2"); break;
-        case '8': result = this.__findNoteByValue("G#2"); break;
-        case '9': result = this.__findNoteByValue("A#2"); break;
-        case 'Q': result = this.__findNoteByValue("C#3"); break;
-        case 'E': result = this.__findNoteByValue("D#3"); break;
-        case 'T': result = this.__findNoteByValue("F#3"); break;
-        case 'U': result = this.__findNoteByValue("G#3"); break;
-        case 'O': result = this.__findNoteByValue("A#3"); break;
+    //switch(String.fromCharCode(keyCode)){
+    switch(key){
+        case '0': result = this.__findNoteByDefaultValue("C#1"); break;
+        case '1': result = this.__findNoteByDefaultValue("D#1"); break;
+        case '2': result = this.__findNoteByDefaultValue("F#1"); break;
+        case '3': result = this.__findNoteByDefaultValue("G#1"); break;
+        case '4': result = this.__findNoteByDefaultValue("A#1"); break;
+        case '5': result = this.__findNoteByDefaultValue("C#2"); break;
+        case '6': result = this.__findNoteByDefaultValue("D#2"); break;
+        case '7': result = this.__findNoteByDefaultValue("F#2"); break;
+        case '8': result = this.__findNoteByDefaultValue("G#2"); break;
+        case '9': result = this.__findNoteByDefaultValue("A#2"); break;
+        case 'Q': result = this.__findNoteByDefaultValue("C#3"); break;
+        case 'E': result = this.__findNoteByDefaultValue("D#3"); break;
+        case 'T': result = this.__findNoteByDefaultValue("F#3"); break;
+        case 'U': result = this.__findNoteByDefaultValue("G#3"); break;
+        case 'O': result = this.__findNoteByDefaultValue("A#3"); break;
 
-        case 'W': result = this.__findNoteByValue("C1"); break;
-        case 'R': result = this.__findNoteByValue("D2"); break;
-        case 'Y': result = this.__findNoteByValue("E1"); break;
-        case 'I': result = this.__findNoteByValue("F1"); break;
-        case 'P': result = this.__findNoteByValue("G1"); break;
-        case 'A': result = this.__findNoteByValue("A1"); break;
-        case 'S': result = this.__findNoteByValue("B1"); break;
-        case 'D': result = this.__findNoteByValue("C2"); break;
-        case 'F': result = this.__findNoteByValue("D2"); break;
-        case 'G': result = this.__findNoteByValue("E2"); break;
-        case 'H': result = this.__findNoteByValue("F2"); break;
-        case 'J': result = this.__findNoteByValue("G2"); break;
-        case 'K': result = this.__findNoteByValue("A2"); break;
-        case 'L': result = this.__findNoteByValue("B2"); break;
-        case 'Z': result = this.__findNoteByValue("C3"); break;
-        case 'X': result = this.__findNoteByValue("D3"); break;
-        case 'C': result = this.__findNoteByValue("E3"); break;
-        case 'V': result = this.__findNoteByValue("F3"); break;
-        case 'B': result = this.__findNoteByValue("G3"); break;
-        case 'N': result = this.__findNoteByValue("A3"); break;
-        case 'M': result = this.__findNoteByValue("B3"); break;
-        default: console.log("wrong key code: " + keyCode); break;
+        case 'W': result = this.__findNoteByDefaultValue("C1"); break;
+        case 'R': result = this.__findNoteByDefaultValue("D2"); break;
+        case 'Y': result = this.__findNoteByDefaultValue("E1"); break;
+        case 'I': result = this.__findNoteByDefaultValue("F1"); break;
+        case 'P': result = this.__findNoteByDefaultValue("G1"); break;
+        case 'A': result = this.__findNoteByDefaultValue("A1"); break;
+        case 'S': result = this.__findNoteByDefaultValue("B1"); break;
+        case 'D': result = this.__findNoteByDefaultValue("C2"); break;
+        case 'F': result = this.__findNoteByDefaultValue("D2"); break;
+        case 'G': result = this.__findNoteByDefaultValue("E2"); break;
+        case 'H': result = this.__findNoteByDefaultValue("F2"); break;
+        case 'J': result = this.__findNoteByDefaultValue("G2"); break;
+        case 'K': result = this.__findNoteByDefaultValue("A2"); break;
+        case 'L': result = this.__findNoteByDefaultValue("B2"); break;
+        case 'Z': result = this.__findNoteByDefaultValue("C3"); break;
+        case 'X': result = this.__findNoteByDefaultValue("D3"); break;
+        case 'C': result = this.__findNoteByDefaultValue("E3"); break;
+        case 'V': result = this.__findNoteByDefaultValue("F3"); break;
+        case 'B': result = this.__findNoteByDefaultValue("G3"); break;
+        case 'N': result = this.__findNoteByDefaultValue("A3"); break;
+        case 'M': result = this.__findNoteByDefaultValue("B3"); break;
+        default: console.log("wrong key: " + key); break;
     }
     return result;
 };
@@ -2763,9 +2767,20 @@ PianoModel.prototype.__findNoteByValue = function(value){
     return null;
 };
 
+PianoModel.prototype.__findNoteByDefaultValue = function(value){
+    var i;
+    for (i = 0; i < this.notes.length; ++i){
+        if(this.notes[i].defaultValue === value){
+            return this.notes[i];
+        }
+    }
+    return null;
+};
+
 PianoModel.prototype.shift = function(shiftIndex){
     var i;
     for(i = 0; i < this.notes.length; ++i){
+        if(shiftIndex >= 0 && shiftIndex < this.notes[i].additionalValue.length)
         this.notes[i].setValueFromAdditional(shiftIndex);
     }
 };
@@ -4001,7 +4016,8 @@ function Piano(track){
     this.__pressedKeys = [];
     this.track = track;
     this.piano = $("<div class='keys'>");
-    //this.notesChosen = Factory.dropDownElement();
+    this.octaveRange = Factory.dropDownElement("octave-range", "octave-range", {"C1-B3": 0, "C4-B6": 1},
+                                                this._dropDownEvent.bind(this));
     this.recordButton = Factory.createButton("record", "record");
     this.recordButton = Factory.createButton("clear", "clear");
     this._build();
@@ -4013,6 +4029,12 @@ Piano.prototype._build = function(){
     var container = this.getContainer();
     this.createKeys();
     container.append(this.piano);
+    container.append(this.octaveRange);
+};
+
+Piano.prototype._dropDownEvent = function(id, text, dataValue){
+    PianoModel.shift(dataValue); // change keys notation
+    this.createKeys();
 };
 
 Piano.prototype.createKeys = function(){
@@ -4020,60 +4042,67 @@ Piano.prototype.createKeys = function(){
     var notes = PianoModel.notes;
     var keyDistance = 40;
     var whiteKeyDistance = -40;
-    var blackKeyDistance = -25;
+    var blackKeyDistance = -15;
+    this.piano.empty(); // clear previous piano keys
     for (i = 0; i < notes.length; ++i){
         tokenNote = notes[i];
         key = PianoModel.keyList[i];
         if(tokenNote.isBlack() === true){
             style = "background-color: rgb(32,32,32); width: 30px; height: 120px; z-index: 1; color: #ffffff;";
             this.piano.append(Factory.createKey("key " + key, "left: " + blackKeyDistance + "; " + style, key,
-                tokenNote.value, undefined));
+                tokenNote.value, this._keyDownHandler.bind(this), this._keyUpHandler.bind(this)));
         } else{
             whiteKeyDistance += keyDistance;
             blackKeyDistance += keyDistance;
             this.piano.append(Factory.createKey("key " + key, "left: " + whiteKeyDistance + ";", key,
-                tokenNote.value, undefined));
+                tokenNote.value, this._keyDownHandler.bind(this), this._keyUpHandler.bind(this)));
         }
         //container.append(Factory.createKey(tokenNote.value, tokenNote.isBlack()));
     }
 };
 
 Piano.prototype.keyDown = function(){
-    var note, key;
+    var key;
     var self = this;
     $(document).keydown(function(event){
         key = String.fromCharCode(event.keyCode);
-        // store incoming keycode inside __pressedKeys array
-        note = PianoModel.getNoteForKey(event.keyCode);
-        if(note !== null){
-            if(self.__pressedKeys.indexOf(key) === -1){
-                self.__pressedKeys.push(key);
-                Factory.setColorToKey(key, "grey");
-                self.track.playKeyNow(note.getValue());
-            }
-        }
+        self._keyDownHandler(key);
     });
 };
 
 Piano.prototype.keyUp = function(){
-    var note, key;
+    var key;
     var self = this;
     $(document).keyup(function(event){
-        // remove key from __pressedKeys array and stop play it
-        note = PianoModel.getNoteForKey(event.keyCode);
         key = String.fromCharCode(event.keyCode);
-        if(note !== null){
-            if(self.__pressedKeys.indexOf(key) >= 0){
-                if(note.isBlack() === true){
-                    Factory.setColorToKey(key, "black");
-                } else{
-                    Factory.setColorToKey(key, "");
-                }
-                self.track.stopKeyNow();
-                self.__pressedKeys.splice(self.__pressedKeys.indexOf(key), 1);
-            }
-        }
+        self._keyUpHandler(key);
     });
+};
+
+Piano.prototype._keyDownHandler = function(key){
+    var note = PianoModel.getNoteForKey(key);
+    if(note !== null){
+        if(this.__pressedKeys.indexOf(key) === -1){
+            this.__pressedKeys.push(key);
+            Factory.setColorToKey(key, "grey");
+            this.track.playKeyNow(note.getValue());
+        }
+    }
+};
+
+Piano.prototype._keyUpHandler = function(key){
+    var note = PianoModel.getNoteForKey(key);
+    if(note !== null) {
+        if (this.__pressedKeys.indexOf(key) >= 0) {
+            if (note.isBlack() === true) {
+                Factory.setColorToKey(key, "black");
+            } else {
+                Factory.setColorToKey(key, "");
+            }
+            this.track.stopKeyNow();
+            this.__pressedKeys.splice(this.__pressedKeys.indexOf(key), 1);
+        }
+    }
 };
 
 

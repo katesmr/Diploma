@@ -191,3 +191,8 @@ body {
 .key-content .keyboard {
     margin-top: 10px;
 }
+
+.octave-range {
+    position: relative;
+    float: right;
+}
