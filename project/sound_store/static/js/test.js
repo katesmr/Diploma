@@ -109,6 +109,42 @@ module.exports = {
 "use strict";
 
 
+module.exports = BaseView;
+
+/**
+ * @param {Array} [classes=undefined] - css class list
+ */
+function BaseView(classes){
+    var classNames = (typeof classes === "string" ? classes : "");
+    this._container = $("<div class='" + classNames + "'>");
+}
+
+BaseView.prototype.getContainer = function(){
+    return this._container;
+};
+
+BaseView.prototype.show = function(){
+    this.getContainer().show();
+};
+
+BaseView.prototype.hide = function(){
+    this.getContainer().hide();
+};
+
+BaseView.prototype._build = null;
+
+BaseView.prototype.appendToBlock = function(blockName){
+    $(blockName).append(this.getContainer());
+};
+
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
 module.exports = {
     "createKey": createKey,
     "rangeElement": rangeElement,
@@ -279,61 +315,32 @@ function keyContent(key, note){
     return $result;
 }
 
-function createKey(className, style, key, note, mouseDownCallback, mouseUpCallback){
-    var $key = $("<div class='" + className + "' style='" + style + "'>");
+var isClicked = false;
+function createKey(className, id, style, key, note, mouseDownCallback, mouseUpCallback){
+    var $key = $("<div class='" + className + "' id='" + id + "' style='" + style + "'>");
     $key.append(keyContent(key, note));
     $key.mousedown(function(event){
+        isClicked = true;
         mouseDownCallback(key);
     });
     $key.mouseup(function(event){
+        isClicked = false;
+        mouseUpCallback(key);
+    });
+    $key.mouseenter(function(event){
+        if(isClicked === true){
+            mouseDownCallback(key);
+        }
+    });
+    $key.mouseleave(function(event){
         mouseUpCallback(key);
     });
     return $key;
 }
 
-function getClassKeyElement(className, key){
-    return $('.' + className).find(".key." + key);
+function setColorToKey(pianoElement, key, color){
+    pianoElement.find('#' + key).css("background-color", color);
 }
-
-function setColorToKey(key, color){
-    $(getClassKeyElement("piano", key)).css("background-color", color);
-}
-
-
-/***/ }),
-/* 3 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = BaseView;
-
-/**
- * @param {Array} [classes=undefined] - css class list
- */
-function BaseView(classes){
-    var classNames = (typeof classes === "string" ? classes : "");
-    this._container = $("<div class='" + classNames + "'>");
-}
-
-BaseView.prototype.getContainer = function(){
-    return this._container;
-};
-
-BaseView.prototype.show = function(){
-    this.getContainer().show();
-};
-
-BaseView.prototype.hide = function(){
-    this.getContainer().hide();
-};
-
-BaseView.prototype._build = null;
-
-BaseView.prototype.appendToBlock = function(blockName){
-    $(blockName).append(this.getContainer());
-};
 
 
 /***/ }),
@@ -376,7 +383,7 @@ module.exports = function(method, dataType, url, callback){
 "use strict";
 
 
-var transportAudioFile = __webpack_require__(56);
+var transportAudioFile = __webpack_require__(57);
 var TrackManager = __webpack_require__(23);
 
 var changeSound = __webpack_require__(48);
@@ -602,7 +609,7 @@ function _notify(list, event, data){
 
 var inherit = __webpack_require__(0);
 var BaseWindow = __webpack_require__(15);
-var Factory = __webpack_require__(2);
+var Factory = __webpack_require__(3);
 var commonEventNames = __webpack_require__(1);
 var windowsTransport = __webpack_require__(4);
 
@@ -716,8 +723,8 @@ function onRemoveButtonClicked($element){
 
 var inherit = __webpack_require__(0);
 var BaseWindow = __webpack_require__(15);
-var TrackDataView = __webpack_require__(63);
-var Factory = __webpack_require__(2);
+var TrackDataView = __webpack_require__(66);
+var Factory = __webpack_require__(3);
 var commonEventNames = __webpack_require__(1);
 var windowsTransport = __webpack_require__(4);
 
@@ -849,9 +856,9 @@ function setTrackInstrument(value){
 
 var inherit = __webpack_require__(0);
 var BaseWindow = __webpack_require__(15);
-var FilterView = __webpack_require__(57);
-var SettingView = __webpack_require__(61);
-var InstrumentView = __webpack_require__(67);
+var FilterView = __webpack_require__(58);
+var SettingView = __webpack_require__(64);
+var InstrumentView = __webpack_require__(59);
 var commonEventNames = __webpack_require__(1);
 var windowsTransport = __webpack_require__(4);
 
@@ -917,6 +924,9 @@ TrackView.prototype.back = function(){
     this.filterTabSegment.table.empty();
     windowsTransport.notify(commonEventNames.E_ACTIVATE_WINDOW, "trackList");
     this.filterTabSegment.resetFilters(); // reset previous filter of track
+    // save playing setting
+    this.instrumentView.track.setPlaySettings();
+    this.instrumentView.getContainer().empty();
 };
 
 TrackView.prototype.bindKeyEvent = function(){
@@ -1126,7 +1136,7 @@ ObservableList.prototype.remove = function(index){
 
 
 var inherit = __webpack_require__(0);
-var BaseView = __webpack_require__(3);
+var BaseView = __webpack_require__(2);
 
 module.exports = BaseWindow;
 
@@ -1243,13 +1253,12 @@ function BaseTrackModel(id, data){
     this.setting = data.setting || {}; // this
     this.instrument = data.instrument || "synth";
     this.playSetting = data["play-setting"] || [];
-    //this.filterSetting = data["post-setting"] || {};
+    this.playObjects = [];
 
-    this.trackObject = this._generate(); // this
+    this.trackObject = this._generate();
     this.postSettings = new PostSettings(data["post-setting"]);
 
-    //ProxyTrackManager.updateFromTrack(SettingsList, this);
-    //ProxyTrackManager.updateFromTrack(FiltersList, this);
+    this.createPlayObjects();
 }
 
 BaseTrackModel.prototype.createFormData = function(){
@@ -1370,11 +1379,19 @@ BaseTrackModel.prototype.setSetting = function(){
 };
 
 /**
- * Rewrite play setting data
- * @param playSetting
+ * Set data to play setting list from play setting object
  */
-BaseTrackModel.prototype.setPlaySetting = function(playSetting){ // ??????????
-    this.playSetting = playSetting;
+BaseTrackModel.prototype.setPlaySettings = function(){
+    var i;
+    this.playSetting.length = 0; // clear previous play setting data
+    for(i = 0; i < this.playObjects.length; ++i){
+        this.playSetting[i].push(this.playObjects.getData());
+    }
+};
+
+BaseTrackModel.prototype.emptyPlaySetting = function(){
+    this.playSetting.length = 0;
+    this.playObjects.length = 0;
 };
 
 /**
@@ -1384,6 +1401,8 @@ BaseTrackModel.prototype.setPlaySetting = function(playSetting){ // ??????????
  * @return {Tone}
  */
 BaseTrackModel.prototype._generate = null;
+
+BaseTrackModel.prototype.createPlayObjects = null;
 
 /**
  * @param {Object} options
@@ -1466,7 +1485,7 @@ BaseTrackSetting.prototype.toString = function(){
 "use strict";
 
 
-var capitalize = __webpack_require__(55);
+var capitalize = __webpack_require__(56);
 
 module.exports = {
     "updateSettingListFromTrack": function(settingList, track){ // SettingList OR FilterList
@@ -1772,10 +1791,10 @@ TrackManager.save = (function(){
 
 
 var inherit = __webpack_require__(0);
-var TabSegment = __webpack_require__(62);
+var TabSegment = __webpack_require__(65);
 var BaseRange = __webpack_require__(13);
 var BaseOptionList = __webpack_require__(12);
-var Factory = __webpack_require__(2);
+var Factory = __webpack_require__(3);
 
 module.exports = ToolView;
 
@@ -2052,12 +2071,12 @@ ProjectListModel.prototype.clearActiveProject = function(){
 
 
 var inherit = __webpack_require__(0);
-var BaseView = __webpack_require__(3);
-var MessageModal = __webpack_require__(59);
+var BaseView = __webpack_require__(2);
+var MessageModal = __webpack_require__(61);
 var ProjectListView = __webpack_require__(8);
 var TrackListView = __webpack_require__(9);
 var TrackView = __webpack_require__(10);
-var MenuBar = __webpack_require__(58);
+var MenuBar = __webpack_require__(60);
 var windowsTransport = __webpack_require__(4);
 var commonEventNames = __webpack_require__(1);
 
@@ -2475,7 +2494,29 @@ BaseModel.prototype.remove = null;
 
 
 /***/ }),
-/* 36 */,
+/* 36 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = BaseNote;
+
+function BaseNote(value){
+    this.value = value;
+}
+
+BaseNote.prototype.getValue = function(){
+    return this.value;
+};
+
+BaseNote.prototype.setValue = function(value){
+    this.value = value;
+};
+
+
+
+/***/ }),
 /* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -2652,14 +2693,13 @@ FreeverbFilter.prototype.setByName = function(optionName, value){
 
 
 /***/ }),
-/* 40 */,
-/* 41 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var PianoNote = __webpack_require__(69);
+var PianoNote = __webpack_require__(41);
 
 module.exports = new PianoModel;
 
@@ -2780,6 +2820,39 @@ PianoModel.prototype.shift = function(shiftIndex){
     for(i = 0; i < this.notes.length; ++i){
         if(shiftIndex >= 0 && shiftIndex < this.notes[i].additionalValue.length)
         this.notes[i].setValueFromAdditional(shiftIndex);
+    }
+};
+
+
+/***/ }),
+/* 41 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var BaseNote = __webpack_require__(36);
+
+module.exports = PianoNote;
+
+function PianoNote(defaultValue, additionalValue, value){
+    BaseNote.call(this, value);
+    this.additionalValue = additionalValue || [];
+    this.defaultValue = defaultValue;
+    this.__isBlack = defaultValue.indexOf('#') > -1;
+}
+
+inherit(PianoNote, BaseNote);
+
+PianoNote.prototype.isBlack = function(){
+    return this.__isBlack;
+};
+
+PianoNote.prototype.setValueFromAdditional = function(index){
+    var value = this.additionalValue[index];
+    if(value){
+        this.setValue(value);
     }
 };
 
@@ -3102,6 +3175,7 @@ TrackNoise.prototype.play = function(options){
 
 
 var BaseTrackModel = __webpack_require__(18);
+var PianoKeyPlayer = __webpack_require__(70);
 var inherit = __webpack_require__(0);
 
 module.exports = TrackSynthesizer;
@@ -3132,6 +3206,15 @@ TrackSynthesizer.prototype.playKeyNow = function(note){
 
 TrackSynthesizer.prototype.stopKeyNow = function(){
     this.trackObject.triggerRelease();
+};
+
+TrackSynthesizer.prototype.createPlayObjects = function(){
+    var i, tokenPlaySetting;
+    for(i = 0; i < this.playSetting.length; ++i){
+        tokenPlaySetting = this.playSetting[i];
+        this.playObjects[i].push(new PianoKeyPlayer(this.trackObject, tokenPlaySetting.note,
+            tokenPlaySetting.triggerAttackTime, tokenPlaySetting.triggerReleaseTime));
+    }
 };
 
 TrackSynthesizer.prototype.saveTest = function(callback){
@@ -3273,7 +3356,8 @@ module.exports = baseRequest.bind(null, "GET", "json", "projects/");
 
 
 /***/ }),
-/* 55 */
+/* 55 */,
+/* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3285,7 +3369,7 @@ module.exports = function capitalize(str){
 
 
 /***/ }),
-/* 56 */
+/* 57 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3313,7 +3397,7 @@ function fetch(url, resolve){
 
 
 /***/ }),
-/* 57 */
+/* 58 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3323,7 +3407,7 @@ var inherit = __webpack_require__(0);
 var ToolView = __webpack_require__(24);
 var FiltersList = __webpack_require__(38);
 var ProxyTrackManager = __webpack_require__(20);
-var Factory = __webpack_require__(2);
+var Factory = __webpack_require__(3);
 
 module.exports = FilterView;
 
@@ -3457,20 +3541,61 @@ function uncheckEvent(filterName, isChecked){
 
 
 /***/ }),
-/* 58 */
+/* 59 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var BaseView = __webpack_require__(3);
-var UserInfoBar = __webpack_require__(64);
+var BaseView = __webpack_require__(2);
+var Piano = __webpack_require__(62);
+
+module.exports = InstrumentView;
+
+function InstrumentView(track){
+    BaseView.call(this, "instrument-view");
+    this.track = track;
+    this.instrument = null;
+    this.setInstrument();
+
+    this._build();
+}
+
+inherit(InstrumentView, BaseView);
+
+InstrumentView.prototype._build = function(){
+    var container = this.getContainer();
+
+    container.append(this.instrument.getContainer());
+};
+
+InstrumentView.prototype.setInstrument = function(){
+    switch(this.track.instrument){
+        case "synth":
+            this.instrument = new Piano(this.track);
+            break;
+        case "oscillator":
+            break;
+    }
+};
+
+
+/***/ }),
+/* 60 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var BaseView = __webpack_require__(2);
+var UserInfoBar = __webpack_require__(67);
 var TrackView = __webpack_require__(10);
 var TrackListView = __webpack_require__(9);
 var ProjectListView = __webpack_require__(8);
-var PlayerView = __webpack_require__(60);
-var Factory = __webpack_require__(2);
+var PlayerView = __webpack_require__(63);
+var Factory = __webpack_require__(3);
 var commonEventNames = __webpack_require__(1);
 var windowsTransport = __webpack_require__(4);
 
@@ -3507,6 +3632,7 @@ MenuBar.prototype.adaptToActiveWindow = function(window){
     if(window instanceof TrackView || window instanceof TrackListView){
         this.backButton.show();
         this.player.show();
+        this.player.audioPlayer.setModel(window.controller.model);
     } else if(window instanceof ProjectListView){
         this.backButton.hide();
         this.player.hide();
@@ -3519,15 +3645,15 @@ MenuBar.prototype.adaptToActiveWindow = function(window){
 
 
 /***/ }),
-/* 59 */
+/* 61 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var BaseView = __webpack_require__(3);
-var Factory = __webpack_require__(2);
+var BaseView = __webpack_require__(2);
+var Factory = __webpack_require__(3);
 var Observer = __webpack_require__(7);
 var commonEventNames = __webpack_require__(1);
 
@@ -3583,20 +3709,207 @@ MessageModal.prototype.hide = function(){
 
 
 /***/ }),
-/* 60 */
+/* 62 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var Factory = __webpack_require__(2);
-var BaseView = __webpack_require__(3);
+var PianoKeyPlayer = __webpack_require__(70);
+var BaseView = __webpack_require__(2);
+var PianoModel = __webpack_require__(40);
+var Factory = __webpack_require__(3);
+
+module.exports = Piano;
+
+function Piano(track){
+    BaseView.call(this, "piano");
+    this.track = track;
+    this.startTime = 0;
+    this.isRecordNow = false;
+    this.isMouseClicked = false;
+
+    this.__pressedKeys = [];
+    //this.__movedKeys = [];
+    //this.__recordedKeys = [];
+
+    this.piano = $("<div class='keys'>");
+    this.octaveRange = Factory.dropDownElement("octave-range", "octave-range", {"C1-B3": 0, "C4-B6": 1},
+                                                this._dropDownEvent.bind(this));
+    this.recordButton = Factory.createButton("record", "record");
+    this.cleardButton = Factory.createButton("reset-record", "reset record");
+    this.cleardButton = Factory.createButton("clear", "clear");
+    this._build();
+}
+
+inherit(Piano, BaseView);
+
+Piano.prototype._build = function(){
+    var self = this;
+    var container = this.getContainer();
+    this.createKeys();
+
+    /*this.piano.mouseup(function(event){
+        self.isMouseClicked = false;
+    });*/
+
+    /*this.replayButton.on("click", function(){
+        var i;
+        console.log(self.__recordedKeys);
+        for (i = 0; i < self.__recordedKeys.length; ++i){
+            self.__recordedKeys[i].play();
+        }
+    });*/
+
+    this.recordButton.on("click", function(){
+        if(self.isRecordNow === true){
+            // stop record
+            self.recordButton.text("record");
+            self.isRecordNow = false;
+            console.log(self.track.playObjects);
+        } else{
+            self.isRecordNow = true;
+            self.track.emptyPlaySetting(); // clear previous play data setting
+            self.recordButton.text("stop");
+        }
+    });
+
+    this.cleardButton.on("click", function(){
+        self.track.emptyPlaySetting();
+    });
+
+    container.append(this.piano);
+    container.append(this.octaveRange);
+    container.append(this.recordButton);
+    container.append(this.cleardButton);
+};
+
+Piano.prototype._dropDownEvent = function(id, text, dataValue){
+    PianoModel.shift(dataValue); // change keys notation
+    this.createKeys();
+};
+
+Piano.prototype.createKeys = function(){
+    var i, tokenNote, style, key;
+    var notes = PianoModel.notes;
+    var keyDistance = 40;
+    var whiteKeyDistance = -40;
+    var blackKeyDistance = -15;
+    this.piano.empty(); // clear previous piano keys
+    for (i = 0; i < notes.length; ++i){
+        tokenNote = notes[i];
+        key = PianoModel.keyList[i];
+        if(tokenNote.isBlack() === true){
+            style = "background-color: rgb(32,32,32); width: 30px; height: 120px; z-index: 1; color: #ffffff;";
+            this.piano.append(Factory.createKey("key", key, "left: " + blackKeyDistance + "; " + style,
+                                                key, tokenNote.value, this._pianoKeyDownHandler.bind(this),
+                                                this._pianoKeyUpHandler.bind(this)));
+        } else{
+            whiteKeyDistance += keyDistance;
+            blackKeyDistance += keyDistance;
+            this.piano.append(Factory.createKey("key", key, "left: " + whiteKeyDistance + ";", key,
+                                                tokenNote.value, this._pianoKeyDownHandler.bind(this),
+                                                this._pianoKeyUpHandler.bind(this)));
+        }
+        //container.append(Factory.createKey(tokenNote.value, tokenNote.isBlack()));
+    }
+};
+
+Piano.prototype._recordAttackHandler = function(note){
+    if(this.track.playObjects.length === 0){
+        // this is the first button pressed, so it's time to remember the start time!
+        this.startTime = Date.now();
+        this.track.playObjects.push(new PianoKeyPlayer(this.track.trackObject, note, 0));
+    } else{
+        // it is not first key press, so just record the difference between start moment and present:
+        this.track.playObjects.push(new PianoKeyPlayer(this.track.trackObject, note, Date.now()-this.startTime));
+    }
+};
+
+Piano.prototype._recordReleaseHandler = function(note){
+    var i, tokenPlayObject;
+    for (i = 0; i < this.track.playObjects.length; ++i){
+        tokenPlayObject = this.track.playObjects[i];
+        if(tokenPlayObject.note === note && tokenPlayObject.triggerReleaseTime === 0){
+            // If current recItem has same note and has default releaseTime - so this is what we need:
+            tokenPlayObject.triggerReleaseTime = Date.now() - this.startTime;
+        }
+    }
+};
+
+Piano.prototype._pianoKeyDownHandler = function(key){
+    var note = PianoModel.getNoteForKey(key);
+    if(note !== null){
+        if(this.__pressedKeys.indexOf(key) === -1){
+            // play pressed key once
+            this.__pressedKeys.push(key);
+            Factory.setColorToKey(this.piano, key, "grey");
+            this.track.playKeyNow(note.getValue());
+            if(this.isRecordNow === true){
+                this._recordAttackHandler(note.getValue());
+            }
+        }
+    }
+};
+
+Piano.prototype._pianoKeyUpHandler = function(key){
+    var note = PianoModel.getNoteForKey(key);
+    if(note !== null) {
+        if(this.__pressedKeys.indexOf(key) >= 0){
+            // change unpressed key color on default
+            if (note.isBlack() === true) {
+                Factory.setColorToKey(this.piano, key, "black");
+            } else {
+                Factory.setColorToKey(this.piano, key, "");
+            }
+            // stop key playing
+            this.track.stopKeyNow();
+            if(this.isRecordNow === true){
+                this._recordReleaseHandler(note.getValue());
+            }
+            this.__pressedKeys.splice(this.__pressedKeys.indexOf(key), 1);
+        }
+    }
+};
+
+Piano.prototype.keyDown = function(){
+    var key;
+    var self = this;
+    $(document).keydown(function(event){
+        key = String.fromCharCode(event.keyCode);
+        self._pianoKeyDownHandler(key);
+    });
+};
+
+Piano.prototype.keyUp = function(){
+    var key;
+    var self = this;
+    $(document).keyup(function(event){
+        key = String.fromCharCode(event.keyCode);
+        self._pianoKeyUpHandler(key);
+    });
+};
+
+
+/***/ }),
+/* 63 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var Factory = __webpack_require__(3);
+var BaseView = __webpack_require__(2);
+var AudioPlayer = __webpack_require__(71);
 
 module.exports = PlayerView;
 
 function PlayerView(){
     BaseView.call(this, "player-view");
+
+    this.audioPlayer = new AudioPlayer();
 
     this.playButton = Factory.createIconButton("ui button", "play icon", "");
     this.pauseButton = Factory.createIconButton("ui button", "pause icon", "");
@@ -3608,13 +3921,15 @@ function PlayerView(){
 inherit(PlayerView, BaseView);
 
 PlayerView.prototype._build = function(){
+    var self = this;
     var container = this.getContainer();
 
-    this.playButton.on("click", function(_){
+    this.playButton.on("click", function(event){
+        self.audioPlayer.play();
     });
-    this.pauseButton.on("click", function(_){
+    this.pauseButton.on("click", function(event){
     });
-    this.stopButton.on("click", function(_){
+    this.stopButton.on("click", function(event){
     });
 
     container.append(this.playButton);
@@ -3623,7 +3938,7 @@ PlayerView.prototype._build = function(){
 };
 
 /***/ }),
-/* 61 */
+/* 64 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3633,7 +3948,7 @@ var inherit = __webpack_require__(0);
 var ToolView = __webpack_require__(24);
 var SettingsList = __webpack_require__(44);
 var ProxyTrackManager = __webpack_require__(20);
-var Factory = __webpack_require__(2);
+var Factory = __webpack_require__(3);
 
 module.exports = SettingView;
 
@@ -3692,14 +4007,14 @@ SettingView.prototype.setEvent = function(optionName, value){
 
 
 /***/ }),
-/* 62 */
+/* 65 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var BaseView = __webpack_require__(3);
+var BaseView = __webpack_require__(2);
 
 module.exports = TabSegment;
 
@@ -3717,14 +4032,14 @@ TabSegment.prototype.setActive = function(){
 
 
 /***/ }),
-/* 63 */
+/* 66 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var BaseView = __webpack_require__(3);
+var BaseView = __webpack_require__(2);
 
 module.exports = TrackDataView;
 
@@ -3791,16 +4106,16 @@ TrackDataView.prototype.createWaveForm = function(){
 
 
 /***/ }),
-/* 64 */
+/* 67 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var Factory = __webpack_require__(2);
-var BaseView = __webpack_require__(3);
-var UserModal = __webpack_require__(65);
+var Factory = __webpack_require__(3);
+var BaseView = __webpack_require__(2);
+var UserModal = __webpack_require__(68);
 var RequestManager = __webpack_require__(6);
 var commonEventNames = __webpack_require__(1);
 var windowsTransport = __webpack_require__(4);
@@ -3851,15 +4166,15 @@ UserInfoBar.prototype.setUserName = function(userName){
 
 
 /***/ }),
-/* 65 */
+/* 68 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var Factory = __webpack_require__(2);
-var BaseView = __webpack_require__(3);
+var Factory = __webpack_require__(3);
+var BaseView = __webpack_require__(2);
 var commonEventNames = __webpack_require__(1);
 var windowsTransport = __webpack_require__(4);
 
@@ -3898,275 +4213,42 @@ UserModal.prototype.show = function(){
 
 
 /***/ }),
-/* 66 */,
-/* 67 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var inherit = __webpack_require__(0);
-var BaseView = __webpack_require__(3);
-var Piano = __webpack_require__(70);
-
-module.exports = InstrumentView;
-
-function InstrumentView(track){
-    BaseView.call(this, "instrument-view");
-    this.track = track;
-    this.instrument = null;
-    this.setInstrument();
-
-    this._build();
-}
-
-inherit(InstrumentView, BaseView);
-
-InstrumentView.prototype._build = function(){
-    var container = this.getContainer();
-
-    container.append(this.instrument.getContainer());
-};
-
-InstrumentView.prototype.setInstrument = function(){
-    switch(this.track.instrument){
-        case "synth":
-            this.instrument = new Piano(this.track);
-            break;
-        case "oscillator":
-            break;
-    }
-};
-
-
-/***/ }),
-/* 68 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = BaseNote;
-
-function BaseNote(value){
-    this.value = value;
-}
-
-BaseNote.prototype.getValue = function(){
-    return this.value;
-};
-
-BaseNote.prototype.setValue = function(value){
-    this.value = value;
-};
-
-
-
-/***/ }),
-/* 69 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var inherit = __webpack_require__(0);
-var BaseNote = __webpack_require__(68);
-
-module.exports = PianoNote;
-
-function PianoNote(defaultValue, additionalValue, value){
-    BaseNote.call(this, value);
-    this.additionalValue = additionalValue || [];
-    this.defaultValue = defaultValue;
-    this.__isBlack = defaultValue.indexOf('#') > -1;
-}
-
-inherit(PianoNote, BaseNote);
-
-PianoNote.prototype.isBlack = function(){
-    return this.__isBlack;
-};
-
-PianoNote.prototype.setValueFromAdditional = function(index){
-    var value = this.additionalValue[index];
-    if(value){
-        this.setValue(value);
-    }
-};
-
-
-/***/ }),
+/* 69 */,
 /* 70 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var inherit = __webpack_require__(0);
-var PianoKeyRecorder = __webpack_require__(71);
-var BaseView = __webpack_require__(3);
-var PianoModel = __webpack_require__(41);
-var Factory = __webpack_require__(2);
+module.exports = PianoKeyPlayer;
 
-module.exports = Piano;
-
-function Piano(track){
-    BaseView.call(this, "piano");
-    this.track = track;
-    this.startTime = 0;
-    this.isRecordNow = false;
-
-    this.__pressedKeys = [];
-    this.__recordedKeys = [];
-
-    this.piano = $("<div class='keys'>");
-    this.octaveRange = Factory.dropDownElement("octave-range", "octave-range", {"C1-B3": 0, "C4-B6": 1},
-                                                this._dropDownEvent.bind(this));
-    this.recordButton = Factory.createButton("record", "record");
-    this.stopRecordButton = Factory.createButton("stop-record", "stop record");
-    this.replayButton = Factory.createButton("replay", "replay");
-    this.cleardButton = Factory.createButton("clear", "clear");
-    this._build();
+/**
+ * @param piano - Tone.Synth
+ * @param note - String
+ * @param triggerAttackTime
+ * @param triggerReleaseTime
+ * @constructor
+ */
+function PianoKeyPlayer(piano, note, triggerAttackTime, triggerReleaseTime){
+    this.piano = piano;
+    this.note = note;
+    this.triggerAttackTime = triggerAttackTime || 0; // milliseconds
+    this.triggerReleaseTime = triggerReleaseTime || 0; // milliseconds
 }
 
-inherit(Piano, BaseView);
-
-Piano.prototype._build = function(){
-    var self = this;
-    var container = this.getContainer();
-    this.createKeys();
-
-    this.replayButton.on("click", function(){
-        var i;
-        for (i = 0; i < self.__recordedKeys.length; ++i){
-            self.__recordedKeys[i].play();
-        }
-    });
-
-    this.recordButton.on("click", function(){
-        self.isRecordNow = true;
-    });
-
-    this.stopRecordButton.on("click", function(){
-        self.isRecordNow = false;
-        //self.__recordedKeys.length = 0;
-    });
-
-    this.cleardButton.on("click", function(){
-        self.__recordedKeys.length = 0;
-    });
-
-
-    container.append(this.piano);
-    container.append(this.octaveRange);
-    container.append(this.recordButton);
-    container.append(this.stopRecordButton);
-    container.append(this.replayButton);
-    container.append(this.cleardButton);
+PianoKeyPlayer.prototype.play = function(){
+    // convert to seconds:
+    var start = this.triggerAttackTime / 1000;
+    var duration = (this.triggerReleaseTime - this.triggerAttackTime) / 1000;
+    this.piano.triggerAttackRelease(this.note, duration, "+" + start);
 };
 
-Piano.prototype._dropDownEvent = function(id, text, dataValue){
-    PianoModel.shift(dataValue); // change keys notation
-    this.createKeys();
-};
-
-Piano.prototype.createKeys = function(){
-    var i, tokenNote, style, key;
-    var notes = PianoModel.notes;
-    var keyDistance = 40;
-    var whiteKeyDistance = -40;
-    var blackKeyDistance = -15;
-    this.piano.empty(); // clear previous piano keys
-    for (i = 0; i < notes.length; ++i){
-        tokenNote = notes[i];
-        key = PianoModel.keyList[i];
-        if(tokenNote.isBlack() === true){
-            style = "background-color: rgb(32,32,32); width: 30px; height: 120px; z-index: 1; color: #ffffff;";
-            this.piano.append(Factory.createKey("key " + key, "left: " + blackKeyDistance + "; " + style, key,
-                tokenNote.value, this._pianoKeyDownHandler.bind(this), this._pianoKeyUpHandler.bind(this)));
-        } else{
-            whiteKeyDistance += keyDistance;
-            blackKeyDistance += keyDistance;
-            this.piano.append(Factory.createKey("key " + key, "left: " + whiteKeyDistance + ";", key,
-                tokenNote.value, this._pianoKeyDownHandler.bind(this), this._pianoKeyUpHandler.bind(this)));
-        }
-        //container.append(Factory.createKey(tokenNote.value, tokenNote.isBlack()));
-    }
-};
-
-Piano.prototype._recordAttackHandler = function(note){
-    if (this.__recordedKeys.length === 0){
-        // this is the first button pressed, so it's time to remember the start time!
-        this.startTime = Date.now();
-        this.__recordedKeys.push(new PianoKeyRecorder(this.track.trackObject, note, 0));
-    } else{
-        // it is not first key press, so just record the difference between start moment and present:
-        this.__recordedKeys.push(new PianoKeyRecorder(this.track.trackObject, note, Date.now() - this.startTime));
-    }
-};
-
-Piano.prototype._recordReleaseHandler = function(note){
-    var i, tokenRecItem;
-    for (i = 0; i < this.__recordedKeys.length; ++i){
-        tokenRecItem = this.__recordedKeys[i];
-        if (tokenRecItem.note === note && tokenRecItem.triggerReleaseTime === 0){
-            // If current recItem has same note and has default releaseTime - so this is what we need:
-            tokenRecItem.triggerReleaseTime = Date.now() - this.startTime;
-        }
-    }
-};
-
-Piano.prototype._pianoKeyDownHandler = function(key){
-    var note = PianoModel.getNoteForKey(key);
-    if(note !== null){
-        if(this.__pressedKeys.indexOf(key) === -1){
-            // play pressed key once
-            this.__pressedKeys.push(key);
-            Factory.setColorToKey(key, "grey");
-            this.track.playKeyNow(note.getValue());
-            if(this.isRecordNow === true){
-                this._recordAttackHandler(note.getValue());
-            }
-        }
-    }
-};
-
-Piano.prototype._pianoKeyUpHandler = function(key){
-    var note = PianoModel.getNoteForKey(key);
-    if(note !== null) {
-        if(this.__pressedKeys.indexOf(key) >= 0){
-            // change unpressed key color on default
-            if (note.isBlack() === true) {
-                Factory.setColorToKey(key, "black");
-            } else {
-                Factory.setColorToKey(key, "");
-            }
-            // stop key playing
-            this.track.stopKeyNow();
-            if(this.isRecordNow === true){
-                this._recordReleaseHandler(note.getValue());
-            }
-            this.__pressedKeys.splice(this.__pressedKeys.indexOf(key), 1);
-        }
-    }
-};
-
-Piano.prototype.keyDown = function(){
-    var key;
-    var self = this;
-    $(document).keydown(function(event){
-        key = String.fromCharCode(event.keyCode);
-        self._pianoKeyDownHandler(key);
-    });
-};
-
-Piano.prototype.keyUp = function(){
-    var key;
-    var self = this;
-    $(document).keyup(function(event){
-        key = String.fromCharCode(event.keyCode);
-        self._pianoKeyUpHandler(key);
-    });
+PianoKeyPlayer.prototype.getData = function(){
+    var result = {};
+    result.note = this.note;
+    result.triggerAttackTime = this.triggerAttackTime;
+    result.triggerReleaseTime = this.triggerReleaseTime;
+    return result;
 };
 
 
@@ -4177,29 +4259,72 @@ Piano.prototype.keyUp = function(){
 "use strict";
 
 
-module.exports = PianoKeyRecorder;
+var TrackManager = __webpack_require__(23);
+var BaseTrackModel = __webpack_require__(18);
+var ProjectModel = __webpack_require__(43);
 
+module.exports = AudioPlayer;
 
-/**
- * @param piano - Tone.Synth
- * @param note - String
- * @param triggerAttackTime
- * @param triggerReleaseTime
- * @constructor
- */
-function PianoKeyRecorder(piano, note, triggerAttackTime, triggerReleaseTime){
-    this.piano = piano;
-    this.note = note;
-    this.triggerAttackTime = triggerAttackTime || 0; // milliseconds
-    this.triggerReleaseTime = triggerReleaseTime || 0; // milliseconds
+function AudioPlayer(model){
+    this.model = null;
+    this.player = [];
+
+    this.setModel(model);
 }
 
-PianoKeyRecorder.prototype.play = function(){
-    // convert to seconds:
-    var start = this.triggerAttackTime / 1000;
-    var duration = (this.triggerReleaseTime - this.triggerAttackTime) / 1000;
-    this.piano.triggerAttackRelease(this.note, duration, "+" + start);
+AudioPlayer.prototype.setModel = function(model){
+    if(model){
+        this.model = model;
+        if(this.model instanceof ProjectModel){
+            // merge before play
+            this._fullPlayerWithProject();
+        } else if(this.model instanceof BaseTrackModel){
+            this.player = this.model.playObjects;
+        }
+    }
 };
+
+AudioPlayer.prototype.play = function(){
+    var i;
+    for(i = 0; i < this.player.length; ++i){
+        this.player[i].play();
+    }
+};
+
+AudioPlayer.prototype._fullPlayerWithProject = function(){
+
+};
+
+AudioPlayer.prototype._fullPlayerWithTrack = function(){
+
+};
+
+AudioPlayer.prototype.pause = function(){};
+
+AudioPlayer.prototype.stop = function(){};
+
+/*AudioPlayer.prototype.save = function(fileName){
+    var resultAudioBuffer;
+    if(this.trackList.length === 1){
+        resultAudioBuffer = this.trackList[0];
+    } else if(this.trackList.length > 1){
+        resultAudioBuffer = TrackManager.mergeTracks(this.trackList);
+    }
+    TrackManager.save(resultAudioBuffer, fileName);
+    // call request of saving Project !!!!
+};
+
+AudioPlayer.prototype.export = function(){
+    // save Sound
+};
+
+function _trackDataToTrack(audioPlayerObject){
+    var i;
+    var trackData = audioPlayerObject.model.trackDataList;
+    for(i=0; i < trackData.length; ++i){
+
+    }
+}*/
 
 
 /***/ })

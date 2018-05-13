@@ -145,6 +145,13 @@ body {
 .keys {
     width: 100%;
     position: relative;
+
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome and Opera */
 }
 
 .keys .key {
@@ -202,12 +209,7 @@ body {
     float: right;
 }
 
-.button.stop-record {
-    margin-left: 80%;
-    float: right;
-}
-
-.button.replay {
+.button.reset-record {
     margin-left: 80%;
     float: right;
 }
