@@ -1385,7 +1385,7 @@ BaseTrackModel.prototype.setPlaySettings = function(){
     var i;
     this.playSetting.length = 0; // clear previous play setting data
     for(i = 0; i < this.playObjects.length; ++i){
-        this.playSetting[i].push(this.playObjects.getData());
+        this.playSetting.push(this.playObjects[i].getData());
     }
 };
 
@@ -2162,9 +2162,6 @@ WindowManager.prototype.setActiveWindow = function(newActiveWindow){
     }
     // Attach & show the new one:
     this.__activeWindow = newActiveWindow;
-    // if menubar change after change active window
-    // for example project view add play button when active project view
-    this.__menuBar.adaptToActiveWindow(this.__activeWindow);
     this.__activeWindow.show();
 
     // TODO: consider to re-implement this...
@@ -2185,6 +2182,9 @@ WindowManager.prototype.setActiveWindow = function(newActiveWindow){
         this.__activeWindow.controller.sendTrack();
         this.__activeWindow.bindKeyEvent();
     }
+    // if menubar change after change active window
+    // for example project view add play button when active project view
+    this.__menuBar.adaptToActiveWindow(this.__activeWindow);
 };
 
 /*WindowManager.prototype.hideUserOnlyElements = function(userName){
@@ -3212,7 +3212,7 @@ TrackSynthesizer.prototype.createPlayObjects = function(){
     var i, tokenPlaySetting;
     for(i = 0; i < this.playSetting.length; ++i){
         tokenPlaySetting = this.playSetting[i];
-        this.playObjects[i].push(new PianoKeyPlayer(this.trackObject, tokenPlaySetting.note,
+        this.playObjects.push(new PianoKeyPlayer(this.trackObject, tokenPlaySetting.note,
             tokenPlaySetting.triggerAttackTime, tokenPlaySetting.triggerReleaseTime));
     }
 };
@@ -3628,12 +3628,12 @@ MenuBar.prototype._build = function(){
     container.append(this.userInfoBar.getContainer());
 };
 
-MenuBar.prototype.adaptToActiveWindow = function(window){
-    if(window instanceof TrackView || window instanceof TrackListView){
+MenuBar.prototype.adaptToActiveWindow = function(newWindow){
+    if(newWindow instanceof TrackView || newWindow instanceof TrackListView){
         this.backButton.show();
         this.player.show();
-        this.player.audioPlayer.setModel(window.controller.model);
-    } else if(window instanceof ProjectListView){
+        this.player.audioPlayer.setModel(newWindow.controller.model);
+    } else if(newWindow instanceof ProjectListView){
         this.backButton.hide();
         this.player.hide();
     }
