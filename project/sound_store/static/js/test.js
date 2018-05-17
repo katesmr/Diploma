@@ -64,7 +64,7 @@ var test =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 32);
+/******/ 	return __webpack_require__(__webpack_require__.s = 34);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -82,28 +82,6 @@ module.exports = function(child, parent){
 
 /***/ }),
 /* 1 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = {
-    "E_MODEL_UPDATED": "MODEL_UPDATED",
-    "E_ITEM_ADDED": "ITEM_ADDED",
-    "E_ITEM_REMOVED": "ITEM_REMOVED",
-    "E_CONFIRMED": "CONFIRMED",
-    "E_DECLINED": "DECLINED",
-    "E_SHOW_MODAL": "E_SHOW_MODAL",
-    "E_ACTIVATE_WINDOW": "E_ACTIVATE_WINDOW",
-    "E_DEFINE_USER": "E_DEFINE_USER",
-    "ON_BACK_BUTTON_CLICK": "ON_BACK_BUTTON_CLICK",
-    "E_SHOW_LOGIN_FORM": "E_SHOW_LOGIN_FORM",
-    "E_SET_TRACK": "E_SET_TRACK"
-};
-
-
-/***/ }),
-/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -139,7 +117,7 @@ BaseView.prototype.appendToBlock = function(blockName){
 
 
 /***/ }),
-/* 3 */
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -296,7 +274,7 @@ function buttonsPopup(buttonNameList, callback){
         $column = $("<div class='column'>");
         $button = createButton("", buttonNameList[i]);
         $button.on("click", function(event){
-            callback($(this).val());
+            callback($(this).text());
         });
         $column.append($button);
         $row.append($column);
@@ -344,6 +322,28 @@ function setColorToKey(pianoElement, key, color){
 
 
 /***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = {
+    "E_MODEL_UPDATED": "MODEL_UPDATED",
+    "E_ITEM_ADDED": "ITEM_ADDED",
+    "E_ITEM_REMOVED": "ITEM_REMOVED",
+    "E_CONFIRMED": "CONFIRMED",
+    "E_DECLINED": "DECLINED",
+    "E_SHOW_MODAL": "E_SHOW_MODAL",
+    "E_ACTIVATE_WINDOW": "E_ACTIVATE_WINDOW",
+    "E_DEFINE_USER": "E_DEFINE_USER",
+    "ON_BACK_BUTTON_CLICK": "ON_BACK_BUTTON_CLICK",
+    "E_SHOW_LOGIN_FORM": "E_SHOW_LOGIN_FORM",
+    "E_SET_TRACK": "E_SET_TRACK"
+};
+
+
+/***/ }),
 /* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -383,17 +383,17 @@ module.exports = function(method, dataType, url, callback){
 "use strict";
 
 
-var transportAudioFile = __webpack_require__(57);
-var TrackManager = __webpack_require__(23);
+var transportAudioFile = __webpack_require__(58);
+var TrackManager = __webpack_require__(17);
 
-var changeSound = __webpack_require__(48);
-var changeRequest = __webpack_require__(47);
-var getSound = __webpack_require__(52);
-var getProject = __webpack_require__(51);
-var projectList = __webpack_require__(54);
-var deleteProject = __webpack_require__(49);
-var deleteTrack = __webpack_require__(50);
-var getUser = __webpack_require__(53);
+var changeSound = __webpack_require__(50);
+var changeRequest = __webpack_require__(49);
+var getSound = __webpack_require__(54);
+var getProject = __webpack_require__(53);
+var projectList = __webpack_require__(56);
+var deleteProject = __webpack_require__(51);
+var deleteTrack = __webpack_require__(52);
+var getUser = __webpack_require__(55);
 
 
 module.exports = {
@@ -608,9 +608,9 @@ function _notify(list, event, data){
 
 
 var inherit = __webpack_require__(0);
-var BaseWindow = __webpack_require__(15);
-var Factory = __webpack_require__(3);
-var commonEventNames = __webpack_require__(1);
+var BaseWindow = __webpack_require__(18);
+var Factory = __webpack_require__(2);
+var commonEventNames = __webpack_require__(3);
 var windowsTransport = __webpack_require__(4);
 
 module.exports = ProjectListView;
@@ -722,10 +722,10 @@ function onRemoveButtonClicked($element){
 
 
 var inherit = __webpack_require__(0);
-var BaseWindow = __webpack_require__(15);
-var TrackDataView = __webpack_require__(66);
-var Factory = __webpack_require__(3);
-var commonEventNames = __webpack_require__(1);
+var BaseWindow = __webpack_require__(18);
+var TrackDataView = __webpack_require__(67);
+var Factory = __webpack_require__(2);
+var commonEventNames = __webpack_require__(3);
 var windowsTransport = __webpack_require__(4);
 
 module.exports = TrackListView;
@@ -843,6 +843,8 @@ function setTrackInstrument(value){
     var result = {};
     result.data = {};
     result.data.instrument = value;
+    console.log("add");
+    console.log(result);
     this.controller.add(result);
 }
 
@@ -855,11 +857,12 @@ function setTrackInstrument(value){
 
 
 var inherit = __webpack_require__(0);
-var BaseWindow = __webpack_require__(15);
-var FilterView = __webpack_require__(58);
-var SettingView = __webpack_require__(64);
-var InstrumentView = __webpack_require__(59);
-var commonEventNames = __webpack_require__(1);
+var WaveForm = __webpack_require__(70);
+var BaseWindow = __webpack_require__(18);
+var FilterView = __webpack_require__(59);
+var SettingView = __webpack_require__(65);
+var InstrumentView = __webpack_require__(60);
+var commonEventNames = __webpack_require__(3);
 var windowsTransport = __webpack_require__(4);
 
 module.exports = TrackView;
@@ -869,7 +872,7 @@ function TrackView(controller){
 
     this.title = ""; //this.track.instrument; // instrument name
 
-    this.waveform = $("<div class='wave-form'></div>");
+    this.waveform = new WaveForm();
     this.tabBlock = $("<div class='ui top attached tabular menu'>");
 
     this.settingTabSegment = new SettingView(null);
@@ -894,7 +897,7 @@ TrackView.prototype._build = function(){
 
     this.controller.observer.subscribe(commonEventNames.E_SET_TRACK, setTrack.bind(this));
 
-    container.append(this.waveform);
+    container.append(this.waveform.getContainer());
     container.append(this.instrumentView);
     this.tabBlock.append(this.settingTitle);
     this.tabBlock.append(this.filterTitle);
@@ -923,7 +926,8 @@ TrackView.prototype.back = function(){
     this.settingTabSegment.table.empty();
     this.filterTabSegment.table.empty();
     windowsTransport.notify(commonEventNames.E_ACTIVATE_WINDOW, "trackList");
-    this.filterTabSegment.resetFilters(); // reset previous filter of track
+    this.settingTabSegment.resetToolOptions(); // reset previous setting of track
+    this.filterTabSegment.resetToolOptions(); // reset previous filter of track
     // save playing setting
     this.instrumentView.track.setPlaySettings();
     this.instrumentView.getContainer().empty();
@@ -935,6 +939,9 @@ TrackView.prototype.bindKeyEvent = function(){
 };
 
 function setTrack(eventName, track){
+    console.log(track.getBlob());
+    this.waveform.createWaveFormFromFile(track.getBlob());
+
     this.settingTabSegment.setTrack(track);
     this.filterTabSegment.setFilter(track);
 
@@ -950,9 +957,9 @@ function setTrack(eventName, track){
 "use strict";
 
 
-var BaseController = __webpack_require__(33);
+var BaseController = __webpack_require__(35);
 var inherit = __webpack_require__(0);
-var ObservableList = __webpack_require__(14);
+var ObservableList = __webpack_require__(15);
 
 module.exports = ListController;
 
@@ -981,7 +988,7 @@ ListController.prototype.attachModel = function(model){
 
 
 var inherit = __webpack_require__(0);
-var BaseOption = __webpack_require__(17);
+var BaseOption = __webpack_require__(20);
 
 module.exports = BaseOptionList;
 
@@ -1019,7 +1026,7 @@ BaseOptionList.prototype.set = function(value){
 
 
 var inherit = __webpack_require__(0);
-var BaseOption = __webpack_require__(17);
+var BaseOption = __webpack_require__(20);
 
 module.exports = BaseRange;
 
@@ -1045,9 +1052,202 @@ inherit(BaseRange, BaseOption);
 "use strict";
 
 
-var BaseModel = __webpack_require__(35);
+var PostSettings = __webpack_require__(45);
+var generateUID = __webpack_require__(36);
+var AudioHelper = __webpack_require__(16);
+
+module.exports = BaseTrackModel;
+
+// @param {String} name
+// @param {Object} source
+function BaseTrackModel(id, data){
+    this.isDeleted = false;
+    this.id = id || -generateUID();
+    this.length = data.length || 1;
+    this.setting = data.setting || {}; // this
+    this.instrument = data.instrument || "synth";
+    this.playSetting = data["play-setting"] || [];
+    this.playObjects = [];
+
+    this.trackObject = this._generate();
+    this.postSettings = new PostSettings(data["post-setting"]);
+
+    this.createPlayObjects();
+}
+
+BaseTrackModel.prototype.createFormData = function(){
+    var formData = new FormData();
+    formData.append("user_audio", toBlob(this.trackObject), this.name);
+    formData.append("postProcessSettings", JSON.stringify(this.postProcessSettings));
+    return formData;
+};
+
+BaseTrackModel.prototype.getContext = function(){
+    return this.trackObject.context._context;
+};
+
+BaseTrackModel.prototype.getConstants = function(){
+    return this.trackObject.context;
+};
+
+BaseTrackModel.prototype.getAudioBuffer = function(){
+    return AudioHelper.getAudioContextBuffer(this.getConstants());
+};
+
+BaseTrackModel.prototype.getBlob = function(){
+    return AudioHelper.AudioContextToBlob(this.getConstants());
+};
+
+BaseTrackModel.prototype.getFrequency = function(){
+    return this.trackObject.frequency.value;
+};
+
+BaseTrackModel.prototype.getVolume = function(){
+    return this.trackObject.volume.value;
+};
+
+BaseTrackModel.prototype.getType = function(){
+    return this.trackObject.type;
+};
+
+/*BaseTrackModel.prototype.getAttack = function(){
+    return this.trackObject.envelope.attack;
+};
+
+BaseTrackModel.prototype.getDecay = function(){
+    return this.trackObject.envelope.decay;
+};
+
+BaseTrackModel.prototype.getSustain = function(){
+    return this.trackObject.envelope.sustain;
+};
+
+BaseTrackModel.prototype.getRelease = function(){
+    return this.trackObject.envelope.release;
+};*/
+
+/**
+ * Return object of track setting in right format for transfer or saving
+ * @returns {{}}
+ */
+BaseTrackModel.prototype.getData = function(){
+    var result = {};
+    result.id = this.id;
+    result.isDeleted = this.isDeleted;
+    result.instrument = this.instrument;
+    result.length = this.length;
+    result.setting = this.setting;
+    result["play-setting"] = this.playSetting;
+    result["post-setting"] = this.postSettings.getPostSettings();
+    return result;
+};
+
+BaseTrackModel.prototype.toJson = function(){
+    return JSON.stringify(this);
+};
+
+BaseTrackModel.prototype.setFrequency = function(value){
+    this.trackObject.frequency.value = value;
+};
+
+BaseTrackModel.prototype.setVolume = function(value){
+    this.trackObject.volume.value = value;
+};
+
+BaseTrackModel.prototype.setType = function(value){
+    this.trackObject.type = value;
+};
+
+/*BaseTrackModel.prototype.setAttack = function(value){
+    this.trackObject.envelope.attack = value;
+};
+
+BaseTrackModel.prototype.setDecay = function(value){
+    this.trackObject.envelope.decay = value;
+};
+
+BaseTrackModel.prototype.setSustain = function(value){
+    this.trackObject.envelope.sustain = value;
+};
+
+BaseTrackModel.prototype.setRelease = function(value){
+    this.trackObject.envelope.release = value;
+};*/
+
+// CALL THIS BEFORE SAVE ON SERVER !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/**
+ * Update or create oscillator && envelope data
+ */
+/*BaseTrackModel.prototype.setSetting = function(){
+    if(this.trackObject){
+        if(this.setting.oscillator === undefined){
+            this.setting.oscillator = {};
+        }
+        if(this.setting.envelope === undefined){
+            this.setting.envelope = {};
+        }
+        this.setting.oscillator.valume = this.getVolume();
+        this.setting.oscillator.frequency = this.getFrequency();
+        this.setting.oscillator.type = this.getType();
+        this.setting.envelope.attack = this.getAttack();
+        this.setting.envelope.decay = this.getDecay();
+        this.setting.envelope.sustain = this.getSustain();
+        this.setting.envelope.release = this.getRelease();
+    }
+};*/
+
+/**
+ * Set data to play setting list from play setting object
+ */
+BaseTrackModel.prototype.setPlaySettings = function(){
+    var i;
+    this.playSetting.length = 0; // clear previous play setting data
+    for(i = 0; i < this.playObjects.length; ++i){
+        this.playSetting.push(this.playObjects[i].getData());
+    }
+};
+
+BaseTrackModel.prototype.emptyPlaySetting = function(){
+    this.playSetting.length = 0;
+    this.playObjects.length = 0;
+};
+
+BaseTrackModel.prototype.disconnectFromAudioSource = function(){
+    this.trackObject.disconnect(Tone.Master);
+};
+
+/**
+ * @param {Object} source
+ * @type {null}
+ * @protected
+ * @return {Tone}
+ */
+BaseTrackModel.prototype._generate = null;
+
+BaseTrackModel.prototype.createPlayObjects = null;
+
+/**
+ * @param {Object} options
+ * @type {null}
+ */
+BaseTrackModel.prototype.play = null;
+
+BaseTrackModel.prototype.record = null;
+
+BaseTrackModel.prototype.setSetting = null;
+
+
+
+/***/ }),
+/* 15 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var BaseModel = __webpack_require__(38);
 var inherit = __webpack_require__(0);
-var commonEventNames = __webpack_require__(1);
+var commonEventNames = __webpack_require__(3);
 
 module.exports = ObservableList;
 
@@ -1129,14 +1329,140 @@ ObservableList.prototype.remove = function(index){
 
 
 /***/ }),
-/* 15 */
+/* 16 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var toWav = __webpack_require__(33);
+
+module.exports = {
+    "getAudioContextBuffer": getAudioContextBuffer,
+    "merge": merge,
+    "BlobToArrayBuffer": BlobToArrayBuffer,
+    "AudioBufferToBlob": AudioBufferToBlob,
+    "AudioContextToBlob": AudioContextToBlob
+};
+
+// return AudioBuffer
+function getAudioContextBuffer(context){
+    var contextConstants = context._constants; // replace on set method
+    var audioBufferSourceNode = contextConstants[1];
+    var buffer = audioBufferSourceNode.buffer;
+    return buffer;
+}
+
+function merge(context, buffer1, buffer2){
+    // add comparison channel numbers
+    var i, data;
+    var newLength = buffer1.length + buffer2.length;
+    var track = context.createBuffer(buffer1.numberOfChannels, newLength, buffer1.sampleRate);
+    for(i = 0; i < track.numberOfChannels; ++i){
+        data = track.getChannelData(i);
+        data.set(buffer1.getChannelData(i));
+        data.set(buffer2.getChannelData(i), buffer1.length);
+    }
+    return track;
+}
+
+function BlobToArrayBuffer(blob, callback){
+    var arrayBuffer;
+    var reader = new FileReader();
+    reader.onload = function(){
+        arrayBuffer = reader.result;
+        callback(arrayBuffer);
+    };
+    reader.readAsArrayBuffer(blob);
+}
+
+function AudioBufferToBlob(audioBuffer){
+    var buffer = toWav(audioBuffer, {float32: true});
+    console.log("+");
+    console.log(buffer);
+    var blob = new Blob([buffer], {"type": "audio/x-wav"});
+
+    console.log("+");
+    console.log(blob);
+    return blob;
+}
+
+function AudioContextToBlob(audioContext){
+    var buffer = getAudioContextBuffer(audioContext);
+    var blob = AudioBufferToBlob(buffer);
+    return blob;
+}
+
+
+/***/ }),
+/* 17 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var AudioHelper = __webpack_require__(16);
+
+module.exports = TrackManager;
+
+function TrackManager(){}
+
+// get array with Tone.Synth
+TrackManager.mergeTracks = function(trackList){
+    var i;
+    var nextIndex;
+    var currentBuffer;
+    var nextBuffer;
+    var nextTrackContext;
+    var currentTrack = trackList[0];
+    var currentTrackContext = currentTrack._context;
+    currentBuffer = AudioHelper.getAudioContextBuffer(currentTrackContext);
+	for(i = 0; i < trackList.length; ++i){
+	    nextIndex = i + 1;
+	    if(nextIndex !== trackList.length){
+	        nextTrackContext = trackList[nextIndex]._context;
+            nextBuffer = AudioHelper.getAudioContextBuffer(nextTrackContext);
+            // put new AudioBuffer where created from merging of past tracks
+            currentBuffer = AudioHelper.merge(currentTrackContext, currentBuffer, nextBuffer);
+        }
+	}
+	return currentBuffer;
+};
+
+TrackManager.save = (function(){
+    var a = document.createElement("a");
+    document.body.appendChild(a);
+    a.style = "display: none";
+    return function(data, fileName){
+        if(fileName === undefined){
+            fileName = "test.wav";
+        }
+        var blob;
+        var buffer;
+        if(data instanceof AudioBuffer){
+            blob = AudioHelper.AudioBufferToBlob(data);
+        } else{
+            buffer = AudioHelper.getAudioContextBuffer(data.context);
+            blob = new Blob([buffer], {"type": "audio/x-wav"});
+        }
+        var url = window.URL.createObjectURL(blob);
+        a.href = url;
+        a.download = fileName;
+        a.click();
+        window.URL.revokeObjectURL(url);
+    };
+}());
+
+
+/***/ }),
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var BaseView = __webpack_require__(2);
+var BaseView = __webpack_require__(1);
 
 module.exports = BaseWindow;
 
@@ -1155,7 +1481,7 @@ BaseWindow.prototype.back = null;
 
 
 /***/ }),
-/* 16 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1187,7 +1513,7 @@ BaseFilterModel.prototype.disconnectFilter = function(track){
 
 
 /***/ }),
-/* 17 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1233,190 +1559,7 @@ BaseOption.prototype.toString = function(){
 
 
 /***/ }),
-/* 18 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var PostSettings = __webpack_require__(42);
-var generateUID = __webpack_require__(34);
-
-module.exports = BaseTrackModel;
-
-// @param {String} name
-// @param {Object} source
-function BaseTrackModel(id, data){
-    this.isDeleted = false;
-    this.id = id || -generateUID();
-    this.length = data.length || 1;
-    this.setting = data.setting || {}; // this
-    this.instrument = data.instrument || "synth";
-    this.playSetting = data["play-setting"] || [];
-    this.playObjects = [];
-
-    this.trackObject = this._generate();
-    this.postSettings = new PostSettings(data["post-setting"]);
-
-    this.createPlayObjects();
-}
-
-BaseTrackModel.prototype.createFormData = function(){
-    var formData = new FormData();
-    formData.append("user_audio", toBlob(this.trackObject), this.name);
-    formData.append("postProcessSettings", JSON.stringify(this.postProcessSettings));
-    return formData;
-};
-
-BaseTrackModel.prototype.getContext = function(){
-    return this.trackObject.context._context;
-};
-
-BaseTrackModel.prototype.getConstants = function(){
-    return this.trackObject.context;
-};
-
-BaseTrackModel.prototype.getAudioBuffer = function(){
-
-};
-
-BaseTrackModel.prototype.getFrequency = function(){
-    return this.trackObject.frequency.value;
-};
-
-BaseTrackModel.prototype.getVolume = function(){
-    return this.trackObject.volume.value;
-};
-
-BaseTrackModel.prototype.getType = function(){
-    return this.trackObject.oscillator.type;
-};
-
-BaseTrackModel.prototype.getAttack = function(){
-    return this.trackObject.envelope.attack;
-};
-
-BaseTrackModel.prototype.getDecay = function(){
-    return this.trackObject.envelope.decay;
-};
-
-BaseTrackModel.prototype.getSustain = function(){
-    return this.trackObject.envelope.sustain;
-};
-
-BaseTrackModel.prototype.getRelease = function(){
-    return this.trackObject.envelope.release;
-};
-
-/**
- * Return object of track setting in right format for transfer or saving
- * @returns {{}}
- */
-BaseTrackModel.prototype.getData = function(){
-    var result = {};
-    result.id = this.id;
-    result.isDeleted = this.isDeleted;
-    result.instrument = this.instrument;
-    result.length = this.length;
-    result.setting = this.setting;
-    result["play-setting"] = this.playSetting;
-    result["post-setting"] = this.postSettings.getPostSettings();
-    return result;
-};
-
-BaseTrackModel.prototype.toJson = function(){
-    return JSON.stringify(this);
-};
-
-BaseTrackModel.prototype.setFrequency = function(value){
-    this.trackObject.frequency.value = value;
-};
-
-BaseTrackModel.prototype.setVolume = function(value){
-    this.trackObject.volume.value = value;
-};
-
-BaseTrackModel.prototype.setType = function(value){
-    this.trackObject.oscillator.type = value;
-};
-
-BaseTrackModel.prototype.setAttack = function(value){
-    this.trackObject.envelope.attack = value;
-};
-
-BaseTrackModel.prototype.setDecay = function(value){
-    this.trackObject.envelope.decay = value;
-};
-
-BaseTrackModel.prototype.setSustain = function(value){
-    this.trackObject.envelope.sustain = value;
-};
-
-BaseTrackModel.prototype.setRelease = function(value){
-    this.trackObject.envelope.release = value;
-};
-
-// CALL THIS BEFORE SAVE ON SERVER !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-/**
- * Update or create oscillator && envelope data
- */
-BaseTrackModel.prototype.setSetting = function(){
-    if(this.trackObject){
-        if(this.setting.oscillator === undefined){
-            this.setting.oscillator = {};
-        }
-        if(this.setting.envelope === undefined){
-            this.setting.envelope = {};
-        }
-        this.setting.oscillator.valume = this.getVolume();
-        this.setting.oscillator.frequency = this.getFrequency();
-        this.setting.oscillator.type = this.getType();
-        this.setting.envelope.attack = this.getAttack();
-        this.setting.envelope.decay = this.getDecay();
-        this.setting.envelope.sustain = this.getSustain();
-        this.setting.envelope.release = this.getRelease();
-    }
-};
-
-/**
- * Set data to play setting list from play setting object
- */
-BaseTrackModel.prototype.setPlaySettings = function(){
-    var i;
-    this.playSetting.length = 0; // clear previous play setting data
-    for(i = 0; i < this.playObjects.length; ++i){
-        this.playSetting.push(this.playObjects[i].getData());
-    }
-};
-
-BaseTrackModel.prototype.emptyPlaySetting = function(){
-    this.playSetting.length = 0;
-    this.playObjects.length = 0;
-};
-
-/**
- * @param {Object} source
- * @type {null}
- * @protected
- * @return {Tone}
- */
-BaseTrackModel.prototype._generate = null;
-
-BaseTrackModel.prototype.createPlayObjects = null;
-
-/**
- * @param {Object} options
- * @type {null}
- */
-BaseTrackModel.prototype.play = null;
-
-BaseTrackModel.prototype.record = null;
-
-BaseTrackModel.prototype.playKeyNow = null;
-
-
-/***/ }),
-/* 19 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1479,13 +1622,146 @@ BaseTrackSetting.prototype.toString = function(){
 
 
 /***/ }),
-/* 20 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var capitalize = __webpack_require__(56);
+module.exports = PianoKeyPlayer;
+
+/**
+ * @param piano - Tone.Synth
+ * @param note - String
+ * @param triggerAttackTime
+ * @param triggerReleaseTime
+ * @constructor
+ */
+function PianoKeyPlayer(piano, note, triggerAttackTime, triggerReleaseTime){
+    this.piano = piano;
+    this.note = note;
+    this.triggerAttackTime = triggerAttackTime || 0; // milliseconds
+    this.triggerReleaseTime = triggerReleaseTime || 0; // milliseconds
+}
+
+PianoKeyPlayer.prototype.play = function(){
+    // convert to seconds:
+    var start = this.triggerAttackTime / 1000;
+    var duration = (this.triggerReleaseTime - this.triggerAttackTime) / 1000;
+    this.piano.triggerAttackRelease(this.note, duration, "+" + start);
+};
+
+PianoKeyPlayer.prototype.getData = function(){
+    var result = {};
+    result.note = this.note;
+    result.triggerAttackTime = this.triggerAttackTime;
+    result.triggerReleaseTime = this.triggerReleaseTime;
+    return result;
+};
+
+
+/***/ }),
+/* 23 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var ObservableList = __webpack_require__(15);
+var inherit = __webpack_require__(0);
+var TrackSynthesizer = __webpack_require__(48);
+var TrackNoise = __webpack_require__(47);
+var TrackOscillator = __webpack_require__(72);
+var commonEventNames = __webpack_require__(3);
+
+module.exports = ProjectModel;
+
+/**
+ * @param project - object
+ * @constructor
+ */
+function ProjectModel(project) {
+    ObservableList.call(this);
+    this.name = project.name;
+    this.id = project.id;
+    this.isDeleted = false;
+    this.__activeTrack = null;
+}
+
+inherit(ProjectModel, ObservableList);
+
+ProjectModel.prototype.getActiveTrack = function(){
+    return this.__activeTrack;
+};
+
+ProjectModel.prototype.setActiveTrack = function(track){
+    this.__activeTrack = track;
+};
+
+ProjectModel.prototype.clearActiveTrack = function(){
+    this.__activeTrack = null;
+};
+
+/**
+ * @param source = object - wait {id, data}
+ */
+ProjectModel.prototype.add = function(source){
+    var data = (source.data && typeof source.data === "object") ? source.data : {};
+    var track;
+    switch (data.instrument){
+        case "synth":
+            track = new TrackSynthesizer(source.id, data);
+            break;
+        case "oscillator":
+            track = new TrackOscillator(source.id, data);
+            break;
+        case "noise":
+            track = new TrackNoise(source.id, data);
+            break;
+        default:
+            track = new TrackSynthesizer(source.id, data);
+    }
+    ObservableList.prototype.add.call(this, track);
+};
+
+ProjectModel.prototype.remove = function(index){
+    if(index >= 0 && index < this.size()){
+        this.at(index).isDeleted = true;
+        this.observer.notify(commonEventNames.E_ITEM_REMOVED, index);
+        // leave item in model for case of some changes and send full model for saving on server
+    }
+};
+
+ProjectModel.prototype.isEmpty = function(){
+    return this.name.length && this.id === 0 && this.__data.length;
+};
+
+ProjectModel.prototype.getData = function(){
+    var i;
+    var data = [];
+    var result = {};
+    result.id = this.id;
+    result.name = this.name;
+    for(i = 0; i < this.size(); ++i){
+        data.push(this.__data[i].getData());
+    }
+    result.data = data;
+    return result;
+};
+
+ProjectModel.prototype.toJson = function(){
+    return JSON.stringify(this.getData());
+};
+
+
+/***/ }),
+/* 24 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var capitalize = __webpack_require__(57);
 
 module.exports = {
     "updateSettingListFromTrack": function(settingList, track){ // SettingList OR FilterList
@@ -1506,6 +1782,9 @@ module.exports = {
     },
     "resetFilters": function(filterList){
         setFilterListToDefault(filterList);
+    },
+    "resetSettings": function(settingList){
+        setSettingListToDefault(settingList);
     }
 };
 
@@ -1607,6 +1886,17 @@ function setFilterListToDefault(filterList) {
     }
 }
 
+function setSettingListToDefault(settingList) {
+    var i;
+    var tokenFilter;
+    var list = settingList.list;
+    for (i = 0; i < list.length; ++i) {
+        tokenFilter = list[i];
+        tokenFilter.isEnabled = false;
+        tokenFilter.reset();
+    }
+}
+
 /**
  * Get data from track object and put them to SettingList
  * @param listElement
@@ -1615,7 +1905,12 @@ function setFilterListToDefault(filterList) {
  */
 function setToSettingList(listElement, trackObject, optionName){
     var methodName = "get" + capitalize(optionName);
-    listElement.set(trackObject[methodName]());
+    console.log(methodName);
+    console.log(methodName in trackObject);
+    if(methodName in trackObject){
+        listElement.isEnabled = true;
+        listElement.set(trackObject[methodName]());
+    }
 }
 
 function setToTrackSetting(track, settingName, value){
@@ -1626,7 +1921,7 @@ function setToTrackSetting(track, settingName, value){
 
 
 /***/ }),
-/* 21 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1658,143 +1953,17 @@ TrackSettingsSet.prototype.set = function(optionName, value){
 
 
 /***/ }),
-/* 22 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var toWav = __webpack_require__(31);
-
-module.exports = {
-    "getAudioContextBuffer": getAudioContextBuffer,
-    "merge": merge,
-    "BlobToArrayBuffer": BlobToArrayBuffer,
-    "AudioBufferToBlob": AudioBufferToBlob,
-    "AudioContextToBlob": AudioContextToBlob
-};
-
-// return AudioBuffer
-function getAudioContextBuffer(context){
-    var contextConstants = context._constants; // replace on set method
-    var audioBufferSourceNode = contextConstants[1];
-    var buffer = audioBufferSourceNode.buffer;
-    return buffer;
-}
-
-function merge(context, buffer1, buffer2){
-    // add comparison channel numbers
-    var i, data;
-    var newLength = buffer1.length + buffer2.length;
-    var track = context.createBuffer(buffer1.numberOfChannels, newLength, buffer1.sampleRate);
-    for(i = 0; i < track.numberOfChannels; ++i){
-        data = track.getChannelData(i);
-        data.set(buffer1.getChannelData(i));
-        data.set(buffer2.getChannelData(i), buffer1.length);
-    }
-    return track;
-}
-
-function BlobToArrayBuffer(blob, callback){
-    var arrayBuffer;
-    var reader = new FileReader();
-    reader.onload = function(){
-        arrayBuffer = reader.result;
-        callback(arrayBuffer);
-    };
-    reader.readAsArrayBuffer(blob);
-}
-
-function AudioBufferToBlob(audioBuffer){
-    var buffer = toWav(audioBuffer, {float32: true});
-    console.log("+");
-    console.log(buffer);
-    var blob = new Blob([buffer], {"type": "audio/x-wav"});
-
-    console.log("+");
-    console.log(blob);
-    return blob;
-}
-
-function AudioContextToBlob(audioContext){
-    var buffer = getAudioContextBuffer(audioContext);
-    var blob = AudioBufferToBlob(buffer);
-    return blob;
-}
-
-
-/***/ }),
-/* 23 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var AudioHelper = __webpack_require__(22);
-
-module.exports = TrackManager;
-
-function TrackManager(){}
-
-// get array with Tone.Synth
-TrackManager.mergeTracks = function(trackList){
-    var i;
-    var nextIndex;
-    var currentBuffer;
-    var nextBuffer;
-    var nextTrackContext;
-    var currentTrack = trackList[0];
-    var currentTrackContext = currentTrack._context;
-    currentBuffer = AudioHelper.getAudioContextBuffer(currentTrackContext);
-	for(i = 0; i < trackList.length; ++i){
-	    nextIndex = i + 1;
-	    if(nextIndex !== trackList.length){
-	        nextTrackContext = trackList[nextIndex]._context;
-            nextBuffer = AudioHelper.getAudioContextBuffer(nextTrackContext);
-            // put new AudioBuffer where created from merging of past tracks
-            currentBuffer = AudioHelper.merge(currentTrackContext, currentBuffer, nextBuffer);
-        }
-	}
-	return currentBuffer;
-};
-
-TrackManager.save = (function(){
-    var a = document.createElement("a");
-    document.body.appendChild(a);
-    a.style = "display: none";
-    return function(data, fileName){
-        if(fileName === undefined){
-            fileName = "test.wav";
-        }
-        var blob;
-        var buffer;
-        if(data instanceof AudioBuffer){
-            blob = AudioHelper.AudioBufferToBlob(data);
-        } else{
-            buffer = AudioHelper.getAudioContextBuffer(data.context);
-            blob = new Blob([buffer], {"type": "audio/x-wav"});
-        }
-        var url = window.URL.createObjectURL(blob);
-        a.href = url;
-        a.download = fileName;
-        a.click();
-        window.URL.revokeObjectURL(url);
-    };
-}());
-
-
-/***/ }),
-/* 24 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var TabSegment = __webpack_require__(65);
+var TabSegment = __webpack_require__(66);
 var BaseRange = __webpack_require__(13);
 var BaseOptionList = __webpack_require__(12);
-var Factory = __webpack_require__(3);
+var Factory = __webpack_require__(2);
 
 module.exports = ToolView;
 
@@ -1813,6 +1982,8 @@ ToolView.prototype._build = function(){
     this.getContainer().append(this.table);
 };
 
+ToolView.prototype.resetToolOptions = null;
+
 ToolView.prototype.setEvent = function(){};
 
 ToolView.prototype.createElement = function(className, name, value){
@@ -1829,7 +2000,7 @@ ToolView.prototype.createElement = function(className, name, value){
 
 
 /***/ }),
-/* 25 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1873,7 +2044,7 @@ ProjectController.prototype.removeById = function(id){
 
 
 /***/ }),
-/* 26 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1917,7 +2088,7 @@ ProjectListController.prototype._removeHandler = function(id){
 
 
 /***/ }),
-/* 27 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1925,7 +2096,7 @@ ProjectListController.prototype._removeHandler = function(id){
 
 var ListController = __webpack_require__(11);
 var inherit = __webpack_require__(0);
-var commonEventNames = __webpack_require__(1);
+var commonEventNames = __webpack_require__(3);
 
 module.exports = TrackController;
 
@@ -1947,15 +2118,15 @@ TrackController.prototype.sendTrack = function(){
 
 
 /***/ }),
-/* 28 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 //var audioBufferUtils = require("audio-buffer-utils");
-var AudioHelper = __webpack_require__(22);
-var TrackManager = __webpack_require__(23);
+var AudioHelper = __webpack_require__(16);
+var TrackManager = __webpack_require__(17);
 
 var sounds = [];
 
@@ -2018,14 +2189,14 @@ function toAudioBuffer(blob, getAudioBuffer){
 
 
 /***/ }),
-/* 29 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var ObservableList = __webpack_require__(14);
-var ProjectModel = __webpack_require__(43);
+var ObservableList = __webpack_require__(15);
+var ProjectModel = __webpack_require__(23);
 var inherit = __webpack_require__(0);
 
 module.exports = ProjectListModel;
@@ -2064,21 +2235,21 @@ ProjectListModel.prototype.clearActiveProject = function(){
 
 
 /***/ }),
-/* 30 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var BaseView = __webpack_require__(2);
-var MessageModal = __webpack_require__(61);
+var BaseView = __webpack_require__(1);
+var MessageModal = __webpack_require__(62);
 var ProjectListView = __webpack_require__(8);
 var TrackListView = __webpack_require__(9);
 var TrackView = __webpack_require__(10);
-var MenuBar = __webpack_require__(60);
+var MenuBar = __webpack_require__(61);
 var windowsTransport = __webpack_require__(4);
-var commonEventNames = __webpack_require__(1);
+var commonEventNames = __webpack_require__(3);
 
 module.exports = WindowManager;
 
@@ -2197,7 +2368,7 @@ WindowManager.prototype.setActiveWindow = function(newActiveWindow){
 
 
 /***/ }),
-/* 31 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2300,23 +2471,23 @@ function writeString (view, offset, string) {
 
 
 /***/ }),
-/* 32 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var merger_test = __webpack_require__(28);
+var merger_test = __webpack_require__(30);
 
-var WindowManager = __webpack_require__(30);
+var WindowManager = __webpack_require__(32);
 var ProjectListView = __webpack_require__(8);
 var TrackListView = __webpack_require__(9);
 
-var ProjectListController = __webpack_require__(26);
-var ProjectController = __webpack_require__(25);
-var TrackController = __webpack_require__(27);
+var ProjectListController = __webpack_require__(28);
+var ProjectController = __webpack_require__(27);
+var TrackController = __webpack_require__(29);
 
-var ProjectListModel = __webpack_require__(29);
+var ProjectListModel = __webpack_require__(31);
 
 var TrackView = __webpack_require__(10);
 
@@ -2356,7 +2527,7 @@ projectListController.fetchData();
 
 
 /***/ }),
-/* 33 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2396,8 +2567,9 @@ BaseController.prototype._fetchDataHandler = function(result){
 
 BaseController.prototype._addHandler = function(result){
     var model = this.model;
+    console.log(result);
     if (result instanceof Error){
-        // Oh no..
+        model.add(result);
     } else {
         model.add(result);
     }
@@ -2428,7 +2600,7 @@ BaseController.prototype.remove = null;
 
 
 /***/ }),
-/* 34 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2442,7 +2614,82 @@ module.exports = function(){
 
 
 /***/ }),
-/* 35 */
+/* 37 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var TrackManager = __webpack_require__(17);
+var BaseTrackModel = __webpack_require__(14);
+var ProjectModel = __webpack_require__(23);
+
+module.exports = AudioPlayer;
+
+function AudioPlayer(model){
+    this.model = null;
+    this.player = [];
+
+    this.setModel(model);
+}
+
+AudioPlayer.prototype.setModel = function(model){
+    if(model){
+        this.model = model;
+        if(this.model instanceof ProjectModel){
+            // merge before play
+            this._fullPlayerWithProject();
+        } else if(this.model instanceof BaseTrackModel){
+            this.player = this.model.playObjects;
+        }
+    }
+};
+
+AudioPlayer.prototype.play = function(){
+    var i;
+    for(i = 0; i < this.player.length; ++i){
+        this.player[i].play();
+    }
+};
+
+AudioPlayer.prototype._fullPlayerWithProject = function(){
+
+};
+
+AudioPlayer.prototype._fullPlayerWithTrack = function(){
+
+};
+
+AudioPlayer.prototype.pause = function(){};
+
+AudioPlayer.prototype.stop = function(){};
+
+/*AudioPlayer.prototype.save = function(fileName){
+    var resultAudioBuffer;
+    if(this.trackList.length === 1){
+        resultAudioBuffer = this.trackList[0];
+    } else if(this.trackList.length > 1){
+        resultAudioBuffer = TrackManager.mergeTracks(this.trackList);
+    }
+    TrackManager.save(resultAudioBuffer, fileName);
+    // call request of saving Project !!!!
+};
+
+AudioPlayer.prototype.export = function(){
+    // save Sound
+};
+
+function _trackDataToTrack(audioPlayerObject){
+    var i;
+    var trackData = audioPlayerObject.model.trackDataList;
+    for(i=0; i < trackData.length; ++i){
+
+    }
+}*/
+
+
+/***/ }),
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2494,7 +2741,7 @@ BaseModel.prototype.remove = null;
 
 
 /***/ }),
-/* 36 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2517,7 +2764,7 @@ BaseNote.prototype.setValue = function(value){
 
 
 /***/ }),
-/* 37 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2526,7 +2773,7 @@ BaseNote.prototype.setValue = function(value){
 //CrusherFilter
 
 var inherit = __webpack_require__(0);
-var BaseFilterModel = __webpack_require__(16);
+var BaseFilterModel = __webpack_require__(19);
 
 module.exports = CrusherFilter;
 
@@ -2568,7 +2815,7 @@ CrusherFilter.prototype.setByName = function(optionName, value){
 
 
 /***/ }),
-/* 38 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2576,8 +2823,8 @@ CrusherFilter.prototype.setByName = function(optionName, value){
 
 var BaseOptionList = __webpack_require__(12);
 var BaseRange = __webpack_require__(13);
-var BaseTrackSetting = __webpack_require__(19);
-var TrackSettingsSet = __webpack_require__(21);
+var BaseTrackSetting = __webpack_require__(21);
+var TrackSettingsSet = __webpack_require__(25);
 
 module.exports = new TrackSettingsSet([
     new BaseTrackSetting("tremolo", false, {
@@ -2618,14 +2865,14 @@ module.exports = new TrackSettingsSet([
 
 
 /***/ }),
-/* 39 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var BaseFilterModel = __webpack_require__(16);
+var BaseFilterModel = __webpack_require__(19);
 
 module.exports = FreeverbFilter;
 
@@ -2693,13 +2940,13 @@ FreeverbFilter.prototype.setByName = function(optionName, value){
 
 
 /***/ }),
-/* 40 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var PianoNote = __webpack_require__(41);
+var PianoNote = __webpack_require__(44);
 
 module.exports = new PianoModel;
 
@@ -2825,14 +3072,14 @@ PianoModel.prototype.shift = function(shiftIndex){
 
 
 /***/ }),
-/* 41 */
+/* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var BaseNote = __webpack_require__(36);
+var BaseNote = __webpack_require__(39);
 
 module.exports = PianoNote;
 
@@ -2858,14 +3105,14 @@ PianoNote.prototype.setValueFromAdditional = function(index){
 
 
 /***/ }),
-/* 42 */
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var FreeverbFilter = __webpack_require__(39);
-var CrusherFilter = __webpack_require__(37);
+var FreeverbFilter = __webpack_require__(42);
+var CrusherFilter = __webpack_require__(40);
 
 module.exports = PostSettings;
 
@@ -3007,97 +3254,7 @@ PostSettings.prototype.setValueToFilter = function(filterName, optionName, value
 
 
 /***/ }),
-/* 43 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var ObservableList = __webpack_require__(14);
-var inherit = __webpack_require__(0);
-var TrackSynthesizer = __webpack_require__(46);
-var TrackNoise = __webpack_require__(45);
-var commonEventNames = __webpack_require__(1);
-
-module.exports = ProjectModel;
-
-/**
- * @param project - object
- * @constructor
- */
-function ProjectModel(project) {
-    ObservableList.call(this);
-    this.name = project.name;
-    this.id = project.id;
-    this.isDeleted = false;
-    this.__activeTrack = null;
-}
-
-inherit(ProjectModel, ObservableList);
-
-ProjectModel.prototype.getActiveTrack = function(){
-    return this.__activeTrack;
-};
-
-ProjectModel.prototype.setActiveTrack = function(track){
-    this.__activeTrack = track;
-};
-
-ProjectModel.prototype.clearActiveTrack = function(){
-    this.__activeTrack = null;
-};
-
-/**
- * @param source = object - wait {id, data}
- */
-ProjectModel.prototype.add = function(source){
-    var data = (source.data && typeof source.data === "object") ? source.data : {};
-    var track;
-    switch (data.instrument){
-        case "synth":
-            track = new TrackSynthesizer(source.id, data);
-            break;
-        case "noise":
-            track = new TrackNoise(source.id, data);
-            break;
-        default:
-            track = new TrackSynthesizer(source.id, data);
-    }
-    ObservableList.prototype.add.call(this, track);
-};
-
-ProjectModel.prototype.remove = function(index){
-    if(index >= 0 && index < this.size()){
-        this.at(index).isDeleted = true;
-        this.observer.notify(commonEventNames.E_ITEM_REMOVED, index);
-        // leave item in model for case of some changes and send full model for saving on server
-    }
-};
-
-ProjectModel.prototype.isEmpty = function(){
-    return this.name.length && this.id === 0 && this.__data.length;
-};
-
-ProjectModel.prototype.getData = function(){
-    var i;
-    var data = [];
-    var result = {};
-    result.id = this.id;
-    result.name = this.name;
-    for(i = 0; i < this.size(); ++i){
-        data.push(this.__data[i].getData());
-    }
-    result.data = data;
-    return result;
-};
-
-ProjectModel.prototype.toJson = function(){
-    return JSON.stringify(this.getData());
-};
-
-
-/***/ }),
-/* 44 */
+/* 46 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3105,11 +3262,11 @@ ProjectModel.prototype.toJson = function(){
 
 var BaseOptionList = __webpack_require__(12);
 var BaseRange = __webpack_require__(13);
-var BaseTrackSetting = __webpack_require__(19);
-var TrackSettingsSet = __webpack_require__(21);
+var BaseTrackSetting = __webpack_require__(21);
+var TrackSettingsSet = __webpack_require__(25);
 
 module.exports = new TrackSettingsSet([
-    new BaseTrackSetting("type", true, {
+    new BaseTrackSetting("type", false, {
         "value": new BaseOptionList({
             "sine": 1,
             "square": 2,
@@ -3117,35 +3274,35 @@ module.exports = new TrackSettingsSet([
             "sawtooth": 4
         }, 1)
     }),
-    new BaseTrackSetting("volume", true, {
+    new BaseTrackSetting("volume", false, {
         "value": new BaseRange(0, -50, 50, 0.5)
     }),
-    new BaseTrackSetting("frequency", true, {
+    new BaseTrackSetting("frequency", false, {
         "value": new BaseRange(440, 0, 1000, 1)
     }),
-    new BaseTrackSetting("attack", true, {
+    new BaseTrackSetting("attack", false, {
         "value": new BaseRange(0, 0, 1, 0.001)
     }),
-    new BaseTrackSetting("decay", true, {
+    new BaseTrackSetting("decay", false, {
         "value": new BaseRange(0, 0, 1, 0.001)
     }),
-    new BaseTrackSetting("sustain", true, {
+    new BaseTrackSetting("sustain", false, {
         "value": new BaseRange(0, 0, 1, 0.001)
     }),
-    new BaseTrackSetting("release", true, {
+    new BaseTrackSetting("release", false, {
         "value": new BaseRange(0, 0, 1, 0.001)
     })
 ]);
 
 
 /***/ }),
-/* 45 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var BaseTrackModel = __webpack_require__(18);
+var BaseTrackModel = __webpack_require__(14);
 var inherit = __webpack_require__(0);
 
 module.exports = TrackNoise;
@@ -3168,14 +3325,14 @@ TrackNoise.prototype.play = function(options){
 
 
 /***/ }),
-/* 46 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var BaseTrackModel = __webpack_require__(18);
-var PianoKeyPlayer = __webpack_require__(70);
+var BaseTrackModel = __webpack_require__(14);
+var PianoKeyPlayer = __webpack_require__(22);
 var inherit = __webpack_require__(0);
 
 module.exports = TrackSynthesizer;
@@ -3187,6 +3344,64 @@ function TrackSynthesizer(id, data){
 }
 
 inherit(TrackSynthesizer, BaseTrackModel);
+
+TrackSynthesizer.prototype.getType = function(){
+    return this.trackObject.oscillator.type;
+};
+
+TrackSynthesizer.prototype.getAttack = function(){
+    return this.trackObject.envelope.attack;
+};
+
+TrackSynthesizer.prototype.getDecay = function(){
+    return this.trackObject.envelope.decay;
+};
+
+TrackSynthesizer.prototype.getSustain = function(){
+    return this.trackObject.envelope.sustain;
+};
+
+TrackSynthesizer.prototype.getRelease = function(){
+    return this.trackObject.envelope.release;
+};
+
+TrackSynthesizer.prototype.setType = function(value){
+    this.trackObject.oscillator.type = value;
+};
+
+TrackSynthesizer.prototype.setAttack = function(value){
+    this.trackObject.envelope.attack = value;
+};
+
+TrackSynthesizer.prototype.setDecay = function(value){
+    this.trackObject.envelope.decay = value;
+};
+
+TrackSynthesizer.prototype.setSustain = function(value){
+    this.trackObject.envelope.sustain = value;
+};
+
+TrackSynthesizer.prototype.setRelease = function(value){
+    this.trackObject.envelope.release = value;
+};
+
+TrackSynthesizer.prototype.setSetting = function(){
+    if(this.trackObject){
+        if(this.setting.oscillator === undefined){
+            this.setting.oscillator = {};
+        }
+        if(this.setting.envelope === undefined){
+            this.setting.envelope = {};
+        }
+        this.setting.oscillator.valume = this.getVolume();
+        this.setting.oscillator.frequency = this.getFrequency();
+        this.setting.oscillator.type = this.getType();
+        this.setting.envelope.attack = this.getAttack();
+        this.setting.envelope.decay = this.getDecay();
+        this.setting.envelope.sustain = this.getSustain();
+        this.setting.envelope.release = this.getRelease();
+    }
+};
 
 TrackSynthesizer.prototype._generate = function(){
     return new Tone.Synth(this.setting).toMaster(); //{"oscillator": {}, "envelope": {}}
@@ -3235,7 +3450,7 @@ TrackSynthesizer.prototype.saveTest = function(callback){
 
 
 /***/ }),
-/* 47 */
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3259,7 +3474,7 @@ module.exports = function(url, data, dataType, callback){
 
 
 /***/ }),
-/* 48 */
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3284,30 +3499,6 @@ module.exports = function(url, formData){
 
 
 /***/ }),
-/* 49 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var baseRequest = __webpack_require__(5);
-
-module.exports = baseRequest.bind(null, "POST", "json");
-
-
-/***/ }),
-/* 50 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var baseRequest = __webpack_require__(5);
-
-module.exports = baseRequest.bind(null, "POST", "json");
-
-
-/***/ }),
 /* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -3316,7 +3507,7 @@ module.exports = baseRequest.bind(null, "POST", "json");
 
 var baseRequest = __webpack_require__(5);
 
-module.exports = baseRequest.bind(null, "GET", "json");
+module.exports = baseRequest.bind(null, "POST", "json");
 
 
 /***/ }),
@@ -3328,7 +3519,7 @@ module.exports = baseRequest.bind(null, "GET", "json");
 
 var baseRequest = __webpack_require__(5);
 
-module.exports = baseRequest.bind(null, "GET", "binary");
+module.exports = baseRequest.bind(null, "POST", "json");
 
 
 /***/ }),
@@ -3340,7 +3531,7 @@ module.exports = baseRequest.bind(null, "GET", "binary");
 
 var baseRequest = __webpack_require__(5);
 
-module.exports = baseRequest.bind(null, "GET", "json", "user/");
+module.exports = baseRequest.bind(null, "GET", "json");
 
 
 /***/ }),
@@ -3352,12 +3543,35 @@ module.exports = baseRequest.bind(null, "GET", "json", "user/");
 
 var baseRequest = __webpack_require__(5);
 
+module.exports = baseRequest.bind(null, "GET", "binary");
+
+
+/***/ }),
+/* 55 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var baseRequest = __webpack_require__(5);
+
+module.exports = baseRequest.bind(null, "GET", "json", "user/");
+
+
+/***/ }),
+/* 56 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var baseRequest = __webpack_require__(5);
+
 module.exports = baseRequest.bind(null, "GET", "json", "projects/");
 
 
 /***/ }),
-/* 55 */,
-/* 56 */
+/* 57 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3369,7 +3583,7 @@ module.exports = function capitalize(str){
 
 
 /***/ }),
-/* 57 */
+/* 58 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3397,17 +3611,17 @@ function fetch(url, resolve){
 
 
 /***/ }),
-/* 58 */
+/* 59 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var ToolView = __webpack_require__(24);
-var FiltersList = __webpack_require__(38);
-var ProxyTrackManager = __webpack_require__(20);
-var Factory = __webpack_require__(3);
+var ToolView = __webpack_require__(26);
+var FiltersList = __webpack_require__(41);
+var ProxyTrackManager = __webpack_require__(24);
+var Factory = __webpack_require__(2);
 
 module.exports = FilterView;
 
@@ -3425,7 +3639,7 @@ function FilterView(track){
 
 inherit(FilterView, ToolView);
 
-FilterView.prototype.resetFilters = function(){
+FilterView.prototype.resetToolOptions = function(){
     ProxyTrackManager.resetFilters(FiltersList);
 };
 
@@ -3541,22 +3755,28 @@ function uncheckEvent(filterName, isChecked){
 
 
 /***/ }),
-/* 59 */
+/* 60 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var BaseView = __webpack_require__(2);
-var Piano = __webpack_require__(62);
+var BaseView = __webpack_require__(1);
+var Piano = __webpack_require__(63);
+var Oscillator = __webpack_require__(73);
+var Factory = __webpack_require__(2);
 
 module.exports = InstrumentView;
 
 function InstrumentView(track){
     BaseView.call(this, "instrument-view");
     this.track = track;
+
     this.instrument = null;
+    this.recordButton = Factory.createButton("record", "record");
+    this.cleardButton = Factory.createButton("clear", "clear");
+
     this.setInstrument();
 
     this._build();
@@ -3565,8 +3785,19 @@ function InstrumentView(track){
 inherit(InstrumentView, BaseView);
 
 InstrumentView.prototype._build = function(){
+    var self = this;
     var container = this.getContainer();
 
+    this.recordButton.on("click", function(){
+        self.instrument.recordEvent($(this));
+    });
+
+    this.cleardButton.on("click", function(){
+        self.instrument.clearEvent();
+    });
+
+    container.append(this.recordButton);
+    container.append(this.cleardButton);
     container.append(this.instrument.getContainer());
 };
 
@@ -3576,27 +3807,28 @@ InstrumentView.prototype.setInstrument = function(){
             this.instrument = new Piano(this.track);
             break;
         case "oscillator":
+            this.instrument = new Oscillator(this.track);
             break;
     }
 };
 
 
 /***/ }),
-/* 60 */
+/* 61 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var BaseView = __webpack_require__(2);
-var UserInfoBar = __webpack_require__(67);
+var BaseView = __webpack_require__(1);
+var UserInfoBar = __webpack_require__(68);
 var TrackView = __webpack_require__(10);
 var TrackListView = __webpack_require__(9);
 var ProjectListView = __webpack_require__(8);
-var PlayerView = __webpack_require__(63);
-var Factory = __webpack_require__(3);
-var commonEventNames = __webpack_require__(1);
+var PlayerView = __webpack_require__(64);
+var Factory = __webpack_require__(2);
+var commonEventNames = __webpack_require__(3);
 var windowsTransport = __webpack_require__(4);
 
 module.exports = MenuBar;
@@ -3645,17 +3877,17 @@ MenuBar.prototype.adaptToActiveWindow = function(newWindow){
 
 
 /***/ }),
-/* 61 */
+/* 62 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var BaseView = __webpack_require__(2);
-var Factory = __webpack_require__(3);
+var BaseView = __webpack_require__(1);
+var Factory = __webpack_require__(2);
 var Observer = __webpack_require__(7);
-var commonEventNames = __webpack_require__(1);
+var commonEventNames = __webpack_require__(3);
 
 module.exports = MessageModal;
 
@@ -3709,17 +3941,17 @@ MessageModal.prototype.hide = function(){
 
 
 /***/ }),
-/* 62 */
+/* 63 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var PianoKeyPlayer = __webpack_require__(70);
-var BaseView = __webpack_require__(2);
-var PianoModel = __webpack_require__(40);
-var Factory = __webpack_require__(3);
+var PianoKeyPlayer = __webpack_require__(22);
+var BaseView = __webpack_require__(1);
+var PianoModel = __webpack_require__(43);
+var Factory = __webpack_require__(2);
 
 module.exports = Piano;
 
@@ -3737,9 +3969,6 @@ function Piano(track){
     this.piano = $("<div class='keys'>");
     this.octaveRange = Factory.dropDownElement("octave-range", "octave-range", {"C1-B3": 0, "C4-B6": 1},
                                                 this._dropDownEvent.bind(this));
-    this.recordButton = Factory.createButton("record", "record");
-    this.cleardButton = Factory.createButton("reset-record", "reset record");
-    this.cleardButton = Factory.createButton("clear", "clear");
     this._build();
 }
 
@@ -3762,27 +3991,25 @@ Piano.prototype._build = function(){
         }
     });*/
 
-    this.recordButton.on("click", function(){
-        if(self.isRecordNow === true){
-            // stop record
-            self.recordButton.text("record");
-            self.isRecordNow = false;
-            console.log(self.track.playObjects);
-        } else{
-            self.isRecordNow = true;
-            self.track.emptyPlaySetting(); // clear previous play data setting
-            self.recordButton.text("stop");
-        }
-    });
-
-    this.cleardButton.on("click", function(){
-        self.track.emptyPlaySetting();
-    });
-
     container.append(this.piano);
     container.append(this.octaveRange);
-    container.append(this.recordButton);
-    container.append(this.cleardButton);
+};
+
+Piano.prototype.recordEvent = function(recordButton){
+    if(this.isRecordNow === true){
+        // stop record
+        recordButton.text("record");
+        this.isRecordNow = false;
+        console.log(this.track.playObjects);
+    } else{
+        this.isRecordNow = true;
+        this.track.emptyPlaySetting(); // clear previous play data setting
+        recordButton.text("stop");
+    }
+};
+
+Piano.prototype.clearEvent = function(){
+    this.track.emptyPlaySetting();
 };
 
 Piano.prototype._dropDownEvent = function(id, text, dataValue){
@@ -3893,16 +4120,16 @@ Piano.prototype.keyUp = function(){
 
 
 /***/ }),
-/* 63 */
+/* 64 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var Factory = __webpack_require__(3);
-var BaseView = __webpack_require__(2);
-var AudioPlayer = __webpack_require__(71);
+var Factory = __webpack_require__(2);
+var BaseView = __webpack_require__(1);
+var AudioPlayer = __webpack_require__(37);
 
 module.exports = PlayerView;
 
@@ -3938,17 +4165,16 @@ PlayerView.prototype._build = function(){
 };
 
 /***/ }),
-/* 64 */
+/* 65 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var ToolView = __webpack_require__(24);
-var SettingsList = __webpack_require__(44);
-var ProxyTrackManager = __webpack_require__(20);
-var Factory = __webpack_require__(3);
+var ToolView = __webpack_require__(26);
+var SettingsList = __webpack_require__(46);
+var ProxyTrackManager = __webpack_require__(24);
 
 module.exports = SettingView;
 
@@ -3970,6 +4196,9 @@ function SettingView(track){
 
 inherit(SettingView, ToolView);
 
+SettingView.prototype.resetToolOptions = function(){
+    ProxyTrackManager.resetSettings(SettingsList);
+};
 
 SettingView.prototype.setTrack = function(track){
     if(track){
@@ -3989,14 +4218,15 @@ SettingView.prototype.createSettingTools = function(){
     var settingName;
     for(i = 0; i < SettingsList.list.length; ++i){
         tokenSetting = SettingsList.list[i];
-        //tokenSetting.reset();
-        options = tokenSetting.options;
-        value = options.value; // BaseOption
-        settingName = tokenSetting.name;
-        $elementName = $("<div class='column'>" + settingName + "</div>");
-        $element = this.createElement("column", settingName, value);
-        this.table.append($elementName);
-        this.table.append($element);
+        if(tokenSetting.isEnabled){
+            options = tokenSetting.options;
+            value = options.value; // BaseOption
+            settingName = tokenSetting.name;
+            $elementName = $("<div class='column'>" + settingName + "</div>");
+            $element = this.createElement("column", settingName, value);
+            this.table.append($elementName);
+            this.table.append($element);
+        }
     }
 };
 
@@ -4007,14 +4237,14 @@ SettingView.prototype.setEvent = function(optionName, value){
 
 
 /***/ }),
-/* 65 */
+/* 66 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var BaseView = __webpack_require__(2);
+var BaseView = __webpack_require__(1);
 
 module.exports = TabSegment;
 
@@ -4032,14 +4262,14 @@ TabSegment.prototype.setActive = function(){
 
 
 /***/ }),
-/* 66 */
+/* 67 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var BaseView = __webpack_require__(2);
+var BaseView = __webpack_require__(1);
 
 module.exports = TrackDataView;
 
@@ -4106,18 +4336,18 @@ TrackDataView.prototype.createWaveForm = function(){
 
 
 /***/ }),
-/* 67 */
+/* 68 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var Factory = __webpack_require__(3);
-var BaseView = __webpack_require__(2);
-var UserModal = __webpack_require__(68);
+var Factory = __webpack_require__(2);
+var BaseView = __webpack_require__(1);
+var UserModal = __webpack_require__(69);
 var RequestManager = __webpack_require__(6);
-var commonEventNames = __webpack_require__(1);
+var commonEventNames = __webpack_require__(3);
 var windowsTransport = __webpack_require__(4);
 
 module.exports = UserInfoBar;
@@ -4166,16 +4396,16 @@ UserInfoBar.prototype.setUserName = function(userName){
 
 
 /***/ }),
-/* 68 */
+/* 69 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var Factory = __webpack_require__(3);
-var BaseView = __webpack_require__(2);
-var commonEventNames = __webpack_require__(1);
+var Factory = __webpack_require__(2);
+var BaseView = __webpack_require__(1);
+var commonEventNames = __webpack_require__(3);
 var windowsTransport = __webpack_require__(4);
 
 module.exports = UserModal;
@@ -4213,42 +4443,53 @@ UserModal.prototype.show = function(){
 
 
 /***/ }),
-/* 69 */,
 /* 70 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-module.exports = PianoKeyPlayer;
+var inherit = __webpack_require__(0);
+var Factory = __webpack_require__(2);
+var BaseView = __webpack_require__(1);
+var RequestManager = __webpack_require__(6);
 
-/**
- * @param piano - Tone.Synth
- * @param note - String
- * @param triggerAttackTime
- * @param triggerReleaseTime
- * @constructor
- */
-function PianoKeyPlayer(piano, note, triggerAttackTime, triggerReleaseTime){
-    this.piano = piano;
-    this.note = note;
-    this.triggerAttackTime = triggerAttackTime || 0; // milliseconds
-    this.triggerReleaseTime = triggerReleaseTime || 0; // milliseconds
+module.exports = WaveForm;
+
+function WaveForm(){
+    BaseView.call(this, "wave-form");
+
+    //$(this.getContainer()).attr("id", "waveform");
+    //this.waveContainer = $("<div id='waveform'></div>");
+
+    this.waveform = null;
+
+    this._build();
 }
 
-PianoKeyPlayer.prototype.play = function(){
-    // convert to seconds:
-    var start = this.triggerAttackTime / 1000;
-    var duration = (this.triggerReleaseTime - this.triggerAttackTime) / 1000;
-    this.piano.triggerAttackRelease(this.note, duration, "+" + start);
+inherit(WaveForm, BaseView);
+
+WaveForm.prototype._build = function(){
+    //this.getContainer().append(this.waveContainer);
 };
 
-PianoKeyPlayer.prototype.getData = function(){
-    var result = {};
-    result.note = this.note;
-    result.triggerAttackTime = this.triggerAttackTime;
-    result.triggerReleaseTime = this.triggerReleaseTime;
-    return result;
+WaveForm.prototype.createWaveFormFromFile = function(blob){
+    this.waveform = WaveSurfer.create({
+        container: this.getContainer().get(0),
+        waveColor: "#626262",
+        progressColor: "#fff843"
+    });
+    this.waveform.loadBlob(blob);
+};
+
+WaveForm.prototype.createWaveForm = function(audioContext){
+    this.waveform = WaveSurfer.create({
+        container: this.getContainer().get(0),
+        audioContext: audioContext,
+        waveColor: "#626262",
+        progressColor: "#fff843"
+    });
+    console.log(this.waveform);
 };
 
 
@@ -4259,72 +4500,160 @@ PianoKeyPlayer.prototype.getData = function(){
 "use strict";
 
 
-var TrackManager = __webpack_require__(23);
-var BaseTrackModel = __webpack_require__(18);
-var ProjectModel = __webpack_require__(43);
+module.exports = DraggerPlayer;
 
-module.exports = AudioPlayer;
-
-function AudioPlayer(model){
-    this.model = null;
-    this.player = [];
-
-    this.setModel(model);
+function DraggerPlayer(frequency, volume, startTime){
+    this.frequency = frequency;
+    this.volume = volume;
+    this.startTime = startTime || 0;
 }
 
-AudioPlayer.prototype.setModel = function(model){
-    if(model){
-        this.model = model;
-        if(this.model instanceof ProjectModel){
-            // merge before play
-            this._fullPlayerWithProject();
-        } else if(this.model instanceof BaseTrackModel){
-            this.player = this.model.playObjects;
+DraggerPlayer.prototype.play = function(oscillator){
+    oscillator.frequency.value = this.frequency;
+    oscillator.volume.value = this.volume;
+    oscillator.start(this.startTime / 1000);
+};
+
+DraggerPlayer.prototype.getData = function(){
+    var result = {};
+    result.frequency = this.frequency;
+    result.volume = this.volume;
+    result.startTime = this.startTime;
+    return result;
+};
+
+
+/***/ }),
+/* 72 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var BaseTrackModel = __webpack_require__(14);
+var inherit = __webpack_require__(0);
+var DraggerPlayer = __webpack_require__(71);
+
+module.exports = TrackOscillator;
+
+// @param {String} name
+// @param {Object} source
+function TrackOscillator(id, data){
+    BaseTrackModel.call(this, id, data);
+}
+
+inherit(TrackOscillator, BaseTrackModel);
+
+TrackOscillator.prototype._generate = function(){
+    return new Tone.Oscillator(this.setting).toMaster(); //{"oscillator": {}, "envelope": {}}
+};
+
+TrackOscillator.prototype.createPlayObjects = function(){
+    var i, tokenPlaySetting;
+    for(i = 0; i < this.playSetting.length; ++i){
+        tokenPlaySetting = this.playSetting[i];
+        this.playObjects.push(new DraggerPlayer(tokenPlaySetting.frequency, tokenPlaySetting.volume,
+                                                tokenPlaySetting.startTime));
+    }
+};
+
+TrackOscillator.prototype.play = function(){
+    var i;
+    for(i =0; i < this.playObjects.length; ++i){
+        this.playObjects.play(this.trackObject);
+    }
+};
+
+TrackOscillator.prototype.setSetting = function(){
+    if(this.trackObject){
+        if(this.setting === undefined){
+            this.setting = {};
         }
+        this.setting.valume = this.getVolume();
+        this.setting.frequency = this.getFrequency();
+        this.setting.type = this.getType();
     }
 };
 
-AudioPlayer.prototype.play = function(){
-    var i;
-    for(i = 0; i < this.player.length; ++i){
-        this.player[i].play();
+
+/***/ }),
+/* 73 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var DraggerPlayer = __webpack_require__(71);
+var BaseView = __webpack_require__(1);
+
+module.exports = Oscillator;
+
+function Oscillator(track){
+    BaseView.call(this, "oscillator");
+    this.track = track;
+    this.draggable = null;
+    this.draggie = null;
+
+    this.startTime = 0;
+    this.isRecordNow = false;
+    this.isMouseClicked = false;
+
+    this.coordsMap = $("<div class='coord-map'>");
+    this.oscillator = $("<div class='circle-drag draggable'>");
+    this._build();
+}
+
+inherit(Oscillator, BaseView);
+
+Oscillator.prototype._build = function(){
+    var self = this;
+    var container = this.getContainer();
+
+    this.draggable = this.oscillator.draggabilly();
+    this.draggie = this.draggable.data("draggabilly");
+
+    setPosition(this.draggie, this.track.getFrequency(), this.track.getVolume());
+
+    this.draggable.on("dragMove", function(event){
+        self.dragMoveEvent();
+    });
+
+    this.draggable.on("pointerDown", function(event){
+        self.dragMoveEvent();
+    });
+
+    this.draggable.on("dragEnd", function(event){
+        self.dragEndEvent();
+    });
+
+    this.coordsMap.append(this.oscillator);
+    container.append(this.coordsMap);
+};
+
+function setPosition(draggieObject, x, y) {
+    draggieObject.position.x = x;
+    draggieObject.position.y = y;
+    draggieObject.setLeftTop();
+}
+
+Oscillator.prototype.dragMoveEvent = function(){
+    this.track.setFrequency(this.draggie.position.x);
+    this.track.setVolume(this.draggie.position.y);
+    this.track.trackObject.start();
+    console.log( 'dragMove', this.draggie.position.x, this.draggie.position.y );
+    if(this.track.playObjects.length === 0){
+        this.startTime = Date.now();
+        this.track.playObjects.push(new DraggerPlayer(this.draggie.position.x, this.draggie.position.y, 0));
+    } else{
+        this.track.playObjects.push(new DraggerPlayer(this.draggie.position.x, this.draggie.position.y,
+                                                      Date.now()-this.startTime));
     }
 };
 
-AudioPlayer.prototype._fullPlayerWithProject = function(){
-
+Oscillator.prototype.dragEndEvent = function(){
+    this.track.trackObject.stop();
 };
-
-AudioPlayer.prototype._fullPlayerWithTrack = function(){
-
-};
-
-AudioPlayer.prototype.pause = function(){};
-
-AudioPlayer.prototype.stop = function(){};
-
-/*AudioPlayer.prototype.save = function(fileName){
-    var resultAudioBuffer;
-    if(this.trackList.length === 1){
-        resultAudioBuffer = this.trackList[0];
-    } else if(this.trackList.length > 1){
-        resultAudioBuffer = TrackManager.mergeTracks(this.trackList);
-    }
-    TrackManager.save(resultAudioBuffer, fileName);
-    // call request of saving Project !!!!
-};
-
-AudioPlayer.prototype.export = function(){
-    // save Sound
-};
-
-function _trackDataToTrack(audioPlayerObject){
-    var i;
-    var trackData = audioPlayerObject.model.trackDataList;
-    for(i=0; i < trackData.length; ++i){
-
-    }
-}*/
 
 
 /***/ })
