@@ -861,7 +861,8 @@ var WaveForm = __webpack_require__(70);
 var BaseWindow = __webpack_require__(18);
 var FilterView = __webpack_require__(59);
 var SettingView = __webpack_require__(65);
-var InstrumentView = __webpack_require__(60);
+var RecorderView = __webpack_require__(77);
+var Piano = __webpack_require__(63);
 var commonEventNames = __webpack_require__(3);
 var windowsTransport = __webpack_require__(4);
 
@@ -934,8 +935,10 @@ TrackView.prototype.back = function(){
 };
 
 TrackView.prototype.bindKeyEvent = function(){
-    this.instrumentView.instrument.keyDown();
-    this.instrumentView.instrument.keyUp();
+    if(this.instrumentView instanceof Piano){
+        this.instrumentView.instrument.keyDown();
+        this.instrumentView.instrument.keyUp();
+    }
 };
 
 function setTrack(eventName, track){
@@ -945,7 +948,7 @@ function setTrack(eventName, track){
     this.settingTabSegment.setTrack(track);
     this.filterTabSegment.setFilter(track);
 
-    this.instrumentView = new InstrumentView(track);
+    this.instrumentView = new RecorderView(track);
     this.getContainer().append(this.instrumentView.getContainer());
 }
 
@@ -1378,12 +1381,7 @@ function BlobToArrayBuffer(blob, callback){
 
 function AudioBufferToBlob(audioBuffer){
     var buffer = toWav(audioBuffer, {float32: true});
-    console.log("+");
-    console.log(buffer);
     var blob = new Blob([buffer], {"type": "audio/x-wav"});
-
-    console.log("+");
-    console.log(blob);
     return blob;
 }
 
@@ -1622,45 +1620,7 @@ BaseTrackSetting.prototype.toString = function(){
 
 
 /***/ }),
-/* 22 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = PianoKeyPlayer;
-
-/**
- * @param piano - Tone.Synth
- * @param note - String
- * @param triggerAttackTime
- * @param triggerReleaseTime
- * @constructor
- */
-function PianoKeyPlayer(piano, note, triggerAttackTime, triggerReleaseTime){
-    this.piano = piano;
-    this.note = note;
-    this.triggerAttackTime = triggerAttackTime || 0; // milliseconds
-    this.triggerReleaseTime = triggerReleaseTime || 0; // milliseconds
-}
-
-PianoKeyPlayer.prototype.play = function(){
-    // convert to seconds:
-    var start = this.triggerAttackTime / 1000;
-    var duration = (this.triggerReleaseTime - this.triggerAttackTime) / 1000;
-    this.piano.triggerAttackRelease(this.note, duration, "+" + start);
-};
-
-PianoKeyPlayer.prototype.getData = function(){
-    var result = {};
-    result.note = this.note;
-    result.triggerAttackTime = this.triggerAttackTime;
-    result.triggerReleaseTime = this.triggerReleaseTime;
-    return result;
-};
-
-
-/***/ }),
+/* 22 */,
 /* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -1905,8 +1865,6 @@ function setSettingListToDefault(settingList) {
  */
 function setToSettingList(listElement, trackObject, optionName){
     var methodName = "get" + capitalize(optionName);
-    console.log(methodName);
-    console.log(methodName in trackObject);
     if(methodName in trackObject){
         listElement.isEnabled = true;
         listElement.set(trackObject[methodName]());
@@ -2348,6 +2306,8 @@ WindowManager.prototype.setActiveWindow = function(newActiveWindow){
         this.isProjectListView = true;
         this.__activeWindow.controller.model.clearActiveProject();
     } else if(this.__activeWindow instanceof TrackView){
+        console.log("active");
+        console.log(this.__windows["trackList"].controller.model.getActiveTrack());
         this.__activeWindow.controller.attachModel(this.__windows["trackList"].controller.model.getActiveTrack());
         // send track settings to view
         this.__activeWindow.controller.sendTrack();
@@ -2634,6 +2594,8 @@ function AudioPlayer(model){
 }
 
 AudioPlayer.prototype.setModel = function(model){
+    console.log("model");
+    console.log(model);
     if(model){
         this.model = model;
         if(this.model instanceof ProjectModel){
@@ -3332,7 +3294,7 @@ TrackNoise.prototype.play = function(options){
 
 
 var BaseTrackModel = __webpack_require__(14);
-var PianoKeyPlayer = __webpack_require__(22);
+var PianoKeyPlayer = __webpack_require__(74);
 var inherit = __webpack_require__(0);
 
 module.exports = TrackSynthesizer;
@@ -3755,65 +3717,7 @@ function uncheckEvent(filterName, isChecked){
 
 
 /***/ }),
-/* 60 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var inherit = __webpack_require__(0);
-var BaseView = __webpack_require__(1);
-var Piano = __webpack_require__(63);
-var Oscillator = __webpack_require__(73);
-var Factory = __webpack_require__(2);
-
-module.exports = InstrumentView;
-
-function InstrumentView(track){
-    BaseView.call(this, "instrument-view");
-    this.track = track;
-
-    this.instrument = null;
-    this.recordButton = Factory.createButton("record", "record");
-    this.cleardButton = Factory.createButton("clear", "clear");
-
-    this.setInstrument();
-
-    this._build();
-}
-
-inherit(InstrumentView, BaseView);
-
-InstrumentView.prototype._build = function(){
-    var self = this;
-    var container = this.getContainer();
-
-    this.recordButton.on("click", function(){
-        self.instrument.recordEvent($(this));
-    });
-
-    this.cleardButton.on("click", function(){
-        self.instrument.clearEvent();
-    });
-
-    container.append(this.recordButton);
-    container.append(this.cleardButton);
-    container.append(this.instrument.getContainer());
-};
-
-InstrumentView.prototype.setInstrument = function(){
-    switch(this.track.instrument){
-        case "synth":
-            this.instrument = new Piano(this.track);
-            break;
-        case "oscillator":
-            this.instrument = new Oscillator(this.track);
-            break;
-    }
-};
-
-
-/***/ }),
+/* 60 */,
 /* 61 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -3948,18 +3852,16 @@ MessageModal.prototype.hide = function(){
 
 
 var inherit = __webpack_require__(0);
-var PianoKeyPlayer = __webpack_require__(22);
-var BaseView = __webpack_require__(1);
+var PianoKeyPlayer = __webpack_require__(74);
+var BaseInstrument = __webpack_require__(78);
 var PianoModel = __webpack_require__(43);
 var Factory = __webpack_require__(2);
 
 module.exports = Piano;
 
 function Piano(track){
-    BaseView.call(this, "piano");
-    this.track = track;
-    this.startTime = 0;
-    this.isRecordNow = false;
+    BaseInstrument.call(this, track, "piano");
+
     this.isMouseClicked = false;
 
     this.__pressedKeys = [];
@@ -3972,7 +3874,7 @@ function Piano(track){
     this._build();
 }
 
-inherit(Piano, BaseView);
+inherit(Piano, BaseInstrument);
 
 Piano.prototype._build = function(){
     var self = this;
@@ -4494,36 +4396,7 @@ WaveForm.prototype.createWaveForm = function(audioContext){
 
 
 /***/ }),
-/* 71 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = DraggerPlayer;
-
-function DraggerPlayer(frequency, volume, startTime){
-    this.frequency = frequency;
-    this.volume = volume;
-    this.startTime = startTime || 0;
-}
-
-DraggerPlayer.prototype.play = function(oscillator){
-    oscillator.frequency.value = this.frequency;
-    oscillator.volume.value = this.volume;
-    oscillator.start(this.startTime / 1000);
-};
-
-DraggerPlayer.prototype.getData = function(){
-    var result = {};
-    result.frequency = this.frequency;
-    result.volume = this.volume;
-    result.startTime = this.startTime;
-    return result;
-};
-
-
-/***/ }),
+/* 71 */,
 /* 72 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -4532,7 +4405,7 @@ DraggerPlayer.prototype.getData = function(){
 
 var BaseTrackModel = __webpack_require__(14);
 var inherit = __webpack_require__(0);
-var DraggerPlayer = __webpack_require__(71);
+var MixerRecorder = __webpack_require__(76);
 
 module.exports = TrackOscillator;
 
@@ -4552,7 +4425,7 @@ TrackOscillator.prototype.createPlayObjects = function(){
     var i, tokenPlaySetting;
     for(i = 0; i < this.playSetting.length; ++i){
         tokenPlaySetting = this.playSetting[i];
-        this.playObjects.push(new DraggerPlayer(tokenPlaySetting.frequency, tokenPlaySetting.volume,
+        this.playObjects.push(new MixerRecorder(tokenPlaySetting.frequency, tokenPlaySetting.volume,
                                                 tokenPlaySetting.startTime));
     }
 };
@@ -4560,6 +4433,8 @@ TrackOscillator.prototype.createPlayObjects = function(){
 TrackOscillator.prototype.play = function(){
     var i;
     for(i =0; i < this.playObjects.length; ++i){
+        console.log("+++");
+        console.log(this.trackObject);
         this.playObjects.play(this.trackObject);
     }
 };
@@ -4584,27 +4459,28 @@ TrackOscillator.prototype.setSetting = function(){
 
 
 var inherit = __webpack_require__(0);
-var DraggerPlayer = __webpack_require__(71);
-var BaseView = __webpack_require__(1);
+var MixerRecorder = __webpack_require__(76);
+var BaseInstrument = __webpack_require__(78);
 
 module.exports = Oscillator;
 
 function Oscillator(track){
-    BaseView.call(this, "oscillator");
-    this.track = track;
+    BaseInstrument.call(this, track, "oscillator");
+
     this.draggable = null;
     this.draggie = null;
 
-    this.startTime = 0;
-    this.isRecordNow = false;
     this.isMouseClicked = false;
+
+    this.isMousePressed = false;
+    this.pressedCoords = [];
 
     this.coordsMap = $("<div class='coord-map'>");
     this.oscillator = $("<div class='circle-drag draggable'>");
     this._build();
 }
 
-inherit(Oscillator, BaseView);
+inherit(Oscillator, BaseInstrument);
 
 Oscillator.prototype._build = function(){
     var self = this;
@@ -4616,19 +4492,74 @@ Oscillator.prototype._build = function(){
     setPosition(this.draggie, this.track.getFrequency(), this.track.getVolume());
 
     this.draggable.on("dragMove", function(event){
+        self.isMousePressed = false;
         self.dragMoveEvent();
     });
 
     this.draggable.on("pointerDown", function(event){
-        self.dragMoveEvent();
+        self.isMousePressed = true;
+        self.dragPointPressEvent();
     });
 
     this.draggable.on("dragEnd", function(event){
+        self.isMousePressed = false;
+        self.dragEndEvent();
+    });
+
+    this.draggable.on("pointerUp", function(event){
+        self.isMousePressed = false;
         self.dragEndEvent();
     });
 
     this.coordsMap.append(this.oscillator);
     container.append(this.coordsMap);
+};
+
+Oscillator.prototype.recordEvent = function(recordButton){
+    if(this.isRecordNow === true){
+        // stop record
+        recordButton.text("record");
+        this.isRecordNow = false;
+        console.log(this.track.playObjects);
+    } else{
+        this.isRecordNow = true;
+        this.track.emptyPlaySetting(); // clear previous play data setting
+        recordButton.text("stop");
+    }
+};
+
+Oscillator.prototype.clearEvent = function(){
+    this.track.emptyPlaySetting();
+};
+
+Oscillator.prototype._dragHandler = function(){
+    this.track.setFrequency(this.draggie.position.x);
+    this.track.setVolume(this.draggie.position.y);
+    this.track.trackObject.start();
+    console.log( 'dragMove', this.draggie.position.x, this.draggie.position.y );
+    if(this.track.playObjects.length === 0){
+        this.startTime = Date.now();
+        this.track.playObjects.push(new MixerRecorder(this.track.trackObject, this.draggie.position.x,
+                                                      this.draggie.position.y, 0));
+    } else{
+        this.track.playObjects.push(new MixerRecorder(this.track.trackObject, this.draggie.position.x,
+                                                      this.draggie.position.y, Date.now()-this.startTime));
+    }
+};
+
+Oscillator.prototype.dragMoveEvent = function(){
+    this._dragHandler();
+};
+
+Oscillator.prototype.dragPointPressEvent = function(){
+    var pressedCoord = {'x': this.draggie.position.x, 'b': this.draggie.position.y};
+    if(isContainObject(this.pressedCoords, pressedCoord) === false){
+        this._dragHandler();
+    }
+};
+
+Oscillator.prototype.dragEndEvent = function(){
+    this.track.trackObject.stop();
 };
 
 function setPosition(draggieObject, x, y) {
@@ -4637,23 +4568,222 @@ function setPosition(draggieObject, x, y) {
     draggieObject.setLeftTop();
 }
 
-Oscillator.prototype.dragMoveEvent = function(){
-    this.track.setFrequency(this.draggie.position.x);
-    this.track.setVolume(this.draggie.position.y);
-    this.track.trackObject.start();
-    console.log( 'dragMove', this.draggie.position.x, this.draggie.position.y );
-    if(this.track.playObjects.length === 0){
-        this.startTime = Date.now();
-        this.track.playObjects.push(new DraggerPlayer(this.draggie.position.x, this.draggie.position.y, 0));
-    } else{
-        this.track.playObjects.push(new DraggerPlayer(this.draggie.position.x, this.draggie.position.y,
-                                                      Date.now()-this.startTime));
+function isContainObject(list, object){
+    var i;
+    var result = false;
+    for(i = 0; i < list.length; i++){
+        if(list[i] === object){
+            result = true;
+        }
+    }
+    return result;
+}
+
+
+/***/ }),
+/* 74 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var BaseRecorder = __webpack_require__(75);
+
+module.exports = PianoKeyRecorder;
+
+/**
+ * @param piano - Tone.Synth
+ * @param note - String
+ * @param triggerAttackTime
+ * @param triggerReleaseTime
+ * @constructor
+ */
+function PianoKeyRecorder(piano, note, triggerAttackTime, triggerReleaseTime){
+    BaseRecorder.call(this);
+    this.piano = piano;
+    this.note = note;
+    this.triggerAttackTime = triggerAttackTime || 0; // milliseconds
+    this.triggerReleaseTime = triggerReleaseTime || 0; // milliseconds
+}
+
+inherit(PianoKeyRecorder, BaseRecorder);
+
+PianoKeyRecorder.prototype.play = function(){
+    // convert to seconds:
+    var start = this.triggerAttackTime / 1000;
+    var duration = (this.triggerReleaseTime - this.triggerAttackTime) / 1000;
+    this.piano.triggerAttackRelease(this.note, duration, "+" + start);
+};
+
+PianoKeyRecorder.prototype.getData = function(){
+    var result = {};
+    result.note = this.note;
+    result.triggerAttackTime = this.triggerAttackTime;
+    result.triggerReleaseTime = this.triggerReleaseTime;
+    return result;
+};
+
+
+/***/ }),
+/* 75 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = BaseRecorder;
+
+
+function BaseRecorder(){}
+
+BaseRecorder.prototype.play = null;
+
+BaseRecorder.prototype.getData = null;
+
+
+/***/ }),
+/* 76 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var BaseRecorder = __webpack_require__(75);
+
+module.exports = MixerRecorder;
+
+
+function MixerRecorder(oscillator, frequency, volume, startTime){
+    BaseRecorder.call(this);
+    this.oscillator = oscillator;
+    this.frequency = frequency;
+    this.volume = volume;
+    this.startTime = startTime || 0;
+    this.checkValues();
+}
+
+inherit(MixerRecorder, BaseRecorder);
+
+MixerRecorder.prototype.checkValues = function(){
+    var minFrequency = 60;
+    var maxFrequency = 2000;
+    var minVolume = -100;
+    var maxVolume = 100;
+    if(this.frequency < minFrequency){
+        this.frequency = minFrequency;
+    } else if(this.frequency > maxFrequency){
+        this.frequency = maxFrequency;
+    }
+    if(this.volume < minVolume){
+        this.volume = minVolume;
+    } else if(this.volume > maxVolume) {
+        this.frequency = maxVolume;
     }
 };
 
-Oscillator.prototype.dragEndEvent = function(){
-    this.track.trackObject.stop();
+MixerRecorder.prototype.play = function(){
+    var self = this;
+    setTimeout(function(){
+        this.oscillator.frequency.value = self.frequency;
+        this.oscillator.volume.value = self.volume;
+    }, this.startTime);
+    this.oscillator.start('+' + (this.startTime / 1000));
 };
+
+MixerRecorder.prototype.getData = function(){
+    var result = {};
+    result.frequency = this.frequency;
+    result.volume = this.volume;
+    result.startTime = this.startTime;
+    return result;
+};
+
+
+/***/ }),
+/* 77 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var BaseView = __webpack_require__(1);
+var Piano = __webpack_require__(63);
+var Oscillator = __webpack_require__(73);
+var Factory = __webpack_require__(2);
+
+module.exports = RecorderView;
+
+function RecorderView(track){
+    BaseView.call(this, "instrument-view");
+    this.track = track;
+
+    this.instrument = null;
+    this.recordButton = Factory.createButton("record", "record");
+    this.cleardButton = Factory.createButton("clear", "clear");
+
+    this.setInstrument();
+
+    this._build();
+}
+
+inherit(RecorderView, BaseView);
+
+RecorderView.prototype._build = function(){
+    var self = this;
+    var container = this.getContainer();
+
+    this.recordButton.on("click", function(){
+        self.instrument.recordEvent($(this));
+    });
+
+    this.cleardButton.on("click", function(){
+        self.instrument.clearEvent();
+    });
+
+    container.append(this.recordButton);
+    container.append(this.cleardButton);
+    container.append(this.instrument.getContainer());
+};
+
+RecorderView.prototype.setInstrument = function(){
+    switch(this.track.instrument){
+        case "synth":
+            this.instrument = new Piano(this.track);
+            break;
+        case "oscillator":
+            this.instrument = new Oscillator(this.track);
+            break;
+    }
+};
+
+
+/***/ }),
+/* 78 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var BaseView = __webpack_require__(1);
+
+module.exports = BaseInstrument;
+
+function BaseInstrument(track, instrumentName){
+    BaseView.call(this, instrumentName);
+    this.track = track;
+    this.startTime = 0;
+    this.isRecordNow = false;
+}
+
+inherit(BaseInstrument, BaseView);
+
+BaseInstrument.prototype.recordEvent = null;
+
+BaseInstrument.prototype.clearEvent = null;
 
 
 /***/ })
