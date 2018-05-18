@@ -2608,19 +2608,19 @@ AudioPlayer.prototype.setModel = function(model){
 };
 
 AudioPlayer.prototype.play = function(){
-    var i;
+    if(this.model instanceof BaseTrackModel) {
+        this.model.play();
+    }
+    /*var i;
     for(i = 0; i < this.player.length; ++i){
         this.player[i].play();
-    }
+    }*/
 };
 
 AudioPlayer.prototype._fullPlayerWithProject = function(){
 
 };
 
-AudioPlayer.prototype._fullPlayerWithTrack = function(){
-
-};
 
 AudioPlayer.prototype.pause = function(){};
 
@@ -3369,11 +3369,10 @@ TrackSynthesizer.prototype._generate = function(){
     return new Tone.Synth(this.setting).toMaster(); //{"oscillator": {}, "envelope": {}}
 };
 
-TrackSynthesizer.prototype.play = function(options){
+TrackSynthesizer.prototype.play = function(){
     var i;
-    var r = this.playSetting;
-    for(i = 0; i < r.length; ++i){
-        this.trackObject.triggerAttackRelease(r[i][0], r[i][1], r[i][2]);
+    for(i = 0; i < this.playObjects.length; ++i){
+        this.playObjects[i].play();
     }
 };
 
@@ -4433,10 +4432,9 @@ TrackOscillator.prototype.createPlayObjects = function(){
 TrackOscillator.prototype.play = function(){
     var i;
     for(i =0; i < this.playObjects.length; ++i){
-        console.log("+++");
-        console.log(this.trackObject);
-        this.playObjects.play(this.trackObject);
+        this.playObjects[i].play(this.trackObject);
     }
+    this.trackObject.stop();
 };
 
 TrackOscillator.prototype.setSetting = function(){
@@ -4539,10 +4537,9 @@ Oscillator.prototype._dragHandler = function(){
     console.log( 'dragMove', this.draggie.position.x, this.draggie.position.y );
     if(this.track.playObjects.length === 0){
         this.startTime = Date.now();
-        this.track.playObjects.push(new MixerRecorder(this.track.trackObject, this.draggie.position.x,
-                                                      this.draggie.position.y, 0));
+        this.track.playObjects.push(new MixerRecorder(this.draggie.position.x, this.draggie.position.y, 0));
     } else{
-        this.track.playObjects.push(new MixerRecorder(this.track.trackObject, this.draggie.position.x,
+        this.track.playObjects.push(new MixerRecorder(this.draggie.position.x,
                                                       this.draggie.position.y, Date.now()-this.startTime));
     }
 };
@@ -4655,9 +4652,8 @@ var BaseRecorder = __webpack_require__(75);
 module.exports = MixerRecorder;
 
 
-function MixerRecorder(oscillator, frequency, volume, startTime){
+function MixerRecorder(frequency, volume, startTime){
     BaseRecorder.call(this);
-    this.oscillator = oscillator;
     this.frequency = frequency;
     this.volume = volume;
     this.startTime = startTime || 0;
@@ -4679,17 +4675,17 @@ MixerRecorder.prototype.checkValues = function(){
     if(this.volume < minVolume){
         this.volume = minVolume;
     } else if(this.volume > maxVolume) {
-        this.frequency = maxVolume;
+        this.volume = maxVolume;
     }
 };
 
-MixerRecorder.prototype.play = function(){
+MixerRecorder.prototype.play = function(oscillator){
     var self = this;
     setTimeout(function(){
-        this.oscillator.frequency.value = self.frequency;
-        this.oscillator.volume.value = self.volume;
+        oscillator.frequency.value = self.frequency;
+        oscillator.volume.value = self.volume;
     }, this.startTime);
-    this.oscillator.start('+' + (this.startTime / 1000));
+    oscillator.start('+' + (this.startTime / 1000));
 };
 
 MixerRecorder.prototype.getData = function(){
