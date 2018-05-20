@@ -935,7 +935,7 @@ TrackView.prototype.back = function(){
 };
 
 TrackView.prototype.bindKeyEvent = function(){
-    if(this.instrumentView instanceof Piano){
+    if(this.instrumentView.instrument instanceof Piano){
         this.instrumentView.instrument.keyDown();
         this.instrumentView.instrument.keyUp();
     }
@@ -4417,7 +4417,7 @@ function TrackOscillator(id, data){
 inherit(TrackOscillator, BaseTrackModel);
 
 TrackOscillator.prototype._generate = function(){
-    return new Tone.Oscillator(this.setting).toMaster(); //{"oscillator": {}, "envelope": {}}
+    return new Tone.Oscillator(this.setting).toMaster();
 };
 
 TrackOscillator.prototype.createPlayObjects = function(){
@@ -4459,6 +4459,7 @@ TrackOscillator.prototype.setSetting = function(){
 var inherit = __webpack_require__(0);
 var MixerRecorder = __webpack_require__(76);
 var BaseInstrument = __webpack_require__(78);
+var CoordMap = __webpack_require__(80);
 
 module.exports = Oscillator;
 
@@ -4473,7 +4474,8 @@ function Oscillator(track){
     this.isMousePressed = false;
     this.pressedCoords = [];
 
-    this.coordsMap = $("<div class='coord-map'>");
+    //this.coordsMap = $("<div class='coord-map'>");
+    this.coordsMap = new CoordMap();
     this.oscillator = $("<div class='circle-drag draggable'>");
     this._build();
 }
@@ -4484,7 +4486,8 @@ Oscillator.prototype._build = function(){
     var self = this;
     var container = this.getContainer();
 
-    this.draggable = this.oscillator.draggabilly();
+    // containment - create coord relative to coord-map
+    this.draggable = this.oscillator.draggabilly({containment: this.coordsMap.map});
     this.draggie = this.draggable.data("draggabilly");
 
     setPosition(this.draggie, this.track.getFrequency(), this.track.getVolume());
@@ -4509,8 +4512,8 @@ Oscillator.prototype._build = function(){
         self.dragEndEvent();
     });
 
-    this.coordsMap.append(this.oscillator);
-    container.append(this.coordsMap);
+    this.coordsMap.map.append(this.oscillator);
+    container.append(this.coordsMap.map);
 };
 
 Oscillator.prototype.recordEvent = function(recordButton){
@@ -4531,16 +4534,19 @@ Oscillator.prototype.clearEvent = function(){
 };
 
 Oscillator.prototype._dragHandler = function(){
-    this.track.setFrequency(this.draggie.position.x);
-    this.track.setVolume(this.draggie.position.y);
+    var x = this.draggie.position.x;
+    var y = this.coordsMap.getY(this.draggie.position.y);
+    this.track.setFrequency(x);
+    this.track.setVolume(y);
     this.track.trackObject.start();
-    console.log( 'dragMove', this.draggie.position.x, this.draggie.position.y );
+    console.log(this.track);
+    console.log("----------------------");
+    console.log( 'dragMove', x, y);
     if(this.track.playObjects.length === 0){
         this.startTime = Date.now();
-        this.track.playObjects.push(new MixerRecorder(this.draggie.position.x, this.draggie.position.y, 0));
+        this.track.playObjects.push(new MixerRecorder(x, y, 0));
     } else{
-        this.track.playObjects.push(new MixerRecorder(this.draggie.position.x,
-                                                      this.draggie.position.y, Date.now()-this.startTime));
+        this.track.playObjects.push(new MixerRecorder(x, y, Date.now()-this.startTime));
     }
 };
 
@@ -4552,6 +4558,7 @@ Oscillator.prototype.dragPointPressEvent = function(){
     var pressedCoord = {'x': this.draggie.position.x, 'b': this.draggie.position.y};
     if(isContainObject(this.pressedCoords, pressedCoord) === false){
         this._dragHandler();
+        this.pressedCoords.push(pressedCoord);
     }
 };
 
@@ -4647,6 +4654,7 @@ BaseRecorder.prototype.getData = null;
 
 
 var inherit = __webpack_require__(0);
+var clamp = __webpack_require__(79);
 var BaseRecorder = __webpack_require__(75);
 
 module.exports = MixerRecorder;
@@ -4663,20 +4671,8 @@ function MixerRecorder(frequency, volume, startTime){
 inherit(MixerRecorder, BaseRecorder);
 
 MixerRecorder.prototype.checkValues = function(){
-    var minFrequency = 60;
-    var maxFrequency = 2000;
-    var minVolume = -100;
-    var maxVolume = 100;
-    if(this.frequency < minFrequency){
-        this.frequency = minFrequency;
-    } else if(this.frequency > maxFrequency){
-        this.frequency = maxFrequency;
-    }
-    if(this.volume < minVolume){
-        this.volume = minVolume;
-    } else if(this.volume > maxVolume) {
-        this.volume = maxVolume;
-    }
+    this.frequency = clamp(this.frequency, 0, 1500);
+    this.volume = clamp(this.volume, -75, 75);
 };
 
 MixerRecorder.prototype.play = function(oscillator){
@@ -4780,6 +4776,91 @@ inherit(BaseInstrument, BaseView);
 BaseInstrument.prototype.recordEvent = null;
 
 BaseInstrument.prototype.clearEvent = null;
+
+
+/***/ }),
+/* 79 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = function(value, min, max){
+    if(value > max){
+        value = max;
+    } else if(value < min){
+        value = min;
+    }
+    return value;
+};
+
+
+/***/ }),
+/* 80 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = CoordMap;
+
+function CoordMap(){
+    this.map = $("<div class='coord-map'>");
+}
+
+CoordMap.prototype.getY = function(y){
+    var newCoord = 0;
+    var newHeight = getEven(this.map.height());
+    var center = newHeight / 2;
+    if(y === center){
+        // begin coord
+        newCoord = 0;
+    } else if(y === 0){
+        // max coord
+        newCoord = center;
+    } else if(y < center && y > 0){
+        // positive
+        // new coord for positive part is just division of center and y
+        newCoord = getNewCoord(y, center);
+    } else if(y > center && y <= newHeight){
+        // convert to negative
+        newCoord = (center - getNewCoord(y, newHeight)) * (-1);
+    }
+    return newCoord;
+};
+
+CoordMap.prototype.getX = function(x){
+    var newCoord = 0;
+    var newWidth = getEven(this.map.width());
+    var center = newWidth / 2;
+    if(x === center){
+        // begin coord
+        newCoord = 0;
+    } else if(x === 0){
+        // max coord
+        newCoord = newWidth / -2;
+    } else if(x < center && x > 0){
+        // convert to negative
+        newCoord = getNewCoord(x, center) * (-1);
+    } else if(x > center && x <= newWidth){
+        // positive
+        newCoord = center - getNewCoord(x, newWidth);
+        console.log(newCoord);
+    }
+    return newCoord;
+};
+
+function getNewCoord(coord, limit){
+    return limit - coord
+}
+
+function getEven(number){
+    var evenNumber = number;
+    if(number % 2 !== 0){
+        evenNumber = number - 1;
+    }
+    return evenNumber;
+}
 
 
 /***/ })

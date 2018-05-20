@@ -224,8 +224,8 @@ body {
 }
 
 .draggable {
-    width: 100px;
-    height: 100px;
+    width: 25px;
+    height: 25px;
     background: #F90;
 }
 .draggable.is-pointer-down {
@@ -236,7 +236,7 @@ body {
 }
 
 .coord-map {
-    width: 100%;
-    height: 50%;
+    width: 1500px;
+    height: 150px;
     background-color: grey;
 }
