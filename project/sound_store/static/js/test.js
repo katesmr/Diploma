@@ -537,15 +537,15 @@ BaseTrackModel.prototype.getBlob = function(){
 };
 
 BaseTrackModel.prototype.getVolume = function(){
-    return this.trackObject.volume.value;
+    return this.trackObject ? this.trackObject.volume.value : null;
 };
 
 BaseTrackModel.prototype.getType = function(){
-    return this.trackObject.type;
+    return this.trackObject ? this.trackObject.type : null;
 };
 
 BaseTrackModel.prototype.getFrequency = function(){
-    return this.trackObject.frequency.value;
+    return this.trackObject ? this.trackObject.frequency.value : null;
 };
 
 /**
@@ -982,8 +982,6 @@ function setTrackInstrument(value){
     var result = {};
     result.data = {};
     result.data.instrument = value;
-    console.log("add");
-    console.log(result);
     this.controller.add(result);
 }
 
@@ -1079,7 +1077,7 @@ TrackView.prototype.bindKeyEvent = function(){
 
 function setTrack(eventName, track){
     console.log(track.getBlob());
-    this.waveform.createWaveFormFromFile(track.getBlob());
+    //this.waveform.createWaveFormFromFile(track.getBlob());
 
     this.settingTabSegment.setTrack(track);
     this.filterTabSegment.setFilter(track);
@@ -1922,10 +1920,14 @@ function setSettingListToDefault(settingList) {
  * @param optionName
  */
 function setToSettingList(listElement, trackObject, optionName){
+    var result;
     var methodName = "get" + capitalize(optionName);
     if(methodName in trackObject){
         listElement.isEnabled = true;
-        listElement.set(trackObject[methodName]());
+        result = trackObject[methodName]();
+        if(result !== undefined || result !== null){
+            listElement.set(trackObject[methodName]());
+        }
     }
 }
 
@@ -2859,8 +2861,6 @@ function AudioPlayer(model){
 }
 
 AudioPlayer.prototype.setModel = function(model){
-    console.log("model");
-    console.log(model);
     if(model){
         this.model = model;
         if(this.model instanceof ProjectModel){
@@ -5064,9 +5064,15 @@ function TrackDrum(id, data){
 
 inherit(TrackDrum, BaseTrackModel);
 
-TrackDrum.prototype._generate = function(){
-    return new Tone.Oscillator(this.setting).toMaster();
-};
+TrackDrum.prototype._generate = function(){};
+
+TrackDrum.prototype.getContext = function(){};
+
+TrackDrum.prototype.getConstants = function(){};
+
+TrackDrum.prototype.getAudioBuffer = function(){};
+
+TrackDrum.prototype.getBlob = function(){};
 
 TrackDrum.prototype.createDrumObject = function(drum, playSettings){
     switch(drum){
@@ -5091,6 +5097,8 @@ TrackDrum.prototype.createDrumObjects = function(){
 
 TrackDrum.prototype.getData = function(){
     var result = {};
+    result.id = this.id;
+    result.isDeleted = this.isDeleted;
     result.instrument = this.instrument;
     result["post-setting"] = this.postSettings.getPostSettings();
     result["drums"] = this.getDrumObjectsData();
@@ -5188,7 +5196,6 @@ var inherit = __webpack_require__(0);
 var DrumRecorder = __webpack_require__(80);
 var DrumModel = __webpack_require__(85);
 var BaseInstrument = __webpack_require__(28);
-var Factory = __webpack_require__(2);
 
 module.exports = DrumMachine;
 
