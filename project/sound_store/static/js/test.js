@@ -5075,6 +5075,8 @@ var KickLeft = __webpack_require__(81);
 var KickRight = __webpack_require__(82);
 var TrackPlayer = __webpack_require__(84);
 var DrumRecorder = __webpack_require__(80);
+var BigTom = __webpack_require__(87);
+var LeftTom = __webpack_require__(88);
 
 module.exports = TrackDrum;
 
@@ -5104,6 +5106,12 @@ TrackDrum.prototype.createDrumObject = function(drumName){
             break;
         case "kick-right":
             this.drumObjects[drumName] = new KickRight();
+            break;
+        case "big-tom":
+            this.drumObjects[drumName] = new BigTom();
+            break;
+        case "left-tom":
+            this.drumObjects[drumName] = new LeftTom();
             break;
         case "":
             this.drumObjects[drumName] = new TrackPlayer();
@@ -5210,14 +5218,16 @@ function TrackPlayer(){
 
 var KickLeft = __webpack_require__(81);
 var KickRight = __webpack_require__(82);
+var BigTom = __webpack_require__(87);
+var LeftTom = __webpack_require__(88);
 
 module.exports = new DrumModel;
 
 function DrumModel(){
     this.kickLeft = new KickLeft();
     this.kickRight = new KickRight();
-    this.tom1 = null;
-    this.tom2 = null;
+    this.bigTom = new BigTom();
+    this.leftTom = new LeftTom();
     this.tom3 = null;
     this.snare1 = null;
     this.snare2 = null;
@@ -5232,8 +5242,8 @@ DrumModel.prototype.getDrumForKey = function(key){
     switch(key){
         case 'B': result = this.kickLeft; break;
         case 'N': result = this.kickRight; break;
-        case 'F': result = this.tom1; break;
-        case 'G': result = this.tom2; break;
+        case 'F': result = this.bigTom; break;
+        case 'G': result = this.leftTom; break;
         case 'H': result = this.tom3; break;
         case 'J': result = this.snare1; break;
         case 'K': result = this.snare2; break;
@@ -5345,6 +5355,90 @@ DrumMachine.prototype.createDrumGrid = function(drumList){
         this.drumGrid.append($column);
     }
 };
+
+
+/***/ }),
+/* 87 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var MembraneModel = __webpack_require__(78);
+var inherit = __webpack_require__(0);
+
+module.exports = BigTom;
+
+function BigTom(){
+    MembraneModel.call(this);
+    this.note = "E1";
+    this.setSetting();
+}
+
+inherit(BigTom, MembraneModel);
+
+BigTom.prototype.setSetting = function(){
+    if(this.setting.oscillator === undefined){
+        this.setting.oscillator = {};
+    }
+    if(this.setting.envelope === undefined){
+        this.setting.envelope = {};
+    }
+    this.setting.pitchDecay = 0.9;
+    this.setting.octaves = 3;
+    this.setting.oscillator.type = "sine";
+    this.setting.envelope.attack = 0.001;
+    this.setting.envelope.decay = 1;
+    this.setting.envelope.release = 0.8;
+    this.setting.envelope.attackCurve = "exponential";
+};
+
+BigTom.prototype.setInstrument = function(){
+    this.instrument = "big-tom";
+};
+
+
+
+
+/***/ }),
+/* 88 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var MembraneModel = __webpack_require__(78);
+var inherit = __webpack_require__(0);
+
+module.exports = LeftTom;
+
+function LeftTom(){
+    MembraneModel.call(this);
+    this.note = "E1";
+    this.setSetting();
+}
+
+inherit(LeftTom, MembraneModel);
+
+LeftTom.prototype.setSetting = function(){
+    if(this.setting.oscillator === undefined){
+        this.setting.oscillator = {};
+    }
+    if(this.setting.envelope === undefined){
+        this.setting.envelope = {};
+    }
+    this.setting.pitchDecay = 0.01;
+    this.setting.octaves = 3;
+    this.setting.oscillator.type = "sine";
+    this.setting.envelope.attack = 0.001;
+};
+
+LeftTom.prototype.setInstrument = function(){
+    this.instrument = "left-tom";
+};
+
+
+
 
 
 /***/ })
