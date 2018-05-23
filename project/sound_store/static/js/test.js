@@ -544,21 +544,9 @@ BaseTrackModel.prototype.getType = function(){
     return this.trackObject.type;
 };
 
-/*BaseTrackModel.prototype.getAttack = function(){
-    return this.trackObject.envelope.attack;
+BaseTrackModel.prototype.getFrequency = function(){
+    return this.trackObject.frequency.value;
 };
-
-BaseTrackModel.prototype.getDecay = function(){
-    return this.trackObject.envelope.decay;
-};
-
-BaseTrackModel.prototype.getSustain = function(){
-    return this.trackObject.envelope.sustain;
-};
-
-BaseTrackModel.prototype.getRelease = function(){
-    return this.trackObject.envelope.release;
-};*/
 
 /**
  * Return object of track setting in right format for transfer or saving
@@ -588,43 +576,9 @@ BaseTrackModel.prototype.setType = function(value){
     this.trackObject.type = value;
 };
 
-/*BaseTrackModel.prototype.setAttack = function(value){
-    this.trackObject.envelope.attack = value;
+BaseTrackModel.prototype.setFrequency = function(value){
+    this.trackObject.frequency.value = value;
 };
-
-BaseTrackModel.prototype.setDecay = function(value){
-    this.trackObject.envelope.decay = value;
-};
-
-BaseTrackModel.prototype.setSustain = function(value){
-    this.trackObject.envelope.sustain = value;
-};
-
-BaseTrackModel.prototype.setRelease = function(value){
-    this.trackObject.envelope.release = value;
-};*/
-
-// CALL THIS BEFORE SAVE ON SERVER !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-/**
- * Update or create oscillator && envelope data
- */
-/*BaseTrackModel.prototype.setSetting = function(){
-    if(this.trackObject){
-        if(this.setting.oscillator === undefined){
-            this.setting.oscillator = {};
-        }
-        if(this.setting.envelope === undefined){
-            this.setting.envelope = {};
-        }
-        this.setting.oscillator.valume = this.getVolume();
-        this.setting.oscillator.frequency = this.getFrequency();
-        this.setting.oscillator.type = this.getType();
-        this.setting.envelope.attack = this.getAttack();
-        this.setting.envelope.decay = this.getDecay();
-        this.setting.envelope.sustain = this.getSustain();
-        this.setting.envelope.release = this.getRelease();
-    }
-};*/
 
 /**
  * Set data to play setting list from play setting object
@@ -920,7 +874,7 @@ function TrackListView(controller){
 
     this.projectName = $("<h1></h1>");
     this.addTrackButton = Factory.createIconButton("circular ui icon button add-track", "plus icon", "");
-    this.instrumentChoice = Factory.buttonsPopup(["synth", "oscillator", "noise"],
+    this.instrumentChoice = Factory.buttonsPopup(["synth", "drum", "oscillator", "noise"],
                                                  setTrackInstrument.bind(this));
     this.trackList = $("<div class='track-list'>");
     this.__onRemoveButtonClicked = onRemoveButtonClicked.bind(this);
@@ -1047,7 +1001,6 @@ var BaseWindow = __webpack_require__(18);
 var FilterView = __webpack_require__(66);
 var SettingView = __webpack_require__(72);
 var RecorderView = __webpack_require__(71);
-var Piano = __webpack_require__(29);
 var commonEventNames = __webpack_require__(3);
 var windowsTransport = __webpack_require__(4);
 
@@ -1120,10 +1073,8 @@ TrackView.prototype.back = function(){
 };
 
 TrackView.prototype.bindKeyEvent = function(){
-    if(this.instrumentView.instrument instanceof Piano){
-        this.instrumentView.instrument.keyDown();
-        this.instrumentView.instrument.keyUp();
-    }
+    this.instrumentView.instrument.keyDown();
+    this.instrumentView.instrument.keyUp();
 };
 
 function setTrack(eventName, track){
@@ -1647,7 +1598,7 @@ function MixerRecorder(frequency, volume, startTime, stopTime){
     this.frequency = frequency;
     this.volume = volume;
     this.startTime = startTime || 0;
-    this.stopTime = stopTime || 0;
+    //this.stopTime = stopTime || 0;
     this.checkValues();
 }
 
@@ -1665,7 +1616,7 @@ MixerRecorder.prototype.play = function(oscillator){
         oscillator.volume.value = self.volume;
     }, this.startTime);
     oscillator.start('+' + (this.startTime / 1000));
-    oscillator.stop(this.stopTime / 1000);
+    //oscillator.stop(this.stopTime / 1000);
 };
 
 MixerRecorder.prototype.getData = function(){
@@ -1735,6 +1686,7 @@ var inherit = __webpack_require__(0);
 var TrackSynthesizer = __webpack_require__(53);
 var TrackNoise = __webpack_require__(51);
 var TrackOscillator = __webpack_require__(52);
+var TrackDrum = __webpack_require__(83);
 var commonEventNames = __webpack_require__(3);
 
 module.exports = ProjectModel;
@@ -1774,6 +1726,9 @@ ProjectModel.prototype.add = function(source){
     switch (data.instrument){
         case "synth":
             track = new TrackSynthesizer(source.id, data);
+            break;
+        case "drum":
+            track = new TrackDrum(source.id, data);
             break;
         case "oscillator":
             track = new TrackOscillator(source.id, data);
@@ -2038,6 +1993,10 @@ BaseInstrument.prototype.recordEvent = null;
 
 BaseInstrument.prototype.clearEvent = null;
 
+BaseInstrument.prototype.keyDown = function(){};
+
+BaseInstrument.prototype.keyUp = function(){};
+
 
 /***/ }),
 /* 29 */
@@ -2047,7 +2006,7 @@ BaseInstrument.prototype.clearEvent = null;
 
 
 var inherit = __webpack_require__(0);
-var PianoKeyPlayer = __webpack_require__(24);
+var PianoKeyRecorder = __webpack_require__(24);
 var BaseInstrument = __webpack_require__(28);
 var PianoModel = __webpack_require__(47);
 var Factory = __webpack_require__(2);
@@ -2127,14 +2086,14 @@ Piano.prototype.createKeys = function(){
         if(tokenNote.isBlack() === true){
             style = "background-color: rgb(32,32,32); width: 30px; height: 120px; z-index: 1; color: #ffffff;";
             this.piano.append(Factory.createKey("key", key, "left: " + blackKeyDistance + "; " + style,
-                                                key, tokenNote.value, this._pianoKeyDownHandler.bind(this),
-                                                this._pianoKeyUpHandler.bind(this)));
+                                                key, tokenNote.value, this._drumKeyDownHandler.bind(this),
+                                                this._drumKeyUpHandler.bind(this)));
         } else{
             whiteKeyDistance += keyDistance;
             blackKeyDistance += keyDistance;
             this.piano.append(Factory.createKey("key", key, "left: " + whiteKeyDistance + ";", key,
-                                                tokenNote.value, this._pianoKeyDownHandler.bind(this),
-                                                this._pianoKeyUpHandler.bind(this)));
+                                                tokenNote.value, this._drumKeyDownHandler.bind(this),
+                                                this._drumKeyUpHandler.bind(this)));
         }
         //container.append(Factory.createKey(tokenNote.value, tokenNote.isBlack()));
     }
@@ -2144,10 +2103,10 @@ Piano.prototype._recordAttackHandler = function(note){
     if(this.track.playObjects.length === 0){
         // this is the first button pressed, so it's time to remember the start time!
         this.startTime = Date.now();
-        this.track.playObjects.push(new PianoKeyPlayer(this.track.trackObject, note, 0));
+        this.track.playObjects.push(new PianoKeyRecorder(this.track.trackObject, note, 0));
     } else{
         // it is not first key press, so just record the difference between start moment and present:
-        this.track.playObjects.push(new PianoKeyPlayer(this.track.trackObject, note, Date.now()-this.startTime));
+        this.track.playObjects.push(new PianoKeyRecorder(this.track.trackObject, note, Date.now()-this.startTime));
     }
 };
 
@@ -2162,7 +2121,7 @@ Piano.prototype._recordReleaseHandler = function(note){
     }
 };
 
-Piano.prototype._pianoKeyDownHandler = function(key){
+Piano.prototype._drumKeyDownHandler = function(key){
     var note = PianoModel.getNoteForKey(key);
     if(note !== null){
         if(this.__pressedKeys.indexOf(key) === -1){
@@ -2177,7 +2136,7 @@ Piano.prototype._pianoKeyDownHandler = function(key){
     }
 };
 
-Piano.prototype._pianoKeyUpHandler = function(key){
+Piano.prototype._drumKeyUpHandler = function(key){
     var note = PianoModel.getNoteForKey(key);
     if(note !== null) {
         if(this.__pressedKeys.indexOf(key) >= 0){
@@ -2202,7 +2161,7 @@ Piano.prototype.keyDown = function(){
     var self = this;
     $(document).keydown(function(event){
         key = String.fromCharCode(event.keyCode);
-        self._pianoKeyDownHandler(key);
+        self._drumKeyDownHandler(key);
     });
 };
 
@@ -2211,7 +2170,7 @@ Piano.prototype.keyUp = function(){
     var self = this;
     $(document).keyup(function(event){
         key = String.fromCharCode(event.keyCode);
-        self._pianoKeyUpHandler(key);
+        self._drumKeyUpHandler(key);
     });
 };
 
@@ -3669,10 +3628,6 @@ TrackSynthesizer.prototype.getType = function(){
     return this.trackObject.oscillator.type;
 };
 
-TrackSynthesizer.prototype.getFrequency = function(){
-    return this.trackObject.frequency.value;
-};
-
 TrackSynthesizer.prototype.getAttack = function(){
     return this.trackObject.envelope.attack;
 };
@@ -3691,10 +3646,6 @@ TrackSynthesizer.prototype.getRelease = function(){
 
 TrackSynthesizer.prototype.setType = function(value){
     this.trackObject.oscillator.type = value;
-};
-
-TrackSynthesizer.prototype.setFrequency = function(value){
-    this.trackObject.frequency.value = value;
 };
 
 TrackSynthesizer.prototype.setAttack = function(value){
@@ -4346,20 +4297,15 @@ Oscillator.prototype._build = function(){
 
     this.draggable.on("pointerDown", function(event){
         self.isMousePressed = true;
-        self.dragPointPressEvent();
+        //self.dragPointPressEvent();
     });
 
     this.draggable.on("pointerUp", function(event){
         self.isMousePressed = false;
-        self.dragPointPressEvent();
+        //self.dragPointPressEvent();
     });
 
     this.draggable.on("dragEnd", function(event){
-        self.isMousePressed = false;
-        self.dragEndEvent();
-    });
-
-    this.draggable.on("pointerUp", function(event){
         self.isMousePressed = false;
         self.dragEndEvent();
     });
@@ -4394,8 +4340,8 @@ Oscillator.prototype._dragHandler = function(){
     this.track.trackObject.start();
     console.log(this.track);
     console.log("----------------------");
-    this.startTime = Date.now();
     if(this.track.playObjects.length === 0){
+        this.startTime = Date.now();
         this.track.playObjects.push(new MixerRecorder(x, y, 0));
     } else{
         this.track.playObjects.push(new MixerRecorder(x, y, Date.now()-this.startTime));
@@ -4403,7 +4349,7 @@ Oscillator.prototype._dragHandler = function(){
 };
 
 Oscillator.prototype._pressHandler = function(stopTime){
-    this._playOscillator();
+    //this._playOscillator();
     console.log(this.track);
     console.log("----------------------");
     if(this.track.playObjects.length === 0){
@@ -4510,6 +4456,7 @@ var inherit = __webpack_require__(0);
 var BaseView = __webpack_require__(1);
 var Piano = __webpack_require__(29);
 var Oscillator = __webpack_require__(69);
+var DrumMachine = __webpack_require__(86);
 var Factory = __webpack_require__(2);
 
 module.exports = RecorderView;
@@ -4550,6 +4497,9 @@ RecorderView.prototype.setInstrument = function(){
     switch(this.track.instrument){
         case "synth":
             this.instrument = new Piano(this.track);
+            break;
+        case "drum":
+            this.instrument = new DrumMachine(this.track);
             break;
         case "oscillator":
             this.instrument = new Oscillator(this.track);
@@ -4884,6 +4834,446 @@ WaveForm.prototype.createWaveForm = function(audioContext){
         progressColor: "#fff843"
     });
     console.log(this.waveform);
+};
+
+
+/***/ }),
+/* 78 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var BaseDrumModel = __webpack_require__(79);
+var DrumRecorder = __webpack_require__(80);
+var inherit = __webpack_require__(0);
+
+module.exports = MembraneModel;
+
+function MembraneModel(playSetting){
+    BaseDrumModel.call(this, playSetting);
+    this.note = null;
+}
+
+inherit(MembraneModel, BaseDrumModel);
+
+MembraneModel.prototype._generate = function(){
+    return new Tone.MembraneSynth(this.setting).toMaster();
+};
+
+MembraneModel.prototype.play = function(){
+    var i;
+    for(i =0; i < this.playObjects.length; ++i){
+        this.playObjects[i].play(this.trackObject);
+    }
+};
+
+MembraneModel.prototype.playNow = function(){
+    this.trackObject.triggerAttack(this.note);
+};
+
+MembraneModel.prototype.playAll = function(){
+    var token;
+    for(token in this.playSetting){
+        this.play(this.playSetting[token].note, this.playSetting[token].startTime);
+    }
+};
+
+MembraneModel.prototype.createPlayObjects = function(){
+    var i, tokenPlaySetting;
+    for(i = 0; i < this.playSetting.length; ++i){
+        tokenPlaySetting = this.playSetting[i];
+        this.playObjects.push(new DrumRecorder(tokenPlaySetting.note, tokenPlaySetting.startTime));
+    }
+};
+
+
+/***/ }),
+/* 79 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = BaseDrumModel;
+
+function BaseDrumModel(setting, playSetting){
+    this.instrument = null;
+    this.setting = setting || {};
+    this.playSetting = playSetting || [];
+    this.playObjects = [];
+    this.createPlayObjects();
+    this.setInstrument();
+    this.setSetting();
+    this.trackObject = this._generate();
+}
+
+BaseDrumModel.prototype._generate = null;
+
+BaseDrumModel.prototype.play = null;
+
+BaseDrumModel.prototype.playNow = null;
+
+BaseDrumModel.prototype.playAll = null;
+
+BaseDrumModel.prototype.createPlayObjects = null;
+
+BaseDrumModel.prototype.setSetting = null;
+
+BaseDrumModel.prototype.setInstrument = null;
+
+BaseDrumModel.prototype.emptyPlaySetting = function(){
+    this.playSetting.length = 0;
+    this.playObjects.length = 0;
+};
+
+
+/***/ }),
+/* 80 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var BaseRecorder = __webpack_require__(21);
+
+module.exports = DrumRecorder;
+
+function DrumRecorder(instrument, playValue, startTime){
+    BaseRecorder.call(this);
+    this.instrument = instrument;
+    this.playValue = playValue;
+    this.startTime = startTime;
+}
+
+inherit(DrumRecorder, BaseRecorder);
+
+DrumRecorder.prototype.play = function(drumObject){
+    drumObject.triggerAttackRelease(this.playValue, this.startTime);
+};
+
+
+/***/ }),
+/* 81 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var MembraneModel = __webpack_require__(78);
+var inherit = __webpack_require__(0);
+
+module.exports = KickLeft;
+
+function KickLeft(){
+    MembraneModel.call(this);
+    this.note = "E1";
+    this.setSetting();
+}
+
+inherit(KickLeft, MembraneModel);
+
+KickLeft.prototype.setSetting = function(){
+    if(this.setting.oscillator === undefined){
+        this.setting.oscillator = {};
+    }
+    if(this.setting.envelope === undefined){
+        this.setting.envelope = {};
+    }
+    this.setting.pitchDecay = 0.06;
+    this.setting.octaves = 6;
+    this.setting.oscillator.type = "sine";
+    this.setting.envelope.attack = 0.05;
+    this.setting.envelope.decay = 0.3;
+    this.setting.envelope.sustain = 0;
+    this.setting.envelope.release = 1.4;
+    this.setting.envelope.attackCurve = "exponential";
+};
+
+KickLeft.prototype.setInstrument = function(){
+    this.instrument = "kick-left";
+};
+
+
+/***/ }),
+/* 82 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var MembraneModel = __webpack_require__(78);
+var inherit = __webpack_require__(0);
+
+module.exports = KickRight;
+
+function KickRight(){
+    MembraneModel.call(this);
+    this.note = "C2";
+    this.setSetting();
+}
+
+inherit(KickRight, MembraneModel);
+
+KickRight.prototype.setSetting = function(){
+    if(this.setting.oscillator === undefined){
+        this.setting.oscillator = {};
+    }
+    if(this.setting.envelope === undefined){
+        this.setting.envelope = {};
+    }
+    this.setting.pitchDecay = 0.1;
+    this.setting.octaves = 10;
+    this.setting.oscillator.type = "sine";
+    this.setting.envelope.attack = 0.02;
+    this.setting.envelope.decay = 0.6;
+    this.setting.envelope.sustain = 0;
+};
+
+KickRight.prototype.setInstrument = function(){
+    this.instrument = "kick-right";
+};
+
+
+/***/ }),
+/* 83 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+// TrackDrum
+
+var BaseTrackModel = __webpack_require__(7);
+var inherit = __webpack_require__(0);
+var KickLeft = __webpack_require__(81);
+var KickRight = __webpack_require__(82);
+var TrackPlayer = __webpack_require__(84);
+
+module.exports = TrackDrum;
+
+// @param {String} name
+// @param {Object} source
+function TrackDrum(id, data){
+    BaseTrackModel.call(this, id, data);
+    this.drums = data.drums || {};
+    this.drumObjects = {};
+    this.createDrumObjects();
+}
+
+inherit(TrackDrum, BaseTrackModel);
+
+TrackDrum.prototype._generate = function(){
+    return new Tone.Oscillator(this.setting).toMaster();
+};
+
+TrackDrum.prototype.createDrumObject = function(drum, playSettings){
+    switch(drum){
+        case "kick-left":
+            this.drumObjects[drum] = new KickLeft(playSettings);
+            break;
+        case "kick-right":
+            this.drumObjects[drum] = new KickRight(playSettings);
+            break;
+        case "":
+            this.drumObjects[drum] = new TrackPlayer();
+            break;
+    }
+};
+
+TrackDrum.prototype.createDrumObjects = function(){
+    var drum;
+    for(drum in this.drums){
+        this.createDrumObject(drum, this.drums[drum]["play-setting"]);
+    }
+};
+
+TrackDrum.prototype.getData = function(){
+    var result = {};
+    result.instrument = this.instrument;
+    result["post-setting"] = this.postSettings.getPostSettings();
+    result["drums"] = this.getDrumObjectsData();
+    return result;
+};
+
+TrackDrum.prototype.getDrumObjectsData = function(){
+    var drum;
+    var result = {};
+    for(drum in this.drumObjects){
+        result[drum] = this.drumObjects[drum].playSetting;
+    }
+    return result;
+};
+
+TrackDrum.prototype.emptyPlaySetting = function(){
+    var drum;
+    for(drum in this.drums){
+        this.drums[drum].emptyPlaySetting();
+    }
+};
+
+TrackDrum.prototype.createPlayObjects = function(){};
+
+
+/***/ }),
+/* 84 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+// TrackPlayer
+
+module.exports = TrackPlayer;
+
+function TrackPlayer(){
+
+}
+
+
+/***/ }),
+/* 85 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var KickLeft = __webpack_require__(81);
+var KickRight = __webpack_require__(82);
+
+module.exports = new DrumModel;
+
+function DrumModel(){
+    this.kickLeft = new KickLeft();
+    this.kickRight = new KickRight();
+    this.tom1 = null;
+    this.tom2 = null;
+    this.tom3 = null;
+    this.snare1 = null;
+    this.snare2 = null;
+    this.hitHat1 = null;
+    this.hitHat2 = null;
+    this.hitHat3 = null;
+    this.keys = ['B', 'N', 'F', 'G', 'H', 'J', 'K', 'E', 'R', 'I'];
+}
+
+DrumModel.prototype.getDrumForKey = function(key){
+    var result = null;
+    switch(key){
+        case 'B': result = this.kickLeft; break;
+        case 'N': result = this.kickRight; break;
+        case 'F': result = this.tom1; break;
+        case 'G': result = this.tom2; break;
+        case 'H': result = this.tom3; break;
+        case 'J': result = this.snare1; break;
+        case 'K': result = this.snare2; break;
+        case 'E': result = this.hitHat1; break;
+        case 'R': result = this.hitHat2; break;
+        case 'I': result = this.hitHat3; break;
+        default: console.log("wrong key: " + key); break;
+    }
+    return result;
+};
+
+
+/***/ }),
+/* 86 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var DrumRecorder = __webpack_require__(80);
+var DrumModel = __webpack_require__(85);
+var BaseInstrument = __webpack_require__(28);
+var Factory = __webpack_require__(2);
+
+module.exports = DrumMachine;
+
+function DrumMachine(track){
+    BaseInstrument.call(this, track, "drum-machine");
+
+    this.drumGrid = null;
+
+    this._build();
+}
+
+inherit(DrumMachine, BaseInstrument);
+
+DrumMachine.prototype._build = function(){
+    var self = this;
+    var container = this.getContainer();
+
+    this.createDrumGrid(['B', 'N', 'F', 'G', 'H', 'J', 'K', 'E', 'R', 'I']);
+
+    container.append(this.drumGrid);
+};
+
+DrumMachine.prototype.recordEvent = function(recordButton){
+    if(this.isRecordNow === true){
+        // stop record
+        recordButton.text("record");
+        this.isRecordNow = false;
+    } else{
+        this.isRecordNow = true;
+        this.track.emptyPlaySetting(); // clear previous play data setting
+        recordButton.text("stop");
+    }
+};
+
+DrumMachine.prototype.clearEvent = function(){
+    this.track.emptyPlaySetting();
+};
+
+
+DrumMachine.prototype._recordHandler = function(drum){
+    if(drum.playObjects.length === 0){
+        // this is the first button pressed, so it's time to remember the start time!
+        this.startTime = Date.now();
+        drum.playObjects.push(new DrumRecorder(drum.note, 0));
+    } else{
+        drum.playObjects.push(new DrumRecorder(drum.note, Date.now()-this.startTime));
+    }
+    this.track.drumObjects[drum.instrument] = drum;
+};
+
+DrumMachine.prototype._drumKeyDownHandler = function(key){
+    var drum = DrumModel.getDrumForKey(key);
+    if(drum !== null){
+        console.log(drum);
+        drum.playNow();
+        if(this.isRecordNow === true){
+            this._recordHandler(drum);
+        }
+    }
+};
+
+DrumMachine.prototype.keyDown = function(){
+    var key;
+    var self = this;
+    $(document).keydown(function(event){
+        key = String.fromCharCode(event.keyCode);
+        self._drumKeyDownHandler(key);
+    });
+};
+
+DrumMachine.prototype.createDrumGrid = function(drumList){
+    var i;
+    var self = this;
+    var $item = null;
+    var $column = null;
+    this.drumGrid = $("<div class='ten column stackable ui grid drum'>");
+    for(i = 0; i < drumList.length; ++i){
+        $item = $("<div id='" + drumList[i] + "' class='item'>" + drumList[i] + "</div>");
+        $item.on("click", function(event){
+            self._drumKeyDownHandler($(this).attr("id"));
+        });
+        $column = $("<div class='column'>");
+        $column.append($item);
+        this.drumGrid.append($column);
+    }
 };
 
 

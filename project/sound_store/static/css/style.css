@@ -240,3 +240,8 @@ body {
     height: 150px;
     background-color: grey;
 }
+
+.grid.drum {
+    width: 80%;
+    background-color: grey;
+}
