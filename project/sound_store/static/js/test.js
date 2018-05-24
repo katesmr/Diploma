@@ -624,6 +624,8 @@ BaseTrackModel.prototype.applyFilter = null;
 
 BaseTrackModel.prototype.removeFilter = null;
 
+BaseTrackModel.prototype.merge = null;
+
 
 /***/ }),
 /* 8 */
@@ -1070,12 +1072,10 @@ TrackView.prototype.back = function(){
     this.filterTabSegment.resetToolOptions(); // reset previous filter of track
     // save playing setting
     this.instrumentView.track.setPlaySettings();
-    this.instrumentView.getContainer().empty();
+    this.instrumentView.instrument.getContainer().empty();
 };
 
 TrackView.prototype.bindKeyEvent = function(){
-    console.log("-------");
-    console.log(this.instrumentView.instrument);
     this.instrumentView.instrument.keyDown();
     this.instrumentView.instrument.keyUp();
 };
@@ -5105,8 +5105,10 @@ module.exports = TrackDrum;  // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 function TrackDrum(id, data){
     BaseTrackModel.call(this, id, data);
-    this.drums = data.drums || [];
-    this.drumObjects = {};
+    this.drums = data.drums || []; // name of drum list
+    this.drumObjects = {}; // only used drum
+    this.allDrumObjects = {};
+    this.createAllDrumObjects();
     this.createDrumObjects();
 }
 
@@ -5122,26 +5124,6 @@ TrackDrum.prototype.getAudioBuffer = function(){};
 
 TrackDrum.prototype.getBlob = function(){};
 
-TrackDrum.prototype.createDrumObject = function(drumName){
-    switch(drumName){
-        case "kick-left":
-            this.drumObjects[drumName] = new KickLeft();
-            break;
-        case "kick-right":
-            this.drumObjects[drumName] = new KickRight();
-            break;
-        case "big-tom":
-            this.drumObjects[drumName] = new BigTom();
-            break;
-        case "left-tom":
-            this.drumObjects[drumName] = new LeftTom();
-            break;
-        case "":
-            this.drumObjects[drumName] = new TrackPlayer();
-            break;
-    }
-};
-
 TrackDrum.prototype.getData = function(){
     var result = {};
     result.id = this.id;
@@ -5153,17 +5135,28 @@ TrackDrum.prototype.getData = function(){
     return result;
 };
 
-TrackDrum.prototype.createDrumObjects = function(){
-    var i;
-    for(i = 0; i < this.drums.length; ++i){
-        this.createDrumObject(this.drums[i]);
+/**
+ * Add new drum
+ * @param drumName
+ */
+TrackDrum.prototype.addDrum = function(drumName){
+    if(this.drums.indexOf(drumName) === -1){
+        // get reference to drum object
+        this.drumObjects[drumName] = this.allDrumObjects[drumName];
+        this.drums.push(drumName);
     }
 };
 
-TrackDrum.prototype.addDrum = function(drumObject){
-    if(this.drums.indexOf(drumObject.instrument) === -1){
-        this.drums.push(drumObject.instrument);
-        this.drumObjects[drumObject.instrument] = drumObject;
+/**
+ * Put used drum sound object in this.drumObjects if them exist
+ */
+TrackDrum.prototype.createDrumObjects = function(){
+    var drumName;
+    for(drumName in this.allDrumObjects){
+        if(this.drums.indexOf(drumName) !== -1){
+            // get reference to drum object
+            this.drumObjects[drumName] = this.allDrumObjects[drumName];
+        }
     }
 };
 
@@ -5171,18 +5164,10 @@ TrackDrum.prototype.play = function(){
     var i, token;
     for(i = 0; i < this.playObjects.length; ++i){
         token = this.playObjects[i];
-        console.log(this.drumObjects[token.instrument]);
+        console.log("++++++++++");
+        console.log(this.drumObjects);
         token.play(this.drumObjects[token.instrument].trackObject);
     }
-};
-
-TrackDrum.prototype.getDrumObjectsData = function(){
-    var drum;
-    var result = {};
-    for(drum in this.drumObjects){
-        result[drum] = this.drumObjects[drum].playSetting;
-    }
-    return result;
 };
 
 TrackDrum.prototype.createPlayObjects = function(){
@@ -5199,8 +5184,8 @@ TrackDrum.prototype.createPlayObjects = function(){
  */
 TrackDrum.prototype.applyFilter = function(filter){
     var drum;
-    for(drum in this.drumObjects){
-        filter.applyToTrack(this.drumObjects[drum].trackObject);
+    for(drum in this.allDrumObjects){
+        filter.applyToTrack(this.allDrumObjects[drum].trackObject);
     }
 };
 
@@ -5210,9 +5195,23 @@ TrackDrum.prototype.applyFilter = function(filter){
  */
 TrackDrum.prototype.removeFilter = function(filter){
     var drum;
-    for(drum in this.drumObjects){
-        filter.disconnectFilter(this.drumObjects[drum].trackObject);
+    for(drum in this.allDrumObjects){
+        filter.disconnectFilter(this.allDrumObjects[drum].trackObject);
     }
+};
+
+TrackDrum.prototype.merge = function(){
+    // merge this.object !!!!!!!
+};
+
+/**
+ * Init all drum sound objects
+ */
+TrackDrum.prototype.createAllDrumObjects = function(){
+    this.allDrumObjects["kick-left"] = new KickLeft();
+    this.allDrumObjects["kick-right"] = new KickRight();
+    this.allDrumObjects["big-tom"] = new BigTom();
+    this.allDrumObjects["left-tom"] = new LeftTom();
 };
 
 
@@ -5247,10 +5246,10 @@ var LeftTom = __webpack_require__(88);
 module.exports = new DrumModel;
 
 function DrumModel(){
-    this.kickLeft = new KickLeft();
-    this.kickRight = new KickRight();
-    this.bigTom = new BigTom();
-    this.leftTom = new LeftTom();
+    this.kickLeft = "kick-left";
+    this.kickRight = "kick-right";
+    this.bigTom = "big-tom";
+    this.leftTom = "left-tom";
     this.tom3 = null;
     this.snare1 = null;
     this.snare2 = null;
@@ -5260,7 +5259,7 @@ function DrumModel(){
     this.keys = ['B', 'N', 'F', 'G', 'H', 'J', 'K', 'E', 'R', 'I'];
 }
 
-DrumModel.prototype.getDrumForKey = function(key){
+DrumModel.prototype.getDrumNameForKey = function(key){
     var result = null;
     switch(key){
         case 'B': result = this.kickLeft; break;
@@ -5307,7 +5306,7 @@ DrumMachine.prototype._build = function(){
     var self = this;
     var container = this.getContainer();
 
-    this.createDrumGrid(['B', 'N', 'F', 'G', 'H', 'J', 'K', 'E', 'R', 'I']);
+    this.createDrumGrid(DrumModel.keys);
 
     container.append(this.drumGrid);
 };
@@ -5329,25 +5328,30 @@ DrumMachine.prototype.clearEvent = function(){
 };
 
 
-DrumMachine.prototype._recordHandler = function(drum){
-    this.track.addDrum(drum);
+DrumMachine.prototype._recordHandler = function(drumObject){
+    this.track.addDrum(drumObject.instrument);
     console.log("---------");
     console.log(this.track.playObjects);
     if(this.track.playObjects.length === 0){
         this.startTime = Date.now();
         // this is the first button pressed, so it's time to remember the start time!
-        this.track.playObjects.push(new DrumRecorder(drum.instrument, drum.note, 0));
+        this.track.playObjects.push(new DrumRecorder(drumObject.instrument, drumObject.note, 0));
     } else{
-        this.track.playObjects.push(new DrumRecorder(drum.instrument, drum.note, Date.now()-this.startTime));
+        this.track.playObjects.push(new DrumRecorder(drumObject.instrument, drumObject.note,
+                                                     Date.now()-this.startTime));
     }
 };
 
 DrumMachine.prototype._drumKeyDownHandler = function(key){
-    var drum = DrumModel.getDrumForKey(key);
-    if(drum !== null && this.isActive === true){
-        drum.playNow();
-        if(this.isRecordNow === true){
-            this._recordHandler(drum);
+    var drumObject = null;
+    var drumName = DrumModel.getDrumNameForKey(key);
+    if(drumName !== null){
+        if(this.track){
+            drumObject = this.track.allDrumObjects[drumName];
+            drumObject.playNow();
+            if (this.isRecordNow === true) {
+                this._recordHandler(drumObject);
+            }
         }
     }
 };
