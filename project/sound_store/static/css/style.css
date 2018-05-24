@@ -142,6 +142,10 @@ body {
     margin-top: 2%;
 }
 
+.ui.attached.tabular.menu {
+    margin-top: 16%;
+}
+
 .keys {
     width: 100%;
     position: relative;

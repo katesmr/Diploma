@@ -1021,7 +1021,7 @@ function TrackView(controller){
     this.settingTitle = $("<a class='item' data-tab='" + this.settingTabSegment.dataTab + "'>setting</a>");
     this.filterTitle = $("<a class='item' data-tab='" + this.filterTabSegment.dataTab + "'>filter</a>");
 
-    this.instrumentView = null;
+    this.instrumentView = new RecorderView();
 
     this._build();
     this.hide();
@@ -1038,7 +1038,7 @@ TrackView.prototype._build = function(){
     this.controller.observer.subscribe(commonEventNames.E_SET_TRACK, setTrack.bind(this));
 
     container.append(this.waveform.getContainer());
-    container.append(this.instrumentView);
+    container.append(this.instrumentView.getContainer());
     this.tabBlock.append(this.settingTitle);
     this.tabBlock.append(this.filterTitle);
     container.append(this.tabBlock);
@@ -1074,19 +1074,19 @@ TrackView.prototype.back = function(){
 };
 
 TrackView.prototype.bindKeyEvent = function(){
+    console.log("-------");
+    console.log(this.instrumentView.instrument);
     this.instrumentView.instrument.keyDown();
     this.instrumentView.instrument.keyUp();
 };
 
 function setTrack(eventName, track){
-    console.log(track.getBlob());
     //this.waveform.createWaveFormFromFile(track.getBlob());
 
     this.settingTabSegment.setTrack(track);
     this.filterTabSegment.setFilter(track);
 
-    this.instrumentView = new RecorderView(track);
-    this.getContainer().append(this.instrumentView.getContainer());
+    this.instrumentView.setTrack(track);
 }
 
 
@@ -1990,6 +1990,7 @@ function BaseInstrument(track, instrumentName){
     this.track = track;
     this.startTime = 0;
     this.isRecordNow = false;
+    this.isActive = false;
 }
 
 inherit(BaseInstrument, BaseView);
@@ -2061,7 +2062,6 @@ Piano.prototype.recordEvent = function(recordButton){
         // stop record
         recordButton.text("record");
         this.isRecordNow = false;
-        console.log(this.track.playObjects);
     } else{
         this.isRecordNow = true;
         this.track.emptyPlaySetting(); // clear previous play data setting
@@ -2133,9 +2133,11 @@ Piano.prototype._drumKeyDownHandler = function(key){
             // play pressed key once
             this.__pressedKeys.push(key);
             Factory.setColorToKey(this.piano, key, "grey");
-            this.track.playKeyNow(note.getValue());
-            if(this.isRecordNow === true){
-                this._recordAttackHandler(note.getValue());
+            if(this.track){
+                this.track.playKeyNow(note.getValue());
+                if(this.isRecordNow === true){
+                    this._recordAttackHandler(note.getValue());
+                }
             }
         }
     }
@@ -2144,7 +2146,7 @@ Piano.prototype._drumKeyDownHandler = function(key){
 Piano.prototype._drumKeyUpHandler = function(key){
     var note = PianoModel.getNoteForKey(key);
     if(note !== null) {
-        if(this.__pressedKeys.indexOf(key) >= 0){
+        if(this.__pressedKeys.indexOf(key) >= 0) {
             // change unpressed key color on default
             if (note.isBlack() === true) {
                 Factory.setColorToKey(this.piano, key, "black");
@@ -2152,11 +2154,13 @@ Piano.prototype._drumKeyUpHandler = function(key){
                 Factory.setColorToKey(this.piano, key, "");
             }
             // stop key playing
-            this.track.stopKeyNow();
-            if(this.isRecordNow === true){
-                this._recordReleaseHandler(note.getValue());
+            if(this.track){
+                this.track.stopKeyNow();
+                if(this.isRecordNow === true){
+                    this._recordReleaseHandler(note.getValue());
+                }
+                this.__pressedKeys.splice(this.__pressedKeys.indexOf(key), 1);
             }
-            this.__pressedKeys.splice(this.__pressedKeys.indexOf(key), 1);
         }
     }
 };
@@ -2164,7 +2168,7 @@ Piano.prototype._drumKeyUpHandler = function(key){
 Piano.prototype.keyDown = function(){
     var key;
     var self = this;
-    $(document).keydown(function(event){
+    $(document).keydown(function(event) {
         key = String.fromCharCode(event.keyCode);
         self._drumKeyDownHandler(key);
     });
@@ -2173,7 +2177,7 @@ Piano.prototype.keyDown = function(){
 Piano.prototype.keyUp = function(){
     var key;
     var self = this;
-    $(document).keyup(function(event){
+    $(document).keyup(function(event) {
         key = String.fromCharCode(event.keyCode);
         self._drumKeyUpHandler(key);
     });
@@ -4477,6 +4481,7 @@ function RecorderView(track){
     this.track = track;
 
     this.instrument = null;
+    this.prevInstrument = null;
     this.recordButton = Factory.createButton("record", "record");
     this.cleardButton = Factory.createButton("clear", "clear");
 
@@ -4501,20 +4506,38 @@ RecorderView.prototype._build = function(){
 
     container.append(this.recordButton);
     container.append(this.cleardButton);
-    container.append(this.instrument.getContainer());
+    container.append(this.instrument);
+};
+
+RecorderView.prototype.setTrack = function(track){
+    if(track){
+        this.track = track;
+        this.setInstrument();
+    }
 };
 
 RecorderView.prototype.setInstrument = function(){
-    switch(this.track.instrument){
-        case "synth":
-            this.instrument = new Piano(this.track);
-            break;
-        case "drum":
-            this.instrument = new DrumMachine(this.track);
-            break;
-        case "oscillator":
-            this.instrument = new Oscillator(this.track);
-            break;
+    if(this.track) {
+        if(this.prevInstrument){
+            console.log("+++++++++++");
+            console.log(this.prevInstrument);
+            this.prevInstrument.track = null; // reset reference to track of previous instrument view
+            this.prevInstrument.isActive = false;
+        }
+        switch (this.track.instrument) {
+            case "synth":
+                this.instrument = new Piano(this.track);
+                break;
+            case "drum":
+                this.instrument = new DrumMachine(this.track);
+                break;
+            case "oscillator":
+                this.instrument = new Oscillator(this.track);
+                break;
+        }
+        this.instrument.isActive = true;
+        this.prevInstrument = this.instrument;
+        this.getContainer().append(this.instrument.getContainer());
     }
 };
 
@@ -5078,7 +5101,7 @@ var DrumRecorder = __webpack_require__(80);
 var BigTom = __webpack_require__(87);
 var LeftTom = __webpack_require__(88);
 
-module.exports = TrackDrum;
+module.exports = TrackDrum;  // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 function TrackDrum(id, data){
     BaseTrackModel.call(this, id, data);
@@ -5321,8 +5344,7 @@ DrumMachine.prototype._recordHandler = function(drum){
 
 DrumMachine.prototype._drumKeyDownHandler = function(key){
     var drum = DrumModel.getDrumForKey(key);
-    if(drum !== null){
-        console.log(drum);
+    if(drum !== null && this.isActive === true){
         drum.playNow();
         if(this.isRecordNow === true){
             this._recordHandler(drum);
