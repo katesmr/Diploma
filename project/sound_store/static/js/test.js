@@ -1090,7 +1090,7 @@ function setTrack(eventName, track){
 
     this.instrumentView.setTrack(track);
 
-    testSave(track);
+    //testSave(track);
 }
 
 function testSave(track){
@@ -1526,6 +1526,7 @@ BaseFilterModel.prototype.applyToTrack = function(track){
 
 BaseFilterModel.prototype.disconnectFilter = function(track){
     track.disconnect(this.filter);
+    track.toMaster();
 };
 
 
@@ -1874,6 +1875,9 @@ module.exports = {
     "addFilter": function(filterList, filter, filterName, isEnabled){
         addFilter(filterList, filter, filterName, isEnabled);
     },
+    "resetFilter": function(filterList, filterName){
+        resetFilter(filterList, filterName);
+    },
     "resetFilters": function(filterList){
         setFilterListToDefault(filterList);
     },
@@ -1976,6 +1980,26 @@ function setFilterListToDefault(filterList) {
         for(option in options){
             //options[option].value = options[option].__initialValue;
             options[option].reset();
+        }
+    }
+}
+
+function resetFilter(filterList, filterName){
+    var i;
+    var option;
+    var options;
+    var tokenFilter;
+    var list = filterList.list;
+    for (i = 0; i < list.length; ++i) {
+        tokenFilter = list[i];
+        if(tokenFilter.name === filterName) {
+            tokenFilter.isEnabled = false;
+            options = tokenFilter.options;
+            for(option in options){
+                //options[option].value = options[option].__initialValue;
+                options[option].reset();
+                console.log(options);
+            }
         }
     }
 }
@@ -3137,9 +3161,9 @@ var TrackSettingsSet = __webpack_require__(27);
 
 module.exports = new TrackSettingsSet([
     new BaseTrackSetting("tremolo", false, {
-        "frequency": new BaseRange(1),
-        "depth": new BaseRange(0.1),
-        "spread": new BaseRange(0),
+        "frequency": new BaseRange(0, 0, 1000, 1),
+        "depth": new BaseRange(0, 0, 1, 0.01),
+        "spread": new BaseRange(0, 0, 360, 1),
         "type": new BaseOptionList({
             "sine": 1,
             "square": 2,
@@ -3148,8 +3172,8 @@ module.exports = new TrackSettingsSet([
         }, 1)
     }),
     new BaseTrackSetting("vibrato", false, {
-        "frequency": new BaseRange(1),
-        "depth": new BaseRange(0.1),
+        "frequency": new BaseRange(0, 0, 1000, 1),
+        "depth": new BaseRange(0, 0, 1, 0.01),
         "type": new BaseOptionList({
             "sine": 1,
             "square": 2,
@@ -3161,14 +3185,14 @@ module.exports = new TrackSettingsSet([
         "bits": new BaseRange(4, 1, 8, 1)
     }),
     new BaseTrackSetting("phaser", false, {
-        "octaves": new BaseRange(1, 0, 1000, 1),
-        "frequency": new BaseRange(0, 0, 1, 0.1), // ???
-        "baseFrequency": new BaseRange(1, 0, 1000, 1)
+        "octaves": new BaseRange(1, 0, 100, 0.01),
+        "frequency": new BaseRange(0, 0, 1, 0.1),
+        "wet": new BaseRange(0, 0, 1, 0.1)
     }),
     new BaseTrackSetting("freeverb", false, {
-        "dampening": new BaseRange(1, 0, 1000, 1),
-        "roomSize": new BaseRange(0, 0, 1, 1), // or step = 0.001
-        "wet": new BaseRange(1, 0, 1, 1)
+        "dampening": new BaseRange(1, 0, 3000, 1),
+        "roomSize": new BaseRange(0, 0, 0.7, 0.1),
+        "wet": new BaseRange(0, 0, 1, 0.1)
     })
 ]);
 
@@ -3422,6 +3446,9 @@ PianoNote.prototype.setValueFromAdditional = function(index){
 
 var FreeverbFilter = __webpack_require__(46);
 var CrusherFilter = __webpack_require__(44);
+var PhaserFilter = __webpack_require__(94);
+var VibratoFilter = __webpack_require__(95);
+var TremoloFilter = __webpack_require__(96);
 
 module.exports = PostSettings;
 
@@ -3446,13 +3473,16 @@ function PostSettings(postSettings){
 PostSettings.prototype.createFilterObjects = function(filterName, filterSetting){
     switch(filterName){
         case "tremolo":
+            this.filterObjects[filterName] = new TremoloFilter(filterSetting);
             break;
         case "vibrato":
+            this.filterObjects[filterName] = new VibratoFilter(filterSetting);
             break;
         case "crusher":
             this.filterObjects[filterName] = new CrusherFilter(filterSetting);
             break;
         case "phaser":
+            this.filterObjects[filterName] = new PhaserFilter(filterSetting);
             break;
         case "freeverb":
             this.filterObjects[filterName] = new FreeverbFilter(filterSetting);
@@ -3471,6 +3501,7 @@ PostSettings.prototype.getFilterModel = function(filterName){
 PostSettings.prototype.setToTrack = function(filterName, trackModel){
     var filter = this.getFilterModel(filterName);
     if(filter !== null){
+        trackModel.disconnectFromAudioSource();
         if(trackModel.applyFilter === null) {
             filter.applyToTrack(trackModel.trackObject);
         } else{
@@ -4205,6 +4236,7 @@ function uncheckEvent(filterName, isChecked){
     this.table.find(".filter-setting-" + filterName).hide();
     // transfer disabled filter for to delete it from PostSettings and track
     ProxyTrackManager.addFilter(FiltersList, this.filter, filterName, isChecked);
+    ProxyTrackManager.resetFilter(FiltersList, filterName); // ???
 }
 
 
@@ -6106,6 +6138,250 @@ try {
 // easier to handle this case. if(!global) { ...}
 
 module.exports = g;
+
+
+/***/ }),
+/* 94 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+//PhaserFilter
+
+var inherit = __webpack_require__(0);
+var BaseFilterModel = __webpack_require__(19);
+
+module.exports = PhaserFilter;
+
+function PhaserFilter(options){
+    BaseFilterModel.call(this);
+    this.options = options || {};
+}
+
+inherit(PhaserFilter, BaseFilterModel);
+
+PhaserFilter.prototype.generate = function(){
+    this.filter = new Tone.Phaser(this.options);
+};
+
+PhaserFilter.prototype.getFrequency = function(){
+    return this.filter.frequency.value;
+};
+
+PhaserFilter.prototype.getOctaves = function(){
+    return this.filter.octaves.value;
+};
+
+PhaserFilter.prototype.getWet = function(){
+    return this.filter.wet.value;
+};
+
+PhaserFilter.prototype.getOptions = function(){
+    return this.options;
+};
+
+PhaserFilter.prototype.setFrequency = function(value){
+    this.options.frequency = value;
+    this.filter.frequency.value = value;
+};
+
+PhaserFilter.prototype.setOctaves = function(value){
+    this.options.octaves = value;
+    this.filter.octaves.value = value;
+};
+
+PhaserFilter.prototype.setWet = function(value){
+    this.options.wet = value;
+    this.filter.wet.value = value;
+};
+
+PhaserFilter.prototype.setOptions = function(options){
+    this.setFrequency(options.frequency);
+    this.setOctaves(options.octaves);
+    this.setWet(options.wet);
+};
+
+PhaserFilter.prototype.setByName = function(optionName, value){
+    switch(optionName){
+        case "frequency":
+            this.setFrequency(value);
+            break;
+        case "octaves":
+            this.getOctaves(value);
+            break;
+        case "wet":
+            this.setWet(value);
+            break;
+    }
+};
+
+
+
+/***/ }),
+/* 95 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var BaseFilterModel = __webpack_require__(19);
+
+module.exports = VibratoFilter;
+
+function VibratoFilter(options){
+    BaseFilterModel.call(this);
+    this.options = options || {};
+}
+
+inherit(VibratoFilter, BaseFilterModel);
+
+VibratoFilter.prototype.generate = function(){
+    this.filter = new Tone.Vibrato(this.options);
+};
+
+VibratoFilter.prototype.getFrequency = function(){
+    return this.filter.frequency.value;
+};
+
+VibratoFilter.prototype.getDepth = function(){
+    return this.filter.depth.value;
+};
+
+VibratoFilter.prototype.getType = function(){
+    return this.filter.type;
+};
+
+VibratoFilter.prototype.getOptions = function(){
+    return this.options;
+};
+
+VibratoFilter.prototype.setFrequency = function(value){
+    this.options.frequency = value;
+    this.filter.frequency.value = value;
+};
+
+VibratoFilter.prototype.setDepth = function(value){
+    this.options.depth = value;
+    this.filter.depth.value = value;
+};
+
+VibratoFilter.prototype.setType = function(value){
+    this.options.type = value;
+    this.filter.type = value;
+};
+
+VibratoFilter.prototype.setOptions = function(options){
+    this.setFrequency(options.frequency);
+    this.setDepth(options.depth);
+    this.setType(options.type);
+};
+
+VibratoFilter.prototype.setByName = function(optionName, value){
+    switch(optionName){
+        case "frequency":
+            this.setFrequency(value);
+            break;
+        case "depth":
+            this.setDepth(value);
+            break;
+        case "type":
+            this.setType(value);
+            break;
+    }
+};
+
+
+
+/***/ }),
+/* 96 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var BaseFilterModel = __webpack_require__(19);
+
+module.exports = TremoloFilter;
+
+function TremoloFilter(options){
+    BaseFilterModel.call(this);
+    this.options = options || {};
+}
+
+inherit(TremoloFilter, BaseFilterModel);
+
+TremoloFilter.prototype.generate = function(){
+    this.filter = new Tone.Tremolo(this.options);
+};
+
+TremoloFilter.prototype.getFrequency = function(){
+    return this.filter.frequency.value;
+};
+
+TremoloFilter.prototype.getDepth = function(){
+    return this.filter.depth.value;
+};
+
+TremoloFilter.prototype.getSpread = function(){
+    return this.filter.spread;
+};
+
+TremoloFilter.prototype.getType = function(){
+    return this.filter.type;
+};
+
+TremoloFilter.prototype.getOptions = function(){
+    return this.options;
+};
+
+TremoloFilter.prototype.setFrequency = function(value){
+    this.options.frequency = value;
+    this.filter.frequency.value = value;
+};
+
+TremoloFilter.prototype.setDepth = function(value){
+    this.options.depth = value;
+    this.filter.depth.value = value;
+};
+
+TremoloFilter.prototype.setSpread = function(value){
+    this.options.spread = value;
+    this.filter.spread = value;
+};
+
+TremoloFilter.prototype.setType = function(value){
+    this.options.type = value;
+    this.filter.type = value;
+};
+
+TremoloFilter.prototype.setOptions = function(options){
+    this.setFrequency(options.frequency);
+    this.setDepth(options.depth);
+    this.setSpread(options.spread);
+    this.setType(options.type);
+};
+
+TremoloFilter.prototype.setByName = function(optionName, value){
+    switch(optionName){
+        case "frequency":
+            this.setFrequency(value);
+            break;
+        case "depth":
+            this.setDepth(value);
+            break;
+        case "spread":
+            this.setSpread(value);
+            break;
+        case "type":
+            this.setType(value);
+            break;
+    }
+};
+
+
 
 
 /***/ })
