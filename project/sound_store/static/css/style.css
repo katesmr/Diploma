@@ -84,7 +84,15 @@ body {
 }
 
 .play-button-group {
-    float: left;
+
+}
+
+.button.record {
+
+}
+
+.button.clear {
+    float: right;
 }
 
 .save-button-group {
@@ -205,21 +213,6 @@ body {
 
 .octave-range {
     position: relative;
-    float: right;
-}
-
-.button.record {
-    margin-left: 80%;
-    float: right;
-}
-
-.button.reset-record {
-    margin-left: 80%;
-    float: right;
-}
-
-.button.clear {
-    margin-left: 80%;
     float: right;
 }
 

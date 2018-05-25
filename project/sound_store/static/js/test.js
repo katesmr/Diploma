@@ -339,7 +339,9 @@ module.exports = {
     "E_DEFINE_USER": "E_DEFINE_USER",
     "ON_BACK_BUTTON_CLICK": "ON_BACK_BUTTON_CLICK",
     "E_SHOW_LOGIN_FORM": "E_SHOW_LOGIN_FORM",
-    "E_SET_TRACK": "E_SET_TRACK"
+    "E_SET_TRACK": "E_SET_TRACK",
+    "E_RECORD_TRACK": "E_RECORD_TRACK",
+    "E_CLEAR_RECORD_TRACK": "E_CLEAR_RECORD_TRACK"
 };
 
 
@@ -1003,7 +1005,7 @@ var WaveForm = __webpack_require__(77);
 var BaseWindow = __webpack_require__(18);
 var FilterView = __webpack_require__(66);
 var SettingView = __webpack_require__(72);
-var RecorderView = __webpack_require__(71);
+var InstrumentView = __webpack_require__(97);
 var commonEventNames = __webpack_require__(3);
 var windowsTransport = __webpack_require__(4);
 
@@ -1025,7 +1027,7 @@ function TrackView(controller){
     this.settingTitle = $("<a class='item' data-tab='" + this.settingTabSegment.dataTab + "'>setting</a>");
     this.filterTitle = $("<a class='item' data-tab='" + this.filterTabSegment.dataTab + "'>filter</a>");
 
-    this.instrumentView = new RecorderView();
+    this.instrumentView = new InstrumentView();
 
     this._build();
     this.hide();
@@ -2156,7 +2158,7 @@ Piano.prototype._build = function(){
     container.append(this.octaveRange);
 };
 
-Piano.prototype.recordEvent = function(recordButton){
+Piano.prototype.recordEvent = function(eventName, recordButton){
     if(this.isRecordNow === true){
         // stop record
         recordButton.text("record");
@@ -4266,6 +4268,8 @@ function MenuBar(){
     this.userInfoBar = new UserInfoBar();
     this.backButton = Factory.createIconButton("ui button user-only", "arrow left icon", "");
     this.player = new PlayerView();
+    this.recordButton = Factory.createButton("record", "record");
+    this.clearButton = Factory.createButton("clear", "clear");
 
     this._build();
 }
@@ -4282,24 +4286,45 @@ MenuBar.prototype._build = function(){
         windowsTransport.notify(commonEventNames.ON_BACK_BUTTON_CLICK);
     });
 
+    this.recordButton.on("click", function(){
+        windowsTransport.notify(commonEventNames.E_RECORD_TRACK, $(this));
+    });
+
+    this.clearButton.on("click", function(){
+        windowsTransport.notify(commonEventNames.E_CLEAR_RECORD_TRACK);
+    });
+
+    this.recordButton.hide();
+    this.clearButton.hide();
+
     container.append(this.backButton);
     container.append(this.player.getContainer());
+    container.append(this.recordButton);
+    container.append(this.clearButton);
     container.append(this.userInfoBar.getContainer());
 };
 
 MenuBar.prototype.adaptToActiveWindow = function(newWindow){
-    if(newWindow instanceof TrackView || newWindow instanceof TrackListView){
-        this.backButton.show();
-        this.player.show();
-        this.player.audioPlayer.setModel(newWindow.controller.model);
+    if(newWindow instanceof TrackView){
+        this.showComponentForTrack(newWindow);
+        this.recordButton.show();
+        this.clearButton.show();
     } else if(newWindow instanceof ProjectListView){
         this.backButton.hide();
         this.player.hide();
+    } else if(newWindow instanceof TrackListView){
+        this.showComponentForTrack(newWindow);
     }
     // Here you can get some public properties from the window to update the "look" of the menu bar
     // For example:
     // - window.title
     // - change some controlls according to the window type
+};
+
+MenuBar.prototype.showComponentForTrack = function(newWindow){
+    this.backButton.show();
+    this.player.show();
+    this.player.audioPlayer.setModel(newWindow.controller.model);
 };
 
 
@@ -4436,7 +4461,7 @@ Oscillator.prototype._build = function(){
     container.append(this.coordsMap.map);
 };
 
-Oscillator.prototype.recordEvent = function(recordButton){
+Oscillator.prototype.recordEvent = function(eventName, recordButton){
     if(this.isRecordNow === true){
         // stop record
         recordButton.text("record");
@@ -4568,88 +4593,7 @@ PlayerView.prototype._build = function(){
 };
 
 /***/ }),
-/* 71 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var inherit = __webpack_require__(0);
-var BaseView = __webpack_require__(1);
-var Piano = __webpack_require__(29);
-var Oscillator = __webpack_require__(69);
-var DrumMachine = __webpack_require__(86);
-var Factory = __webpack_require__(2);
-
-module.exports = RecorderView;
-
-function RecorderView(track){
-    BaseView.call(this, "instrument-view");
-    this.track = track;
-
-    this.instrument = null;
-    this.prevInstrument = null;
-    this.recordButton = Factory.createButton("record", "record");
-    this.cleardButton = Factory.createButton("clear", "clear");
-
-    this.setInstrument();
-
-    this._build();
-}
-
-inherit(RecorderView, BaseView);
-
-RecorderView.prototype._build = function(){
-    var self = this;
-    var container = this.getContainer();
-
-    this.recordButton.on("click", function(){
-        self.instrument.recordEvent($(this));
-    });
-
-    this.cleardButton.on("click", function(){
-        self.instrument.clearEvent();
-    });
-
-    container.append(this.recordButton);
-    container.append(this.cleardButton);
-    container.append(this.instrument);
-};
-
-RecorderView.prototype.setTrack = function(track){
-    if(track){
-        this.track = track;
-        this.setInstrument();
-    }
-};
-
-RecorderView.prototype.setInstrument = function(){
-    if(this.track) {
-        if(this.prevInstrument){
-            console.log("+++++++++++");
-            console.log(this.prevInstrument);
-            this.prevInstrument.track = null; // reset reference to track of previous instrument view
-            this.prevInstrument.isActive = false;
-        }
-        switch (this.track.instrument) {
-            case "synth":
-                this.instrument = new Piano(this.track);
-                break;
-            case "drum":
-                this.instrument = new DrumMachine(this.track);
-                break;
-            case "oscillator":
-                this.instrument = new Oscillator(this.track);
-                break;
-        }
-        this.instrument.isActive = true;
-        this.prevInstrument = this.instrument;
-        this.getContainer().append(this.instrument.getContainer());
-    }
-};
-
-
-/***/ }),
+/* 71 */,
 /* 72 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -5418,7 +5362,7 @@ DrumMachine.prototype._build = function(){
     container.append(this.drumGrid);
 };
 
-DrumMachine.prototype.recordEvent = function(recordButton){
+DrumMachine.prototype.recordEvent = function(eventName, recordButton){
     if(this.isRecordNow === true){
         // stop record
         recordButton.text("record");
@@ -6382,6 +6326,85 @@ TremoloFilter.prototype.setByName = function(optionName, value){
 };
 
 
+
+
+/***/ }),
+/* 97 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var BaseView = __webpack_require__(1);
+var Piano = __webpack_require__(29);
+var Oscillator = __webpack_require__(69);
+var DrumMachine = __webpack_require__(86);
+var windowsTransport = __webpack_require__(4);
+var commonEventNames = __webpack_require__(3);
+
+module.exports = InstrumentView;
+
+/**
+ * Create instrument view corresponding to track instrument
+ * @param track
+ * @constructor
+ */
+function InstrumentView(track){
+    BaseView.call(this, "instrument-view");
+    this.track = track;
+
+    this.instrument = null;
+    this.prevInstrument = null;
+
+    this.setInstrument();
+
+    this._build();
+}
+
+inherit(InstrumentView, BaseView);
+
+InstrumentView.prototype._build = function(){
+    var container = this.getContainer();
+
+    container.append(this.instrument);
+};
+
+InstrumentView.prototype.setTrack = function(track){
+    if(track){
+        this.track = track;
+        this.setInstrument();
+        windowsTransport.subscribe(commonEventNames.E_RECORD_TRACK,
+                                   this.instrument.recordEvent.bind(this.instrument));
+        windowsTransport.subscribe(commonEventNames.E_CLEAR_RECORD_TRACK,
+                                   this.instrument.clearEvent.bind(this.instrument));
+    }
+};
+
+InstrumentView.prototype.setInstrument = function(){
+    if(this.track) {
+        if(this.prevInstrument){
+            console.log("+++++++++++");
+            console.log(this.prevInstrument);
+            this.prevInstrument.track = null; // reset reference to track of previous instrument view
+            this.prevInstrument.isActive = false;
+        }
+        switch (this.track.instrument) {
+            case "synth":
+                this.instrument = new Piano(this.track);
+                break;
+            case "drum":
+                this.instrument = new DrumMachine(this.track);
+                break;
+            case "oscillator":
+                this.instrument = new Oscillator(this.track);
+                break;
+        }
+        this.instrument.isActive = true;
+        this.prevInstrument = this.instrument;
+        this.getContainer().append(this.instrument.getContainer());
+    }
+};
 
 
 /***/ })
