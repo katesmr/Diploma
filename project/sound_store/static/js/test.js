@@ -2029,8 +2029,10 @@ function setToSettingList(listElement, trackObject, optionName){
     if(methodName in trackObject){
         listElement.isEnabled = true;
         result = trackObject[methodName]();
+        // add only existing methods/parameters from track to SettingList
         if(result !== undefined || result !== null){
             listElement.set(trackObject[methodName]());
+            hideExistingParams(listElement, trackObject.instrument);
         }
     }
 }
@@ -2039,6 +2041,24 @@ function setToTrackSetting(track, settingName, value){
     var methodName = "set" + capitalize(settingName);
     track[methodName](value);
     track.setSetting(); // write to model parameter for saving to server
+}
+
+/**
+ * Hide existing parameters in SettingList
+ */
+function hideExistingParams(listElement, instrumentName){
+    switch(instrumentName){
+        case "drum":
+            listElement.isEnabled = false;
+            break;
+        case "oscillator":
+            if(listElement.name === "frequency" || listElement.name === "volume") {
+                listElement.isEnabled = false;
+            }
+            break;
+        case "noise":
+            break;
+    }
 }
 
 
@@ -4294,8 +4314,7 @@ MenuBar.prototype._build = function(){
         windowsTransport.notify(commonEventNames.E_CLEAR_RECORD_TRACK);
     });
 
-    this.recordButton.hide();
-    this.clearButton.hide();
+    this.hideRecorderButtons();
 
     container.append(this.backButton);
     container.append(this.player.getContainer());
@@ -4312,8 +4331,10 @@ MenuBar.prototype.adaptToActiveWindow = function(newWindow){
     } else if(newWindow instanceof ProjectListView){
         this.backButton.hide();
         this.player.hide();
+        //this.hideRecorderButtons();
     } else if(newWindow instanceof TrackListView){
         this.showComponentForTrack(newWindow);
+        this.hideRecorderButtons();
     }
     // Here you can get some public properties from the window to update the "look" of the menu bar
     // For example:
@@ -4325,6 +4346,11 @@ MenuBar.prototype.showComponentForTrack = function(newWindow){
     this.backButton.show();
     this.player.show();
     this.player.audioPlayer.setModel(newWindow.controller.model);
+};
+
+MenuBar.prototype.hideRecorderButtons = function(){
+    this.recordButton.hide();
+    this.clearButton.hide();
 };
 
 
@@ -5174,6 +5200,8 @@ TrackDrum.prototype.getConstants = function(){};
 TrackDrum.prototype.getAudioBuffer = function(){};
 
 TrackDrum.prototype.getBlob = function(){};
+
+TrackDrum.prototype.disconnectFromAudioSource = function(){};
 
 TrackDrum.prototype.getData = function(){
     var result = {};
