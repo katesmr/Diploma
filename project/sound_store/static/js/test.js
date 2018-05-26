@@ -1013,7 +1013,7 @@ var InstrumentView = __webpack_require__(97);
 var commonEventNames = __webpack_require__(3);
 var windowsTransport = __webpack_require__(4);
 
-var TrackManager = __webpack_require__(17);
+var AudioBufferRecorder = __webpack_require__(100);
 
 module.exports = TrackView;
 
@@ -1096,13 +1096,12 @@ function setTrack(eventName, track){
 
     this.instrumentView.setTrack(track);
 
-    testSave(track);
+    var abr = new AudioBufferRecorder(track);
+    abr.record();
+    //testSave(track);
 }
 
 function testSave(track){
-    console.log(createDuration([{"time": 0, "duration": 0.8}, {"time": 0.3, "duration": 0.4},
-                                {"time": 0.4, "duration": 0.3}, {"time": 0.6, "duration": 0.2},
-                                {"time": 0.65, "duration": 0.3}]));
     var events = [];
     var timeData = [];
     var tmp, temp, i, duration;
@@ -1153,21 +1152,6 @@ function testSave(track){
         console.log(buffer._buffer);
 
     });*/
-}
-
-function createDuration(data){
-    var duration = 0;
-    var tmp;
-    var obj;
-    for(obj in data){
-        if(data[obj].time === 0){
-            duration = data[obj].duration;
-        } else{
-            tmp = data[obj].time + data[obj].duration;
-            duration = Math.max(duration, tmp);
-        }
-    }
-    return duration;
 }
 
 
@@ -5950,6 +5934,117 @@ MetalSynthModel.prototype._generate = function(){
     return new Tone.MetalSynth(this.setting).toMaster();
 };
 
+
+
+/***/ }),
+/* 100 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var keyDuration = __webpack_require__(101);
+var TrackManager = __webpack_require__(17);
+
+module.exports = AudioBufferRecorder;
+
+function AudioBufferRecorder(trackModel){
+    this.track = null;
+    this.playData = null;
+    this.duration = 0;
+    this.trackModel = trackModel;
+    this.createTrack();
+}
+
+AudioBufferRecorder.prototype.createTrack = function(){
+    switch(this.trackModel.instrument){
+        case "synth":
+            this.track = new Tone.Synth(this.trackModel.setting).toMaster();
+            this.playData = createSynthPlayData(this.trackModel.playObjects);
+            this.duration = keyDuration(this.playData);
+            break;
+        case "drum":
+            this.track = null;
+            break;
+        case "oscillator":
+            this.track = new Tone.Oscillator();
+            break;
+        case "noise":
+            this.track = new Tone.NoiseSynth();
+            break;
+    }
+};
+
+AudioBufferRecorder.prototype.play = function(instrument, value){
+    switch(instrument){
+        case "synth":
+            this.track.triggerAttackRelease(value.note, value.duration, value.time);
+            break;
+        case "drum":
+            break;
+        case "oscillator":
+            break;
+        case "noise":
+            break;
+    }
+};
+
+AudioBufferRecorder.prototype.record = function(callback){
+    var self = this;
+    Tone.Offline(function(){
+        self.createTrack(self.trackModel.instrument);
+        var part = new Tone.Part(function(time, value){
+            self.play(self.trackModel.instrument, value);
+            console.log(value.note, time, value.duration);
+        }, self.playData);
+        part.start(0);
+        Tone.Transport.start();
+    }, this.duration).then(function(buffer){
+        console.log(buffer);
+        console.log(buffer._buffer);
+        TrackManager.save(buffer._buffer);
+    });
+};
+
+function createSynthPlayData(trackPlayData){
+    var events = [];
+    var tmp, i;
+    for(i = 0; i < trackPlayData.length; ++i){
+        tmp = {};
+        tmp.time = trackPlayData[i].triggerAttackTime / 1000;
+        tmp.duration = trackPlayData[i].triggerReleaseTime / 1000;
+        tmp.note = trackPlayData[i].note;
+        events.push(tmp);
+    }
+    return events;
+}
+
+
+/***/ }),
+/* 101 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * Expect object list with time and duration parametrs
+ * @param timeData - Array
+ * @returns {number}
+ */
+module.exports = function(timeData){
+    var duration = 0;
+    var tmp, token;
+    for(token in timeData){
+        if(timeData[token].time === 0){
+            duration = timeData[token].duration;
+        } else{
+            tmp = timeData[token].time + timeData[token].duration;
+            duration = Math.max(duration, tmp);
+        }
+    }
+    return duration;
+};
 
 
 /***/ })
