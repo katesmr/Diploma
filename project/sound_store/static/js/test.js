@@ -341,7 +341,10 @@ module.exports = {
     "E_SHOW_LOGIN_FORM": "E_SHOW_LOGIN_FORM",
     "E_SET_TRACK": "E_SET_TRACK",
     "E_RECORD_TRACK": "E_RECORD_TRACK",
-    "E_CLEAR_RECORD_TRACK": "E_CLEAR_RECORD_TRACK"
+    "E_CLEAR_RECORD_TRACK": "E_CLEAR_RECORD_TRACK",
+    "E_PLAY_WAVE": "E_PLAY_WAVE",
+    "E_PAUSE_WAVE": "E_PAUSE_WAVE",
+    "E_STOP_WAVE": "E_STOP_WAVE"
 };
 
 
@@ -1033,6 +1036,8 @@ function TrackView(controller){
 
     this.instrumentView = new InstrumentView();
 
+    this.recorder = new AudioBufferRecorder();
+
     this._build();
     this.hide();
     this.showTabMenu();
@@ -1089,68 +1094,16 @@ TrackView.prototype.bindKeyEvent = function(){
 };
 
 function setTrack(eventName, track){
-    //this.waveform.createWaveFormFromFile(track.getBlob());
+    //this.waveform.create(track.getBlob());
 
     this.settingTabSegment.setTrack(track);
     this.filterTabSegment.setFilter(track);
 
     this.instrumentView.setTrack(track);
 
-    var abr = new AudioBufferRecorder(track);
-    abr.record();
-}
+    this.recorder.setModel(track);
 
-function testSave(track){
-    var events = [];
-    var timeData = [];
-    var tmp, temp, i, duration;
-    for(i = 0; i < track.playObjects.length; ++i){
-        tmp = {};
-        temp = {};
-        tmp.time = (track.playObjects[i].triggerAttackTime/1000);
-        tmp.duration = (track.playObjects[i].triggerReleaseTime/1000);
-        temp.time = tmp.time;
-        temp.duration = tmp.duration;
-        tmp.note = (track.playObjects[i].note);
-        events.push(tmp);
-        timeData.push(temp);
-    }
-    console.log(events);
-    duration = createDuration(timeData);
-    console.log(duration);
-
-    Tone.Offline(function(){
-        var synth = new Tone.Synth(track.setting).toMaster();
-        var part = new Tone.Part(function(time, value){
-            //the notes given as the second element in the array
-            //will be passed in as the second argument
-            synth.triggerAttackRelease(value.note, value.duration, time);
-            console.log(value.note, time, value.duration);
-        }, events);
-        part.start(0);
-        Tone.Transport.start();
-    }, duration).then(function(buffer){
-        //do something with the output buffer
-        console.log(buffer);
-        console.log(buffer._buffer);
-        TrackManager.save(buffer._buffer);
-    });
-
-    /*Tone.Offline(function(){
-        var part = new Tone.Part(function(time, note, dur){
-            //the notes given as the second element in the array
-            //will be passed in as the second argument
-            track.trackObject.triggerAttackRelease(note, dur, time);
-            console.log(note, time);
-        }, events);
-        part.start(0);
-        Tone.Transport.start();
-    }, 10).then(function(buffer){
-        //do something with the output buffer
-        console.log(buffer);
-        console.log(buffer._buffer);
-
-    });*/
+    this.recorder.record(this.waveform.create.bind(this.waveform));
 }
 
 
@@ -1729,7 +1682,7 @@ PianoKeyRecorder.prototype.play = function(){
     // convert to seconds:
     var start = this.triggerAttackTime / 1000;
     var duration = (this.triggerReleaseTime - this.triggerAttackTime) / 1000;
-    this.piano.triggerAttackRelease(this.note, duration, "+" + start);
+    this.piano.triggerAttackRelease(this.note, duration, '+' + start);
 };
 
 PianoKeyRecorder.prototype.getData = function(){
@@ -2989,46 +2942,18 @@ AudioPlayer.prototype.setModel = function(model){
 };
 
 AudioPlayer.prototype.play = function(){
-    if(this.model instanceof BaseTrackModel) {
+    if(this.model instanceof BaseTrackModel){
         this.model.play();
     }
-    /*var i;
-    for(i = 0; i < this.player.length; ++i){
-        this.player[i].play();
-    }*/
 };
 
 AudioPlayer.prototype._fullPlayerWithProject = function(){
 
 };
 
-
-AudioPlayer.prototype.pause = function(){};
-
-AudioPlayer.prototype.stop = function(){};
-
-/*AudioPlayer.prototype.save = function(fileName){
-    var resultAudioBuffer;
-    if(this.trackList.length === 1){
-        resultAudioBuffer = this.trackList[0];
-    } else if(this.trackList.length > 1){
-        resultAudioBuffer = TrackManager.mergeTracks(this.trackList);
-    }
-    TrackManager.save(resultAudioBuffer, fileName);
-    // call request of saving Project !!!!
+AudioPlayer.prototype.stop = function(){
+    this.model.stop();
 };
-
-AudioPlayer.prototype.export = function(){
-    // save Sound
-};
-
-function _trackDataToTrack(audioPlayerObject){
-    var i;
-    var trackData = audioPlayerObject.model.trackDataList;
-    for(i=0; i < trackData.length; ++i){
-
-    }
-}*/
 
 
 /***/ }),
@@ -3830,6 +3755,10 @@ TrackSynthesizer.prototype.play = function(){
     }
 };
 
+TrackSynthesizer.prototype.stop = function(){
+    this.trackObject.triggerRelease();
+};
+
 TrackSynthesizer.prototype.playKeyNow = function(note){
     this.trackObject.triggerAttack(note);
 };
@@ -4279,7 +4208,7 @@ function MenuBar(){
     BaseView.call(this, "menubar");
 
     this.userInfoBar = new UserInfoBar();
-    this.backButton = Factory.createIconButton("ui button user-only", "arrow left icon", "");
+    this.backButton = Factory.createIconButton("ui button back user-only", "arrow left icon", "");
     this.player = new PlayerView();
     this.recordButton = Factory.createButton("record", "record");
     this.clearButton = Factory.createButton("clear", "clear");
@@ -4577,6 +4506,8 @@ var inherit = __webpack_require__(0);
 var Factory = __webpack_require__(2);
 var BaseView = __webpack_require__(1);
 var AudioPlayer = __webpack_require__(41);
+var commonEventNames = __webpack_require__(3);
+var windowsTransport = __webpack_require__(4);
 
 module.exports = PlayerView;
 
@@ -4586,7 +4517,6 @@ function PlayerView(){
     this.audioPlayer = new AudioPlayer();
 
     this.playButton = Factory.createIconButton("ui button", "play icon", "");
-    this.pauseButton = Factory.createIconButton("ui button", "pause icon", "");
     this.stopButton = Factory.createIconButton("ui button", "stop icon", "");
 
     this._build();
@@ -4600,14 +4530,14 @@ PlayerView.prototype._build = function(){
 
     this.playButton.on("click", function(event){
         self.audioPlayer.play();
-    });
-    this.pauseButton.on("click", function(event){
+        windowsTransport.notify(commonEventNames.E_PLAY_WAVE);
     });
     this.stopButton.on("click", function(event){
+        self.audioPlayer.stop();
+        windowsTransport.notify(commonEventNames.E_STOP_WAVE);
     });
 
     container.append(this.playButton);
-    container.append(this.pauseButton);
     container.append(this.stopButton);
 };
 
@@ -4748,7 +4678,7 @@ TrackDataView.prototype.createWaveForm = function(){
     this.waveform = new WaveForm();
     this.getContainer().append(this.waveform.getContainer());
     if(data instanceof Blob){
-        this.waveform.createWaveFormFromFile(data);
+        this.waveform.create(data);
     } else if(data instanceof AudioContext){
         this.waveform.createWaveForm(data);
     }*/
@@ -4769,7 +4699,7 @@ TrackDataView.prototype.createWaveForm = function(){
         var blob = AudioHelper.AudioBufferToBlob(buffer._buffer);
         self.waveform = new WaveForm();
         self.getContainer().append(self.waveform.getContainer());
-        self.waveform.createWaveFormFromFile(blob);
+        self.waveform.create(blob);
 
         /*
         self.waveform = new WaveForm();
@@ -4898,9 +4828,10 @@ UserModal.prototype.show = function(){
 
 
 var inherit = __webpack_require__(0);
-var Factory = __webpack_require__(2);
+var AudioHelper = __webpack_require__(16);
 var BaseView = __webpack_require__(1);
-var RequestManager = __webpack_require__(6);
+var commonEventNames = __webpack_require__(3);
+var windowsTransport = __webpack_require__(4);
 
 module.exports = WaveForm;
 
@@ -4918,16 +4849,17 @@ function WaveForm(){
 inherit(WaveForm, BaseView);
 
 WaveForm.prototype._build = function(){
-    //this.getContainer().append(this.waveContainer);
 };
 
-WaveForm.prototype.createWaveFormFromFile = function(blob){
+WaveForm.prototype.create = function(buffer){
     this.waveform = WaveSurfer.create({
         container: this.getContainer().get(0),
         waveColor: "#626262",
         progressColor: "#fff843"
     });
-    this.waveform.loadBlob(blob);
+    this.waveform.loadBlob(AudioHelper.AudioBufferToBlob(buffer));
+    windowsTransport.subscribe(commonEventNames.E_PLAY_WAVE, this.waveform.playPause.bind(this.waveform));
+    windowsTransport.subscribe(commonEventNames.E_STOP_WAVE, this.waveform.stop.bind(this.waveform));
 };
 
 WaveForm.prototype.createWaveForm = function(audioContext){
@@ -5958,8 +5890,15 @@ function AudioBufferRecorder(trackModel){
     this.playData = null;
     this.duration = 0;
     this.trackModel = trackModel;
-    this.createTrack();
+    this.setModel(trackModel);
 }
+
+AudioBufferRecorder.prototype.setModel = function(trackModel){
+    if(trackModel){
+        this.trackModel = trackModel;
+        this.createTrack();
+    }
+};
 
 /**
  * Again create track and filters for record them to Offline
@@ -5974,9 +5913,8 @@ AudioBufferRecorder.prototype.createTrack = function(){
                 this.track.disconnect(Tone.Master);
                 this.track.connect(f);
             }*/
-            this.createFilters();
             this.playData = createSynthPlayData(this.trackModel.playObjects);
-            this.duration = eventDuration(this.playData);
+            this.duration = eventDuration.keyDuration(this.playData);
             break;
         case "drum":
             this.track = null;
@@ -6034,6 +5972,7 @@ AudioBufferRecorder.prototype.applyAllFiltersToTrack = function(filter){
 };
 
 AudioBufferRecorder.prototype.play = function(instrument, value){
+    var self = this;
     switch(instrument){
         case "synth":
             this.track.triggerAttackRelease(value.note, value.duration, value.time);
@@ -6041,8 +5980,10 @@ AudioBufferRecorder.prototype.play = function(instrument, value){
         case "drum":
             break;
         case "oscillator":
-            this.track.frequency.value = value.frequency;
-            this.track.volume.value = value.volume;
+            setTimeout(function(){
+                self.track.frequency.value = value.frequency;
+                self.track.volume.value = value.volume;
+            }, value.time*100);
             this.track.start(value.time);
             break;
         case "noise":
@@ -6063,7 +6004,8 @@ AudioBufferRecorder.prototype.record = function(callback){
     }, this.duration).then(function(buffer){
         console.log(buffer);
         console.log(buffer._buffer);
-        TrackManager.save(buffer._buffer);
+        //TrackManager.save(buffer._buffer);
+        callback(buffer._buffer);
     });
 };
 
@@ -6124,7 +6066,7 @@ function keyDuration(timeData){
             duration = Math.max(duration, tmp);
         }
     }
-    return duration;
+    return duration - 0.1;
 }
 
 function durationByTime(timeData){
@@ -6133,7 +6075,7 @@ function durationByTime(timeData){
     for(time in timeData){
         duration += timeData[time].time;
     }
-    return duration + 0.01;
+    return duration;
 }
 
 

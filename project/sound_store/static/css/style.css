@@ -16,7 +16,8 @@ body {
 }
 
 .user-info-bar {
-    float: right;
+    float: left;
+    margin-left: 80%;
 }
 
 .user-info-bar .ui.button, p {
@@ -83,16 +84,23 @@ body {
     background-color: #626262;
 }
 
-.play-button-group {
+.ui.button.back {
+    float: left;
+}
 
+.player-view {
+    float: left;
+    margin-left: 30%;
 }
 
 .button.record {
-
+    float: left;
+    margin-left: 10%;
 }
 
 .button.clear {
     float: right;
+    margin-left: 5%;
 }
 
 .save-button-group {
