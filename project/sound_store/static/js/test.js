@@ -1098,7 +1098,6 @@ function setTrack(eventName, track){
 
     var abr = new AudioBufferRecorder(track);
     abr.record();
-    //testSave(track);
 }
 
 function testSave(track){
@@ -1511,6 +1510,7 @@ BaseFilterModel.prototype.setByName = function(){};
 
 BaseFilterModel.prototype.applyToTrack = function(track){
     this.filter.toMaster();
+    track.disconnect(Tone.Master);
     track.connect(this.filter);
 };
 
@@ -3508,10 +3508,15 @@ PostSettings.prototype.getFilterModel = function(filterName){
     return result;
 };
 
+/**
+ * Apply filter to track from track model
+ * @param filterName - String
+ * @param trackModel - BaseTrackModel
+ */
 PostSettings.prototype.setToTrack = function(filterName, trackModel){
     var filter = this.getFilterModel(filterName);
     if(filter !== null){
-        trackModel.disconnectFromAudioSource();
+        //trackModel.disconnectFromAudioSource();
         if(trackModel.applyFilter === null) {
             filter.applyToTrack(trackModel.trackObject);
         } else{
@@ -5956,10 +5961,14 @@ function AudioBufferRecorder(trackModel){
     this.createTrack();
 }
 
+/**
+ * Again create track and filters for record them to Offline
+ */
 AudioBufferRecorder.prototype.createTrack = function(){
     switch(this.trackModel.instrument){
         case "synth":
             this.track = new Tone.Synth(this.trackModel.setting).toMaster();
+            this.createFilters();
             this.playData = createSynthPlayData(this.trackModel.playObjects);
             this.duration = keyDuration(this.playData);
             break;
@@ -5972,6 +5981,53 @@ AudioBufferRecorder.prototype.createTrack = function(){
         case "noise":
             this.track = new Tone.NoiseSynth();
             break;
+    }
+};
+
+AudioBufferRecorder.prototype.createFilter = function(filterObjects, filterName, filterSetting){
+    switch(filterName){
+        case "tremolo":
+            filterObjects[filterName] = new Tone.Tremolo(filterSetting);
+            break;
+        case "vibrato":
+            filterObjects[filterName] = new Tone.Vibrato(filterSetting);
+            break;
+        case "crusher":
+            filterObjects[filterName] = new Tone.BitCrusher(filterSetting);
+            break;
+        case "phaser":
+            filterObjects[filterName] = new Tone.Phaser(filterSetting);
+            break;
+        case "freeverb":
+            filterObjects[filterName] = new Tone.Freeverb(filterSetting);
+            break;
+    }
+};
+
+AudioBufferRecorder.prototype.createFilters = function(){
+    var name;
+    var filterObjects = {};
+    for(name in this.trackModel.postSettings.postSettings){
+        this.createFilter(filterObjects, name, this.trackModel.postSettings.postSettings[name]);
+    }
+    console.log("++++");
+    console.log(filterObjects);
+    this.applyAllFiltersToTrack(filterObjects);
+};
+
+
+/**
+ * Apply all filters from filterObjects to one track
+ */
+AudioBufferRecorder.prototype.applyAllFiltersToTrack = function(filterObjects){
+    var name, filter;
+    for(name in filterObjects){
+        filter = filterObjects[name];
+        console.log("---------");
+        console.log(filter);
+        filter.toMaster();
+        this.track.disconnect(Tone.Master);
+        this.track.connect(filter);
     }
 };
 
