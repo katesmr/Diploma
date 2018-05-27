@@ -14,12 +14,9 @@
   <component name="ChangeListManager">
     <list default="true" id="b869e63b-9454-4773-9649-2a5fbab85264" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change beforePath="$PROJECT_DIR$/project/sound_store/static/js/Tone.min.js" afterPath="" />
       <change beforePath="$PROJECT_DIR$/project/sound_store/static/js/test.js" afterPath="$PROJECT_DIR$/project/sound_store/static/js/test.js" />
       <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/AudioBufferRecorder.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/AudioBufferRecorder.js" />
-      <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/BaseFilterModel.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/BaseFilterModel.js" />
-      <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/PostSettings.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/PostSettings.js" />
-      <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/TrackView.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/TrackView.js" />
+      <change beforePath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/utils/keyDuration.js" afterPath="$PROJECT_DIR$/project/sound_store/static/src/node_modules/utils/eventDuration.js" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -64,7 +61,7 @@
       <file leaf-file-name="TrackView.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/TrackView.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="540">
+            <state relative-caret-position="108">
               <caret line="93" column="4" lean-forward="false" selection-start-line="93" selection-start-column="4" selection-end-line="93" selection-end-column="4" />
               <folding />
             </state>
@@ -74,8 +71,8 @@
       <file leaf-file-name="AudioBufferRecorder.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/AudioBufferRecorder.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="990">
-              <caret line="100" column="53" lean-forward="false" selection-start-line="100" selection-start-column="53" selection-end-line="100" selection-end-column="53" />
+            <state relative-caret-position="-1054">
+              <caret line="34" column="80" lean-forward="false" selection-start-line="34" selection-start-column="80" selection-end-line="34" selection-end-column="80" />
               <folding />
             </state>
           </provider>
@@ -91,11 +88,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="MixerRecorder.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/MixerRecorder.js">
+      <file leaf-file-name="eventDuration.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/utils/eventDuration.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="450">
-              <caret line="25" column="14" lean-forward="false" selection-start-line="25" selection-start-column="4" selection-end-line="25" selection-end-column="14" />
+            <state relative-caret-position="558">
+              <caret line="31" column="25" lean-forward="false" selection-start-line="31" selection-start-column="25" selection-end-line="31" selection-end-column="25" />
               <folding />
             </state>
           </provider>
@@ -137,7 +134,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/../../JS project/Tone (copy).js/examples/drum-test.html" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/utils/clamp.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/CoordMap.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/DrumMachine.js" />
@@ -146,7 +142,6 @@
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/NoiseTrack.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/TrackPlayer.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/TrackSynthesizer.js" />
-        <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/MixerRecorder.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/Factory.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/AudioPlayer.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/controller/ProjectController.js" />
@@ -184,10 +179,12 @@
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/PlayerModel.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/js/Tone.min.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/utils/keyDuration.js" />
-        <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/TrackView.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/BaseFilterModel.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/PostSettings.js" />
+        <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/MixerRecorder.js" />
+        <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/TrackView.js" />
         <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/AudioBufferRecorder.js" />
+        <option value="$PROJECT_DIR$/project/sound_store/static/src/node_modules/utils/eventDuration.js" />
       </list>
     </option>
   </component>
@@ -410,12 +407,12 @@
       <workItem from="1526250992520" duration="11862000" />
       <workItem from="1526482906881" duration="72444000" />
       <workItem from="1526912268520" duration="20808000" />
-      <workItem from="1526999530048" duration="128846000" />
+      <workItem from="1526999530048" duration="137398000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1192304000" />
+    <option name="totallyTimeSpent" value="1200856000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="67" y="0" width="1855" height="1092" extended-state="6" />
@@ -749,38 +746,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/utils/keyDuration.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/TrackOscillator.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="558">
-          <caret line="31" column="5" lean-forward="false" selection-start-line="31" selection-start-column="5" selection-end-line="31" selection-end-column="5" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/MixerRecorder.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="450">
-          <caret line="25" column="14" lean-forward="false" selection-start-line="25" selection-start-column="4" selection-end-line="25" selection-end-column="14" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/Oscillator.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="36">
-          <caret line="62" column="55" lean-forward="false" selection-start-line="62" selection-start-column="55" selection-end-line="62" selection-end-column="55" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/project/sound_store/static/node_modules/audiobuffer-to-wav/index.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="692">
@@ -845,18 +810,50 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/MixerRecorder.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="450">
+          <caret line="25" column="4" lean-forward="false" selection-start-line="25" selection-start-column="4" selection-end-line="28" selection-end-column="23" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/TrackView.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="540">
+        <state relative-caret-position="108">
           <caret line="93" column="4" lean-forward="false" selection-start-line="93" selection-start-column="4" selection-end-line="93" selection-end-column="4" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/view/Oscillator.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="36">
+          <caret line="62" column="55" lean-forward="false" selection-start-line="62" selection-start-column="55" selection-end-line="62" selection-end-column="55" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/TrackOscillator.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="558">
+          <caret line="31" column="5" lean-forward="false" selection-start-line="31" selection-start-column="5" selection-end-line="31" selection-end-column="5" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/utils/eventDuration.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="558">
+          <caret line="31" column="25" lean-forward="false" selection-start-line="31" selection-start-column="25" selection-end-line="31" selection-end-column="25" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/project/sound_store/static/src/node_modules/model/AudioBufferRecorder.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="990">
-          <caret line="100" column="53" lean-forward="false" selection-start-line="100" selection-start-column="53" selection-end-line="100" selection-end-column="53" />
+        <state relative-caret-position="-1054">
+          <caret line="34" column="80" lean-forward="false" selection-start-line="34" selection-start-column="80" selection-end-line="34" selection-end-column="80" />
           <folding />
         </state>
       </provider>

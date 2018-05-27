@@ -5948,7 +5948,7 @@ MetalSynthModel.prototype._generate = function(){
 "use strict";
 
 
-var keyDuration = __webpack_require__(101);
+var eventDuration = __webpack_require__(102);
 var TrackManager = __webpack_require__(17);
 
 module.exports = AudioBufferRecorder;
@@ -5968,15 +5968,23 @@ AudioBufferRecorder.prototype.createTrack = function(){
     switch(this.trackModel.instrument){
         case "synth":
             this.track = new Tone.Synth(this.trackModel.setting).toMaster();
+            /*var name;
+            for(name in ["fr"]){
+                var f = new Tone.Freeverb().toMaster();
+                this.track.disconnect(Tone.Master);
+                this.track.connect(f);
+            }*/
             this.createFilters();
             this.playData = createSynthPlayData(this.trackModel.playObjects);
-            this.duration = keyDuration(this.playData);
+            this.duration = eventDuration(this.playData);
             break;
         case "drum":
             this.track = null;
             break;
         case "oscillator":
-            this.track = new Tone.Oscillator();
+            this.track = new Tone.Oscillator(this.trackModel.setting).toMaster();
+            this.playData = createOscillatorPlayData(this.trackModel.playObjects);
+            this.duration = eventDuration.durationByTime(this.playData);
             break;
         case "noise":
             this.track = new Tone.NoiseSynth();
@@ -5984,9 +5992,10 @@ AudioBufferRecorder.prototype.createTrack = function(){
     }
 };
 
-AudioBufferRecorder.prototype.createFilter = function(filterObjects, filterName, filterSetting){
+AudioBufferRecorder.prototype.createFilter = function(filterName, filterSetting){
+    var filter = null;
     switch(filterName){
-        case "tremolo":
+        /*case "tremolo":
             filterObjects[filterName] = new Tone.Tremolo(filterSetting);
             break;
         case "vibrato":
@@ -5997,38 +6006,31 @@ AudioBufferRecorder.prototype.createFilter = function(filterObjects, filterName,
             break;
         case "phaser":
             filterObjects[filterName] = new Tone.Phaser(filterSetting);
-            break;
+            break;*/
         case "freeverb":
-            filterObjects[filterName] = new Tone.Freeverb(filterSetting);
+            filter = new Tone.Freeverb(filterSetting).toMaster();
             break;
     }
+    return filter;
 };
 
 AudioBufferRecorder.prototype.createFilters = function(){
-    var name;
+    var name, filter;
     var filterObjects = {};
     for(name in this.trackModel.postSettings.postSettings){
-        this.createFilter(filterObjects, name, this.trackModel.postSettings.postSettings[name]);
+        filter = this.createFilter(name, this.trackModel.postSettings.postSettings[name]);
     }
-    console.log("++++");
-    console.log(filterObjects);
-    this.applyAllFiltersToTrack(filterObjects);
+    this.applyAllFiltersToTrack(filter);
 };
 
 
 /**
  * Apply all filters from filterObjects to one track
  */
-AudioBufferRecorder.prototype.applyAllFiltersToTrack = function(filterObjects){
-    var name, filter;
-    for(name in filterObjects){
-        filter = filterObjects[name];
-        console.log("---------");
-        console.log(filter);
-        filter.toMaster();
-        this.track.disconnect(Tone.Master);
-        this.track.connect(filter);
-    }
+AudioBufferRecorder.prototype.applyAllFiltersToTrack = function(filter){
+    //filter.toMaster();
+    this.track.disconnect(Tone.Master);
+    this.track.connect(filter);
 };
 
 AudioBufferRecorder.prototype.play = function(instrument, value){
@@ -6039,6 +6041,9 @@ AudioBufferRecorder.prototype.play = function(instrument, value){
         case "drum":
             break;
         case "oscillator":
+            this.track.frequency.value = value.frequency;
+            this.track.volume.value = value.volume;
+            this.track.start(value.time);
             break;
         case "noise":
             break;
@@ -6051,7 +6056,7 @@ AudioBufferRecorder.prototype.record = function(callback){
         self.createTrack(self.trackModel.instrument);
         var part = new Tone.Part(function(time, value){
             self.play(self.trackModel.instrument, value);
-            console.log(value.note, time, value.duration);
+            console.log(time, self.duration, value);
         }, self.playData);
         part.start(0);
         Tone.Transport.start();
@@ -6075,9 +6080,23 @@ function createSynthPlayData(trackPlayData){
     return events;
 }
 
+function createOscillatorPlayData(trackPlayData){
+    var events = [];
+    var tmp, i;
+    for(i = 0; i < trackPlayData.length; ++i){
+        tmp = {};
+        tmp.time = trackPlayData[i].startTime / 1000;
+        tmp.frequency = trackPlayData[i].frequency;
+        tmp.volume = trackPlayData[i].volume;
+        events.push(tmp);
+    }
+    return events;
+}
+
 
 /***/ }),
-/* 101 */
+/* 101 */,
+/* 102 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6088,7 +6107,13 @@ function createSynthPlayData(trackPlayData){
  * @param timeData - Array
  * @returns {number}
  */
-module.exports = function(timeData){
+module.exports = {
+    "keyDuration": keyDuration,
+    "durationByTime": durationByTime
+};
+
+
+function keyDuration(timeData){
     var duration = 0;
     var tmp, token;
     for(token in timeData){
@@ -6100,7 +6125,16 @@ module.exports = function(timeData){
         }
     }
     return duration;
-};
+}
+
+function durationByTime(timeData){
+    var time;
+    var duration = 0;
+    for(time in timeData){
+        duration += timeData[time].time;
+    }
+    return duration + 0.01;
+}
 
 
 /***/ })
