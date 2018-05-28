@@ -1017,6 +1017,7 @@ var commonEventNames = __webpack_require__(3);
 var windowsTransport = __webpack_require__(4);
 
 var AudioBufferRecorder = __webpack_require__(100);
+var TrackManager = __webpack_require__(17);
 
 module.exports = TrackView;
 
@@ -1104,6 +1105,7 @@ function setTrack(eventName, track){
     this.recorder.setModel(track);
 
     this.recorder.record(this.waveform.create.bind(this.waveform));
+    this.recorder.record(TrackManager.save.bind(TrackManager.save));
 }
 
 
@@ -1448,8 +1450,9 @@ BaseWindow.prototype.back = null;
 
 module.exports = BaseFilterModel;
 
-function BaseFilterModel(){
+function BaseFilterModel(options){
     this.filter = null;
+    this.options = options || {};
     this.generate();
 }
 
@@ -1463,13 +1466,13 @@ BaseFilterModel.prototype.setByName = function(){};
 
 BaseFilterModel.prototype.applyToTrack = function(track){
     this.filter.toMaster();
-    track.disconnect(Tone.Master);
+    //track.disconnect(Tone.Master);
     track.connect(this.filter);
 };
 
 BaseFilterModel.prototype.disconnectFilter = function(track){
     track.disconnect(this.filter);
-    track.toMaster();
+    //track.toMaster();
 };
 
 
@@ -3046,8 +3049,7 @@ var BaseFilterModel = __webpack_require__(19);
 module.exports = CrusherFilter;
 
 function CrusherFilter(options){
-    BaseFilterModel.call(this);
-    this.options = options || {};
+    BaseFilterModel.call(this, options);
 }
 
 inherit(CrusherFilter, BaseFilterModel);
@@ -3121,13 +3123,13 @@ module.exports = new TrackSettingsSet([
     }),
     new BaseTrackSetting("phaser", false, {
         "octaves": new BaseRange(1, 0, 100, 0.01),
-        "frequency": new BaseRange(0, 0, 1, 0.1),
-        "wet": new BaseRange(0, 0, 1, 0.1)
+        "frequency": new BaseRange(0, 0, 1, 0.1)
+        //"wet": new BaseRange(0, 0, 1, 0.1)
     }),
     new BaseTrackSetting("freeverb", false, {
         "dampening": new BaseRange(1, 0, 3000, 1),
-        "roomSize": new BaseRange(0, 0, 0.7, 0.1),
-        "wet": new BaseRange(0, 0, 1, 0.1)
+        "roomSize": new BaseRange(0, 0, 0.7, 0.1)
+        //"wet": new BaseRange(0, 0, 1, 0.1)
     })
 ]);
 
@@ -3145,8 +3147,7 @@ var BaseFilterModel = __webpack_require__(19);
 module.exports = FreeverbFilter;
 
 function FreeverbFilter(options){
-    BaseFilterModel.call(this);
-    this.options = options || {};
+    BaseFilterModel.call(this, options);
 }
 
 inherit(FreeverbFilter, BaseFilterModel);
@@ -3199,9 +3200,6 @@ FreeverbFilter.prototype.setByName = function(optionName, value){
             break;
         case "roomSize":
             this.setRoomSize(value);
-            break;
-        case "wet":
-            this.setWet(value);
             break;
     }
 };
@@ -3533,10 +3531,12 @@ PostSettings.prototype.setValueToFilter = function(filterName, optionName, value
         console.log(filterName);
         console.log(optionName);
         console.log(value);
+        console.log(typeof value);
         filter = this.filterObjects[filterName];
         if(optionName in filter.options){
             filter.setByName(optionName, value);
         }
+        console.log(filter);
     }
 };
 
@@ -4862,16 +4862,6 @@ WaveForm.prototype.create = function(buffer){
     windowsTransport.subscribe(commonEventNames.E_STOP_WAVE, this.waveform.stop.bind(this.waveform));
 };
 
-WaveForm.prototype.createWaveForm = function(audioContext){
-    this.waveform = WaveSurfer.create({
-        container: this.getContainer().get(0),
-        audioContext: audioContext,
-        waveColor: "#626262",
-        progressColor: "#fff843"
-    });
-    console.log(this.waveform);
-};
-
 
 /***/ }),
 /* 78 */
@@ -5503,8 +5493,7 @@ var BaseFilterModel = __webpack_require__(19);
 module.exports = PhaserFilter;
 
 function PhaserFilter(options){
-    BaseFilterModel.call(this);
-    this.options = options || {};
+    BaseFilterModel.call(this, options);
 }
 
 inherit(PhaserFilter, BaseFilterModel);
@@ -5558,9 +5547,6 @@ PhaserFilter.prototype.setByName = function(optionName, value){
         case "octaves":
             this.getOctaves(value);
             break;
-        case "wet":
-            this.setWet(value);
-            break;
     }
 };
 
@@ -5579,8 +5565,7 @@ var BaseFilterModel = __webpack_require__(19);
 module.exports = VibratoFilter;
 
 function VibratoFilter(options){
-    BaseFilterModel.call(this);
-    this.options = options || {};
+    BaseFilterModel.call(this, options);
 }
 
 inherit(VibratoFilter, BaseFilterModel);
@@ -5655,8 +5640,7 @@ var BaseFilterModel = __webpack_require__(19);
 module.exports = TremoloFilter;
 
 function TremoloFilter(options){
-    BaseFilterModel.call(this);
-    this.options = options || {};
+    BaseFilterModel.call(this, options);
 }
 
 inherit(TremoloFilter, BaseFilterModel);
@@ -5881,7 +5865,6 @@ MetalSynthModel.prototype._generate = function(){
 
 
 var eventDuration = __webpack_require__(102);
-var TrackManager = __webpack_require__(17);
 
 module.exports = AudioBufferRecorder;
 
@@ -5890,6 +5873,7 @@ function AudioBufferRecorder(trackModel){
     this.playData = null;
     this.duration = 0;
     this.trackModel = trackModel;
+    this.filterObjects = {};
     this.setModel(trackModel);
 }
 
@@ -5904,15 +5888,10 @@ AudioBufferRecorder.prototype.setModel = function(trackModel){
  * Again create track and filters for record them to Offline
  */
 AudioBufferRecorder.prototype.createTrack = function(){
+    this.filterObjects.length = 0;
     switch(this.trackModel.instrument){
         case "synth":
             this.track = new Tone.Synth(this.trackModel.setting).toMaster();
-            /*var name;
-            for(name in ["fr"]){
-                var f = new Tone.Freeverb().toMaster();
-                this.track.disconnect(Tone.Master);
-                this.track.connect(f);
-            }*/
             this.playData = createSynthPlayData(this.trackModel.playObjects);
             this.duration = eventDuration.keyDuration(this.playData);
             break;
@@ -5928,46 +5907,43 @@ AudioBufferRecorder.prototype.createTrack = function(){
             this.track = new Tone.NoiseSynth();
             break;
     }
+    this.createFilters();
 };
 
 AudioBufferRecorder.prototype.createFilter = function(filterName, filterSetting){
-    var filter = null;
     switch(filterName){
-        /*case "tremolo":
-            filterObjects[filterName] = new Tone.Tremolo(filterSetting);
+        case "tremolo":
+            this.filterObjects[filterName] = new Tone.Tremolo(filterSetting);
             break;
         case "vibrato":
-            filterObjects[filterName] = new Tone.Vibrato(filterSetting);
+            this.filterObjects[filterName] = new Tone.Vibrato(filterSetting);
             break;
         case "crusher":
-            filterObjects[filterName] = new Tone.BitCrusher(filterSetting);
+            this.filterObjects[filterName] = new Tone.BitCrusher(filterSetting);
             break;
         case "phaser":
-            filterObjects[filterName] = new Tone.Phaser(filterSetting);
-            break;*/
+            this.filterObjects[filterName] = new Tone.Phaser(filterSetting);
+            break;
         case "freeverb":
-            filter = new Tone.Freeverb(filterSetting).toMaster();
+            this.filterObjects[filterName] = new Tone.Freeverb(filterSetting);
             break;
     }
-    return filter;
 };
 
 AudioBufferRecorder.prototype.createFilters = function(){
-    var name, filter;
-    var filterObjects = {};
-    for(name in this.trackModel.postSettings.postSettings){
-        filter = this.createFilter(name, this.trackModel.postSettings.postSettings[name]);
+    var name;
+    for(name in this.trackModel.postSettings.filterObjects){
+        this.createFilter(name, this.trackModel.postSettings.filterObjects[name].getOptions());
+        this.applyFilterToTrack(this.filterObjects[name]);
     }
-    this.applyAllFiltersToTrack(filter);
+    this.track.disconnect(Tone.Master);
 };
-
 
 /**
  * Apply all filters from filterObjects to one track
  */
-AudioBufferRecorder.prototype.applyAllFiltersToTrack = function(filter){
-    //filter.toMaster();
-    this.track.disconnect(Tone.Master);
+AudioBufferRecorder.prototype.applyFilterToTrack = function(filter){
+    filter.toMaster();
     this.track.connect(filter);
 };
 
@@ -5985,6 +5961,7 @@ AudioBufferRecorder.prototype.play = function(instrument, value){
                 self.track.volume.value = value.volume;
             }, value.time*100);
             this.track.start(value.time);
+            this.track.stop(); // ??????????????????????????????/
             break;
         case "noise":
             break;
@@ -6004,7 +5981,6 @@ AudioBufferRecorder.prototype.record = function(callback){
     }, this.duration).then(function(buffer){
         console.log(buffer);
         console.log(buffer._buffer);
-        //TrackManager.save(buffer._buffer);
         callback(buffer._buffer);
     });
 };
