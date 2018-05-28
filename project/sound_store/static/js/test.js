@@ -1017,6 +1017,7 @@ var commonEventNames = __webpack_require__(3);
 var windowsTransport = __webpack_require__(4);
 
 var AudioBufferRecorder = __webpack_require__(100);
+var DrumAudioBufferRecorder = __webpack_require__(103);
 var TrackManager = __webpack_require__(17);
 
 module.exports = TrackView;
@@ -1024,7 +1025,7 @@ module.exports = TrackView;
 function TrackView(controller){
     BaseWindow.call(this, controller, "track-view");
 
-    this.title = ""; //this.track.instrument; // instrument name
+    this.title = "";
 
     this.waveform = new WaveForm();
     this.tabBlock = $("<div class='ui top attached tabular menu'>");
@@ -1037,7 +1038,7 @@ function TrackView(controller){
 
     this.instrumentView = new InstrumentView();
 
-    this.recorder = new AudioBufferRecorder();
+    this.recorder = new DrumAudioBufferRecorder();
 
     this._build();
     this.hide();
@@ -1081,6 +1082,7 @@ TrackView.prototype.setActiveFilterView = function(){
 TrackView.prototype.back = function(){
     this.settingTabSegment.table.empty();
     this.filterTabSegment.table.empty();
+    this.waveform.getContainer().empty();
     windowsTransport.notify(commonEventNames.E_ACTIVATE_WINDOW, "trackList");
     this.settingTabSegment.resetToolOptions(); // reset previous setting of track
     this.filterTabSegment.resetToolOptions(); // reset previous filter of track
@@ -1095,17 +1097,15 @@ TrackView.prototype.bindKeyEvent = function(){
 };
 
 function setTrack(eventName, track){
-    //this.waveform.create(track.getBlob());
-
     this.settingTabSegment.setTrack(track);
     this.filterTabSegment.setFilter(track);
 
     this.instrumentView.setTrack(track);
 
     this.recorder.setModel(track);
-
-    this.recorder.record(this.waveform.create.bind(this.waveform));
-    this.recorder.record(TrackManager.save.bind(TrackManager.save));
+    this.recorder.record();
+    //this.recorder.record(this.waveform.create.bind(this.waveform));
+    //this.recorder.record(TrackManager.save.bind(TrackManager.save));
 }
 
 
@@ -1311,6 +1311,8 @@ module.exports = {
     "AudioContextToBlob": AudioContextToBlob
 };
 
+var AudioContext = window.AudioContext || window.webkitAudioContext;
+
 // return AudioBuffer
 function getAudioContextBuffer(context){
     var contextConstants = context._constants; // replace on set method
@@ -1319,10 +1321,11 @@ function getAudioContextBuffer(context){
     return buffer;
 }
 
-function merge(context, buffer1, buffer2){
+function merge(buffer1, buffer2){
     // add comparison channel numbers
     var i, data;
     var newLength = buffer1.length + buffer2.length;
+    var context = new AudioContext();
     var track = context.createBuffer(buffer1.numberOfChannels, newLength, buffer1.sampleRate);
     for(i = 0; i < track.numberOfChannels; ++i){
         data = track.getChannelData(i);
@@ -1369,23 +1372,14 @@ module.exports = TrackManager;
 function TrackManager(){}
 
 // get array with Tone.Synth
-TrackManager.mergeTracks = function(trackList){
+TrackManager.mergeTracks = function(bufferList){
     var i;
-    var nextIndex;
-    var currentBuffer;
     var nextBuffer;
-    var nextTrackContext;
-    var currentTrack = trackList[0];
-    var currentTrackContext = currentTrack._context;
-    currentBuffer = AudioHelper.getAudioContextBuffer(currentTrackContext);
-	for(i = 0; i < trackList.length; ++i){
-	    nextIndex = i + 1;
-	    if(nextIndex !== trackList.length){
-	        nextTrackContext = trackList[nextIndex]._context;
-            nextBuffer = AudioHelper.getAudioContextBuffer(nextTrackContext);
-            // put new AudioBuffer where created from merging of past tracks
-            currentBuffer = AudioHelper.merge(currentTrackContext, currentBuffer, nextBuffer);
-        }
+    var currentBuffer = bufferList[0];
+	for(i = 1; i < bufferList.length; ++i){
+        nextBuffer = bufferList[i];
+        // put new AudioBuffer where created from merging of past tracks
+        currentBuffer = AudioHelper.merge(currentBuffer, nextBuffer);
 	}
 	return currentBuffer;
 };
@@ -3528,15 +3522,10 @@ PostSettings.prototype.setFilter = function(filter){
 PostSettings.prototype.setValueToFilter = function(filterName, optionName, value){
     var filter;
     if(filterName in this.filterObjects){
-        console.log(filterName);
-        console.log(optionName);
-        console.log(value);
-        console.log(typeof value);
         filter = this.filterObjects[filterName];
         if(optionName in filter.options){
             filter.setByName(optionName, value);
         }
-        console.log(filter);
     }
 };
 
@@ -3651,6 +3640,10 @@ TrackOscillator.prototype.play = function(){
     for(i =0; i < this.playObjects.length; ++i){
         this.playObjects[i].play(this.trackObject);
     }
+    this.trackObject.stop();
+};
+
+TrackOscillator.prototype.stop = function(){
     this.trackObject.stop();
 };
 
@@ -4885,6 +4878,10 @@ MembraneModel.prototype._generate = function(){
     return new Tone.MembraneSynth(this.setting).toMaster();
 };
 
+MembraneModel.prototype.stop = function(){
+    this.trackObject.triggerRelease();
+};
+
 
 /***/ }),
 /* 79 */
@@ -4955,6 +4952,8 @@ BaseDrumModel.prototype.playAll = function(){
     }
 };
 
+BaseDrumModel.prototype.stop = null;
+
 BaseDrumModel.prototype.createPlayObject = function(note, startTime){
     this.playObjects.push(new DrumRecorder(note, startTime));
 };
@@ -4980,10 +4979,10 @@ var BaseRecorder = __webpack_require__(21);
 
 module.exports = DrumRecorder;
 
-function DrumRecorder(instrumentName, note, startTime, releaseTime){
+function DrumRecorder(instrumentName, playValue, startTime, releaseTime){
     BaseRecorder.call(this);
     this.instrument = instrumentName;
-    this.note = note;
+    this.playValue = playValue;
     this.startTime = startTime || 0;
     this.releaseTime = releaseTime || 0;
 }
@@ -4991,13 +4990,13 @@ function DrumRecorder(instrumentName, note, startTime, releaseTime){
 inherit(DrumRecorder, BaseRecorder);
 
 DrumRecorder.prototype.play = function(drumObject){
-    drumObject.triggerAttack(this.note, '+' + (this.startTime / 1000));
+    drumObject.triggerAttack(this.playValue, '+' + (this.startTime / 1000));
 };
 
 DrumRecorder.prototype.getData = function(){
     var result = {};
     result.instrument = this.instrument;
-    result.note = this.note;
+    result.playValue = this.playValue;
     result.startTime = this.startTime;
     return result;
 };
@@ -5106,9 +5105,9 @@ module.exports = TrackDrum;  // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 function TrackDrum(id, data){
     BaseTrackModel.call(this, id, data);
-    this.drums = data.drums || []; // name of drum list
+    this.drums = data.drums || []; // list of names of used drums
     this.drumObjects = {}; // only used drum
-    this.allDrumObjects = {};
+    this.allDrumObjects = {}; // instances of all possible drum objects
     this.createAllDrumObjects();
     this.createDrumObjects();
 }
@@ -5173,11 +5172,18 @@ TrackDrum.prototype.play = function(){
     }
 };
 
+TrackDrum.prototype.stop = function(){
+    var drum;
+    for(drum in this.drumObjects){
+        this.drumObjects[drum].stop();
+    }
+};
+
 TrackDrum.prototype.createPlayObjects = function(){
     var i, token;
     for(i = 0; i < this.playSetting.length; ++i){
         token = this.playSetting[i];
-        this.playObjects.push(new DrumRecorder(token.instrument, token.note, token.startTime));
+        this.playObjects.push(new DrumRecorder(token.instrument, token.playValue, token.startTime));
     }
 };
 
@@ -5341,9 +5347,9 @@ DrumMachine.prototype._recordHandler = function(drumObject){
     if(this.track.playObjects.length === 0){
         this.startTime = Date.now();
         // this is the first button pressed, so it's time to remember the start time!
-        this.track.playObjects.push(new DrumRecorder(drumObject.instrument, drumObject.note, 0));
+        this.track.playObjects.push(new DrumRecorder(drumObject.instrument, drumObject.playValue, 0));
     } else{
-        this.track.playObjects.push(new DrumRecorder(drumObject.instrument, drumObject.note,
+        this.track.playObjects.push(new DrumRecorder(drumObject.instrument, drumObject.playValue,
                                                      Date.now()-this.startTime));
     }
 };
@@ -5855,6 +5861,9 @@ MetalSynthModel.prototype._generate = function(){
     return new Tone.MetalSynth(this.setting).toMaster();
 };
 
+MetalSynthModel.prototype.stop = function(){
+    this.trackObject.triggerRelease();
+};
 
 
 /***/ }),
@@ -5869,9 +5878,9 @@ var eventDuration = __webpack_require__(102);
 module.exports = AudioBufferRecorder;
 
 function AudioBufferRecorder(trackModel){
-    this.track = null;
-    this.playData = null;
-    this.duration = 0;
+    this.track = null; // current track
+    this.playData = null; // playing data for current track
+    this.duration = 0; // duration for current track
     this.trackModel = trackModel;
     this.filterObjects = {};
     this.setModel(trackModel);
@@ -5932,11 +5941,13 @@ AudioBufferRecorder.prototype.createFilter = function(filterName, filterSetting)
 
 AudioBufferRecorder.prototype.createFilters = function(){
     var name;
+    if(Object.keys(this.trackModel.postSettings.filterObjects).length !== 0){
+        this.track.disconnect(Tone.Master); // disconnect track from Master only if it has applying filter/s
+    }
     for(name in this.trackModel.postSettings.filterObjects){
         this.createFilter(name, this.trackModel.postSettings.filterObjects[name].getOptions());
         this.applyFilterToTrack(this.filterObjects[name]);
     }
-    this.track.disconnect(Tone.Master);
 };
 
 /**
@@ -6051,7 +6062,120 @@ function durationByTime(timeData){
     for(time in timeData){
         duration += timeData[time].time;
     }
-    return duration;
+    return duration + 0.1;
+}
+
+
+/***/ }),
+/* 103 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var TrackManager = __webpack_require__(17);
+var AudioBufferRecorder = __webpack_require__(100);
+var eventDuration = __webpack_require__(102);
+
+module.exports = DrumAudioBufferRecorder;
+
+function DrumAudioBufferRecorder(drumModel){
+    AudioBufferRecorder.call(this, drumModel);
+    this.drumCount = 0;
+    this.drumAudioBuffers = [];
+}
+
+inherit(DrumAudioBufferRecorder, AudioBufferRecorder);
+
+DrumAudioBufferRecorder.prototype.setModel = function(drumModel){
+    if(drumModel){
+        this.trackModel = drumModel;
+        this.drumCount = drumModel.drums.length;
+        this.createTracks();
+    }
+};
+
+DrumAudioBufferRecorder.prototype.createTrack = function(drumTrack){
+    if(drumTrack.trackObject instanceof Tone.MembraneSynth){
+        this.track = new Tone.MembraneSynth(drumTrack.setting).toMaster();
+    } else if(drumTrack.trackObject instanceof Tone.Player){
+
+    } else if(drumTrack.trackObject instanceof Tone.MetalSynth){
+
+    }
+    this.createFilters();
+    this.playData = createDrumPlayData(this.trackModel.playSetting, drumTrack.instrument);
+    this.duration = eventDuration.durationByTime(this.playData);
+    console.log("created");
+    console.log(this.playData);
+    console.log(this.duration);
+};
+
+DrumAudioBufferRecorder.prototype.createTracks = function(){
+    var drum;
+    for(drum in this.trackModel.drumObjects){
+        this.createTrack(this.trackModel.drumObjects[drum]);
+    }
+};
+
+DrumAudioBufferRecorder.prototype.play = function(drumTrack, value){
+    console.log(this.duration, value);
+    if(drumTrack.trackObject instanceof Tone.MembraneSynth){
+        this.track.triggerAttack(value.playValue, value.time);
+    } else if(drumTrack.trackObject instanceof Tone.Player){
+
+    } else if(drumTrack.trackObject instanceof Tone.MetalSynth){
+
+    }
+};
+
+DrumAudioBufferRecorder.prototype.record = function(callback){
+    var i, drumTrack;
+    for(i = 0; i < this.drumCount; ++i){
+        // this.trackModel.drums[i] - drum instrument name
+        drumTrack = this.trackModel.drumObjects[this.trackModel.drums[i]];
+        this._record(drumTrack, i, callback);
+    }
+};
+
+DrumAudioBufferRecorder.prototype._record = function(drumTrack, index, callback){
+    var self = this;
+    Tone.Offline(function(){
+        self.createTrack(drumTrack);
+        console.log("offline");
+        console.log(self.playData);
+        var part = new Tone.Part(function(time, value){
+            console.log("part");
+            self.play(drumTrack, value);
+        }, self.playData);
+        part.start(0);
+        Tone.Transport.start();
+    }, this.duration).then(function(buffer){
+        console.log("then");
+        console.log(buffer._buffer);
+        self.drumAudioBuffers.push(buffer._buffer);
+        console.log(self.drumAudioBuffers);
+        if(index === self.drumCount-1){
+            var b = TrackManager.mergeTracks(self.drumAudioBuffers);
+            //TrackManager.save(b);
+        }
+    });
+};
+
+function createDrumPlayData(trackPlayData, instrument){
+    var events = [];
+    var tmp, i, token;
+    for(i = 0; i < trackPlayData.length; ++i){
+        tmp = {};
+        token = trackPlayData[i];
+        if(token.instrument === instrument){
+            tmp.time = token.startTime / 1000;
+            tmp.playValue = token.playValue;
+            events.push(tmp);
+        }
+    }
+    return events;
 }
 
 
