@@ -574,14 +574,12 @@ BaseTrackModel.prototype.merge = null;
 var toWav = __webpack_require__(41);
 
 module.exports = {
+    "save": save,
     "getAudioContextBuffer": getAudioContextBuffer,
-    "merge": merge,
     "BlobToArrayBuffer": BlobToArrayBuffer,
     "AudioBufferToBlob": AudioBufferToBlob,
     "AudioContextToBlob": AudioContextToBlob
 };
-
-var AudioContext = window.AudioContext || window.webkitAudioContext;
 
 // return AudioBuffer
 function getAudioContextBuffer(context){
@@ -589,20 +587,6 @@ function getAudioContextBuffer(context){
     var audioBufferSourceNode = contextConstants[1];
     var buffer = audioBufferSourceNode.buffer;
     return buffer;
-}
-
-function merge(buffer1, buffer2){
-    // add comparison channel numbers
-    var i, data;
-    var newLength = buffer1.length + buffer2.length;
-    var context = new AudioContext();
-    var track = context.createBuffer(buffer1.numberOfChannels, newLength, buffer1.sampleRate);
-    for(i = 0; i < track.numberOfChannels; ++i){
-        data = track.getChannelData(i);
-        data.set(buffer1.getChannelData(i));
-        data.set(buffer2.getChannelData(i), buffer1.length);
-    }
-    return track;
 }
 
 function BlobToArrayBuffer(blob, callback){
@@ -618,6 +602,8 @@ function BlobToArrayBuffer(blob, callback){
 function AudioBufferToBlob(audioBuffer){
     var buffer = toWav(audioBuffer, {float32: true});
     var blob = new Blob([buffer], {"type": "audio/x-wav"});
+    console.log("----");
+    console.log(blob);
     return blob;
 }
 
@@ -626,6 +612,31 @@ function AudioContextToBlob(audioContext){
     var blob = AudioBufferToBlob(buffer);
     return blob;
 }
+
+var save = (function(){
+    var a = document.createElement("a");
+    document.body.appendChild(a);
+    a.style = "display: none";
+    return function(data, fileName){
+        if(fileName === undefined){
+            fileName = "test.wav";
+        }
+        var blob;
+        var buffer;
+        if(data instanceof AudioBuffer){
+            blob = AudioBufferToBlob(data);
+        } else{
+            buffer = getAudioContextBuffer(data.context);
+            blob = new Blob([buffer], {"type": "audio/x-wav"});
+        }
+        var url = window.URL.createObjectURL(blob);
+        a.href = url;
+        a.download = fileName;
+        a.click();
+        window.URL.revokeObjectURL(url);
+    };
+}());
+
 
 
 /***/ }),
@@ -640,21 +651,14 @@ var AudioHelper = __webpack_require__(8);
 
 module.exports = TrackManager;
 
+var AudioContext = window.AudioContext || window.webkitAudioContext;
+
 function TrackManager(){}
 
 // get array with Tone.Synth
 TrackManager.mergeTracks = function(bufferList){
     var context = new AudioContext();
     return mergeBuffers(bufferList, context);
-    /*var i;
-    var nextBuffer;
-    var currentBuffer = bufferList[0];
-	for(i = 1; i < bufferList.length; ++i){
-        nextBuffer = bufferList[i];
-        // put new AudioBuffer where created from merging of past tracks
-        currentBuffer = AudioHelper.merge(currentBuffer, nextBuffer);
-	}
-	return currentBuffer;*/
 };
 
 TrackManager.save = (function(){
@@ -1042,7 +1046,7 @@ ProjectListView.prototype.updateProjectList = function(){
 function onRemoveButtonClicked($element){
     if (this.selectedItem === null){
         this.selectedItem = $element;
-        windowsTransport.notify(commonEventNames.E_SHOW_MODAL, "teeest");
+        windowsTransport.notify(commonEventNames.E_SHOW_MODAL, "Do you really want to delete project?");
     }
 }
 
@@ -1074,6 +1078,8 @@ function TrackListView(controller){
     this.__onRemoveButtonClicked = onRemoveButtonClicked.bind(this);
 
     this.selectedItem = null;
+
+    this.isSaveAction = false;
 
     this._build();
     this.hide();
@@ -1120,29 +1126,39 @@ TrackListView.prototype._build = function(){
 };
 
 TrackListView.prototype.back = function(){
-    var self = this;
-    if(this.controller.model.isEmpty()){
-        // Nothing to save, model is just in default state...
-        windowsTransport.notify(commonEventNames.E_ACTIVATE_WINDOW, "projectList");
-    } else{
-        this.controller.save(function(result){
-            if (result instanceof Error){
-                // Can't save...
-            } else{
-                self.controller.model.clear();
-                // Project saved!
-                windowsTransport.notify(commonEventNames.E_ACTIVATE_WINDOW, "projectList");
-            }
-        });
-    }
+    windowsTransport.notify(commonEventNames.E_SHOW_MODAL, "Do you want to save project settings?");
+    this.isSaveAction = true;
 };
 
 TrackListView.prototype.confirmed = function(){
-    this.controller.removeById(this.selectedItem.attr("id"));
+    var self = this;
+    if(this.isSaveAction === true){
+        if(this.controller.model.isEmpty()){
+            // Nothing to save, model is just in default state...
+            windowsTransport.notify(commonEventNames.E_ACTIVATE_WINDOW, "projectList");
+        } else{
+            this.controller.save(function(result){
+                if (result instanceof Error){
+                    // Can't save...
+                } else{
+                    self.controller.model.clear();
+                    // Project saved!
+                    windowsTransport.notify(commonEventNames.E_ACTIVATE_WINDOW, "projectList");
+                }
+            });
+        }
+    } else{
+        this.controller.removeById(this.selectedItem.attr("id"));
+    }
 };
 
 TrackListView.prototype.declined = function(){
-    this.selectedItem = null;
+    if(this.isSaveAction === true){
+        this.controller.model.clear();
+        windowsTransport.notify(commonEventNames.E_ACTIVATE_WINDOW, "projectList");
+    } else{
+        this.selectedItem = null;
+    }
 };
 
 TrackListView.prototype.add = function(track){
@@ -1168,7 +1184,7 @@ TrackListView.prototype.remove = function(id){
 function onRemoveButtonClicked($element){
     if (this.selectedItem === null){
         this.selectedItem = $element;
-        windowsTransport.notify(commonEventNames.E_SHOW_MODAL, "teeest");
+        windowsTransport.notify(commonEventNames.E_SHOW_MODAL, "Do you really want to delete track?");
     }
 }
 
@@ -1198,7 +1214,7 @@ var windowsTransport = __webpack_require__(4);
 
 var AudioBufferRecorder = __webpack_require__(24);
 var DrumAudioBufferRecorder = __webpack_require__(51);
-var TrackManager = __webpack_require__(9);
+var TrackDrum = __webpack_require__(64);
 
 module.exports = TrackView;
 
@@ -1218,7 +1234,7 @@ function TrackView(controller){
 
     this.instrumentView = new InstrumentView();
 
-    this.recorder = new DrumAudioBufferRecorder();
+    this.recorder = null;
 
     this._build();
     this.hide();
@@ -1279,11 +1295,17 @@ TrackView.prototype.bindKeyEvent = function(){
 function setTrack(eventName, track){
     this.settingTabSegment.setTrack(track);
     this.filterTabSegment.setFilter(track);
-
     this.instrumentView.setTrack(track);
 
+    if(track instanceof TrackDrum){
+        this.recorder = new DrumAudioBufferRecorder();
+    } else{
+        this.recorder = new AudioBufferRecorder();
+    }
     this.recorder.setModel(track);
-    this.recorder.record();
+    this.recorder.record(this.waveform.create.bind(this.waveform));
+    this.waveform.show();
+
     //this.recorder.record(this.waveform.create.bind(this.waveform));
     //this.recorder.record(TrackManager.save.bind(TrackManager.save));
 }
@@ -1659,7 +1681,7 @@ AudioBufferRecorder.prototype.createFilter = function(filterName, filterSetting)
 AudioBufferRecorder.prototype.createFilters = function(){
     var name;
     if(Object.keys(this.trackModel.postSettings.filterObjects).length !== 0){
-        this.track.disconnect(Tone.Master); // disconnect track from Master only if it has applying filter/s
+        this.track.disconnect(Tone.Master); // disconnect track from Master only if it has applying to filter/s
     }
     for(name in this.trackModel.postSettings.filterObjects){
         this.createFilter(name, this.trackModel.postSettings.filterObjects[name].getOptions());
@@ -1675,6 +1697,11 @@ AudioBufferRecorder.prototype.applyFilterToTrack = function(filter){
     this.track.connect(filter);
 };
 
+/**
+ * Play events for track
+ * @param instrument - String - instrument name
+ * @param value - Object - object with play values
+ */
 AudioBufferRecorder.prototype.play = function(instrument, value){
     var self = this;
     switch(instrument){
@@ -1687,9 +1714,9 @@ AudioBufferRecorder.prototype.play = function(instrument, value){
             setTimeout(function(){
                 self.track.frequency.value = value.frequency;
                 self.track.volume.value = value.volume;
-            }, value.time*100);
+            }, value.time*1000);
             this.track.start(value.time);
-            this.track.stop(); // ??????????????????????????????/
+            //this.track.stop();
             break;
         case "noise":
             break;
@@ -1701,6 +1728,7 @@ AudioBufferRecorder.prototype.record = function(callback){
     Tone.Offline(function(){
         self.createTrack(self.trackModel.instrument);
         var part = new Tone.Part(function(time, value){
+            // record all play values
             self.play(self.trackModel.instrument, value);
             console.log(time, self.duration, value);
         }, self.playData);
@@ -3371,6 +3399,7 @@ DrumAudioBufferRecorder.prototype.createTrack = function(drumTrack){
     /*if(this.track){
         this.track.disconnect(Tone.Master); // disconnect previous track from Master
     }*/
+    this.filterObjects.length = 0;
     if(drumTrack.trackObject instanceof Tone.MembraneSynth){
         this.track = new Tone.MembraneSynth(drumTrack.setting).toMaster();
     } else if(drumTrack.trackObject instanceof Tone.Player){
@@ -3390,7 +3419,10 @@ DrumAudioBufferRecorder.prototype.createTracks = function(){
     var name;
     for(name in this.trackModel.drumObjects){
         drum = this.trackModel.drumObjects[name];
+        console.log("+");
+        console.log(drum.instrument);
         this.createTrack(drum);
+        // save duration of each track in object: key - instrument name, value - duration
         this.durationList[drum.instrument] = eventDuration.durationByTime(this.playData);
     }
 };
@@ -3398,7 +3430,6 @@ DrumAudioBufferRecorder.prototype.createTracks = function(){
 DrumAudioBufferRecorder.prototype.play = function(drumTrack, value){
     if(drumTrack.trackObject instanceof Tone.MembraneSynth){
         this.track.triggerAttack(value.playValue, value.time);
-        //this.track.triggerAttackRelease(value.playValue, '10n', value.time);
     } else if(drumTrack.trackObject instanceof Tone.Player){
 
     } else if(drumTrack.trackObject instanceof Tone.MetalSynth){
@@ -3412,18 +3443,22 @@ DrumAudioBufferRecorder.prototype.record = function(callback){
     for(i = 0; i < this.drumCount; ++i){
         // this.trackModel.drums[i] - drum instrument name
         drumTrack = this.trackModel.drumObjects[this.trackModel.drums[i]];
-        this._record(drumTrack, i, callback);
+        // convert all drum objects to AudioBuffers
+        this._record(drumTrack, callback);
     }
 };
 
-DrumAudioBufferRecorder.prototype._record = function(drumTrack, index, callback){
+DrumAudioBufferRecorder.prototype._record = function(drumTrack, callback){
+    var result; // result merged AudioBuffer
     var self = this;
+    // durationList[drumTrack.instrument] - duration of corresponded instrument
     Tone.Offline(function(){
         self.createTrack(drumTrack);
         console.log("offline");
         console.log(self.playData);
         console.log(self.durationList[drumTrack.instrument]);
         var part = new Tone.Part(function(time, value){
+            // record all play values
             console.log("part");
             self.play(drumTrack, value);
         }, self.playData);
@@ -3436,10 +3471,11 @@ DrumAudioBufferRecorder.prototype._record = function(drumTrack, index, callback)
         console.log(self.drumAudioBuffers);
         if(self.drumAudioBuffers.length === self.drumCount){
             console.log("save");
-            var b = TrackManager.mergeTracks(self.drumAudioBuffers);
+            result = TrackManager.mergeTracks(self.drumAudioBuffers);
             console.log("result");
-            console.log(b);
-            TrackManager.save(b);
+            console.log(result);
+            callback(result);
+            //TrackManager.save(b);
         }
     });
 };
@@ -6173,9 +6209,6 @@ module.exports = WaveForm;
 function WaveForm(){
     BaseView.call(this, "wave-form");
 
-    //$(this.getContainer()).attr("id", "waveform");
-    //this.waveContainer = $("<div id='waveform'></div>");
-
     this.waveform = null;
 
     this._build();
@@ -6187,12 +6220,14 @@ WaveForm.prototype._build = function(){
 };
 
 WaveForm.prototype.create = function(buffer){
+    console.log("wf");
     this.waveform = WaveSurfer.create({
         container: this.getContainer().get(0),
         waveColor: "#626262",
         progressColor: "#fff843"
     });
     this.waveform.loadBlob(AudioHelper.AudioBufferToBlob(buffer));
+    console.log(this.waveform);
     windowsTransport.subscribe(commonEventNames.E_PLAY_WAVE, this.waveform.playPause.bind(this.waveform));
     windowsTransport.subscribe(commonEventNames.E_STOP_WAVE, this.waveform.stop.bind(this.waveform));
 };
