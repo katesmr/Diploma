@@ -103,7 +103,9 @@ module.exports = {
     "E_CLEAR_RECORD_TRACK": "E_CLEAR_RECORD_TRACK",
     "E_PLAY_WAVE": "E_PLAY_WAVE",
     "E_PAUSE_WAVE": "E_PAUSE_WAVE",
-    "E_STOP_WAVE": "E_STOP_WAVE"
+    "E_STOP_WAVE": "E_STOP_WAVE",
+    "E_EXPORT_PROJECT": "E_EXPORT_PROJECT",
+    "E_EXPORT_TRACK": "E_EXPORT_TRACK"
 };
 
 
@@ -1065,6 +1067,8 @@ var Factory = __webpack_require__(3);
 var commonEventNames = __webpack_require__(1);
 var windowsTransport = __webpack_require__(4);
 
+var ProjectRecorder = __webpack_require__(98);
+
 module.exports = TrackListView;
 
 function TrackListView(controller){
@@ -1111,6 +1115,11 @@ TrackListView.prototype._build = function(){
         }
     });
 
+    windowsTransport.subscribe(commonEventNames.E_EXPORT_PROJECT, function(){
+        var r = new ProjectRecorder(self.controller.model);
+        r.createRecord(r.saveBuffers.bind(r));
+    });
+
     /*this.addTrackButton.on("click", function(event){
         self.controller.add({});
     });*/
@@ -1147,6 +1156,7 @@ TrackListView.prototype.confirmed = function(){
                 }
             });
         }
+        this.isSaveAction = false;
     } else{
         this.controller.removeById(this.selectedItem.attr("id"));
     }
@@ -1156,6 +1166,7 @@ TrackListView.prototype.declined = function(){
     if(this.isSaveAction === true){
         this.controller.model.clear();
         windowsTransport.notify(commonEventNames.E_ACTIVATE_WINDOW, "projectList");
+        this.isSaveAction = false;
     } else{
         this.selectedItem = null;
     }
@@ -1215,6 +1226,7 @@ var windowsTransport = __webpack_require__(4);
 var AudioBufferRecorder = __webpack_require__(24);
 var DrumAudioBufferRecorder = __webpack_require__(51);
 var TrackDrum = __webpack_require__(64);
+var TrackManager = __webpack_require__(9);
 
 module.exports = TrackView;
 
@@ -1244,11 +1256,24 @@ function TrackView(controller){
 inherit(TrackView, BaseWindow);
 
 TrackView.prototype._build = function(){
+    var self = this;
     var container = this.getContainer();
 
     this.setActiveSettingView();
 
     this.controller.observer.subscribe(commonEventNames.E_SET_TRACK, setTrack.bind(this));
+
+    windowsTransport.subscribe(commonEventNames.E_EXPORT_TRACK, function(){
+        console.log("export track");
+        console.log(self.controller.model);
+        if(self.controller.model instanceof TrackDrum){
+            self.recorder = new DrumAudioBufferRecorder();
+        } else{
+            self.recorder = new AudioBufferRecorder();
+        }
+        self.recorder.setModel(self.controller.model);
+        self.recorder.record(TrackManager.save);
+    });
 
     container.append(this.waveform.getContainer());
     container.append(this.instrumentView.getContainer());
@@ -2834,6 +2859,8 @@ WindowManager.prototype.setActiveWindow = function(newActiveWindow){
 
     // TODO: consider to re-implement this...
     if(this.__activeWindow instanceof TrackListView){
+        console.log("active");
+        console.log(this.__windows["projectList"].controller.model.getActiveProject());
         this.__activeWindow.controller.attachModel(this.__windows["projectList"].controller.model.getActiveProject());
         this.__activeWindow.controller.model.clearActiveTrack();
         // catch project data only from ProjectListView !!!!!!!!
@@ -2845,8 +2872,6 @@ WindowManager.prototype.setActiveWindow = function(newActiveWindow){
         this.isProjectListView = true;
         this.__activeWindow.controller.model.clearActiveProject();
     } else if(this.__activeWindow instanceof TrackView){
-        console.log("active");
-        console.log(this.__windows["trackList"].controller.model.getActiveTrack());
         this.__activeWindow.controller.attachModel(this.__windows["trackList"].controller.model.getActiveTrack());
         // send track settings to view
         this.__activeWindow.controller.sendTrack();
@@ -3129,6 +3154,8 @@ function AudioPlayer(model){
     this.model = null;
     this.player = [];
 
+    this.projectPlayer = null;
+
     this.setModel(model);
 }
 
@@ -3138,8 +3165,6 @@ AudioPlayer.prototype.setModel = function(model){
         if(this.model instanceof ProjectModel){
             // merge before play
             this._fullPlayerWithProject();
-        } else if(this.model instanceof BaseTrackModel){
-            this.player = this.model.playObjects;
         }
     }
 };
@@ -3147,6 +3172,9 @@ AudioPlayer.prototype.setModel = function(model){
 AudioPlayer.prototype.play = function(){
     if(this.model instanceof BaseTrackModel){
         this.model.play();
+    } else if(this.model instanceof ProjectModel){
+        this.projectPlayer = new Tone.Player();
+        this.projectPlayer.start();
     }
 };
 
@@ -3155,7 +3183,11 @@ AudioPlayer.prototype._fullPlayerWithProject = function(){
 };
 
 AudioPlayer.prototype.stop = function(){
-    this.model.stop();
+    if(this.model instanceof BaseTrackModel){
+        this.model.stop();
+    } else if(this.model instanceof ProjectModel){
+        this.projectPlayer.stop();
+    }
 };
 
 
@@ -3179,6 +3211,10 @@ function BaseModel(data, observer){
     this.__data = data;
     this.observer = observer;
 }
+
+BaseModel.prototype.get = function(){
+    return this.__data;
+};
 
 BaseModel.prototype.attachObserver = function(observer){
     this.observer = observer;
@@ -3475,7 +3511,6 @@ DrumAudioBufferRecorder.prototype._record = function(drumTrack, callback){
             console.log("result");
             console.log(result);
             callback(result);
-            //TrackManager.save(b);
         }
     });
 };
@@ -4621,22 +4656,6 @@ TrackSynthesizer.prototype.createPlayObjects = function(){
     }
 };
 
-TrackSynthesizer.prototype.saveTest = function(callback){
-    var DURATION = 5; // seconds
-    var self = this;
-    Tone.Offline(function(){
-        //only nodes created in this callback will be recorded
-        var i;
-        var r = self.playSetting;
-        for(i = 0; i < r.length; ++i){
-            self.trackObject.triggerAttackRelease(r[i][0], r[i][1], r[i][2]);
-        }
-    }, DURATION).then(function(buffer){
-        console.log(buffer);
-        callback(buffer._buffer);
-    });
-};
-
 
 /***/ }),
 /* 69 */
@@ -5394,6 +5413,7 @@ var Factory = __webpack_require__(3);
 var commonEventNames = __webpack_require__(1);
 var windowsTransport = __webpack_require__(4);
 
+
 module.exports = MenuBar;
 
 function MenuBar(){
@@ -5402,6 +5422,8 @@ function MenuBar(){
     this.userInfoBar = new UserInfoBar();
     this.backButton = Factory.createIconButton("ui button back user-only", "arrow left icon", "");
     this.player = new PlayerView();
+    this.exportProjectButton = Factory.createButton("export-project", "export WAV");
+    this.exportTrackButton = Factory.createButton("export-track", "export WAV");
     this.recordButton = Factory.createButton("record", "record");
     this.clearButton = Factory.createButton("clear", "clear");
 
@@ -5420,18 +5442,20 @@ MenuBar.prototype._build = function(){
         windowsTransport.notify(commonEventNames.ON_BACK_BUTTON_CLICK);
     });
 
-    this.recordButton.on("click", function(){
+    this.recordButton.on("click", function(event){
         windowsTransport.notify(commonEventNames.E_RECORD_TRACK, $(this));
     });
 
-    this.clearButton.on("click", function(){
+    this.clearButton.on("click", function(event){
         windowsTransport.notify(commonEventNames.E_CLEAR_RECORD_TRACK);
     });
 
-    this.hideRecorderButtons();
+    this.hideButtons();
 
     container.append(this.backButton);
     container.append(this.player.getContainer());
+    container.append(this.exportProjectButton);
+    container.append(this.exportTrackButton);
     container.append(this.recordButton);
     container.append(this.clearButton);
     container.append(this.userInfoBar.getContainer());
@@ -5442,18 +5466,29 @@ MenuBar.prototype.adaptToActiveWindow = function(newWindow){
         this.showComponentForTrack(newWindow);
         this.recordButton.show();
         this.clearButton.show();
+        this.exportTrackButton.show();
+        this.exportProjectButton.hide();
+
+        this.exportTrackButton.on("click", function(event){
+            console.log("export");
+            console.log(newWindow);
+            windowsTransport.notify(commonEventNames.E_EXPORT_TRACK);
+        });
+    } else if(newWindow instanceof TrackListView){
+        this.showComponentForTrack(newWindow);
+        this.hideButtons();
+        this.exportProjectButton.show();
+
+        this.exportProjectButton.on("click", function(event){
+            console.log("export");
+            console.log(newWindow);
+            windowsTransport.notify(commonEventNames.E_EXPORT_PROJECT);
+        });
     } else if(newWindow instanceof ProjectListView){
         this.backButton.hide();
         this.player.hide();
-        //this.hideRecorderButtons();
-    } else if(newWindow instanceof TrackListView){
-        this.showComponentForTrack(newWindow);
-        this.hideRecorderButtons();
+        this.exportProjectButton.hide();
     }
-    // Here you can get some public properties from the window to update the "look" of the menu bar
-    // For example:
-    // - window.title
-    // - change some controlls according to the window type
 };
 
 MenuBar.prototype.showComponentForTrack = function(newWindow){
@@ -5462,7 +5497,8 @@ MenuBar.prototype.showComponentForTrack = function(newWindow){
     this.player.audioPlayer.setModel(newWindow.controller.model);
 };
 
-MenuBar.prototype.hideRecorderButtons = function(){
+MenuBar.prototype.hideButtons = function(){
+    this.exportTrackButton.hide();
     this.recordButton.hide();
     this.clearButton.hide();
 };
@@ -6269,6 +6305,55 @@ function mergeBuffers(buffers, ac) {
   }
   return out;
 }
+
+/***/ }),
+/* 98 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var AudioBufferRecorder = __webpack_require__(24);
+var DrumAudioBufferRecorder = __webpack_require__(51);
+var TrackDrum = __webpack_require__(64);
+var TrackManager = __webpack_require__(9);
+
+module.exports = ProjectRecorder;
+
+function ProjectRecorder(projectModel){
+    this.projectModel = projectModel;
+    this.models = this.projectModel.__data;
+    console.log(this.models);
+    this.recorders = [];
+    this.buffers = [];
+}
+
+ProjectRecorder.prototype.createRecord = function(callback){
+    var i, model, recorder;
+    for(i = 0; i < this.models.length; ++i){
+        model = this.models[i];
+        if(model instanceof TrackDrum){
+            recorder = new DrumAudioBufferRecorder();
+            recorder.setModel(model);
+        } else{
+            recorder = new AudioBufferRecorder();
+            recorder.setModel(model);
+        }
+        recorder.record(callback);
+    }
+};
+
+ProjectRecorder.prototype.saveBuffers = function(buffer){
+    var result;
+    this.buffers.push(buffer);
+    if(this.buffers.length === this.models.length){
+        result = TrackManager.mergeTracks(this.buffers);
+        console.log("project");
+        console.log(result);
+        TrackManager.save(result);
+    }
+};
+
 
 /***/ })
 /******/ ]);
