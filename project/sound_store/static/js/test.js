@@ -64,7 +64,7 @@ var test =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 42);
+/******/ 	return __webpack_require__(__webpack_require__.s = 45);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -105,7 +105,9 @@ module.exports = {
     "E_PAUSE_WAVE": "E_PAUSE_WAVE",
     "E_STOP_WAVE": "E_STOP_WAVE",
     "E_EXPORT_PROJECT": "E_EXPORT_PROJECT",
-    "E_EXPORT_TRACK": "E_EXPORT_TRACK"
+    "E_EXPORT_TRACK": "E_EXPORT_TRACK",
+    "E_PLAY_PROJECT": "E_PLAY_PROJECT",
+    "E_STOP_PROJECT": "E_STOP_PROJECT"
 };
 
 
@@ -390,6 +392,53 @@ module.exports = function(method, dataType, url, callback){
 "use strict";
 
 
+var mergeBuffers = __webpack_require__(44);
+var AudioHelper = __webpack_require__(9);
+
+module.exports = TrackManager;
+
+var AudioContext = window.AudioContext || window.webkitAudioContext;
+
+function TrackManager(){}
+
+// get array with Tone.Synth
+TrackManager.mergeTracks = function(bufferList){
+    var context = new AudioContext();
+    return mergeBuffers(bufferList, context);
+};
+
+TrackManager.save = (function(){
+    var a = document.createElement("a");
+    document.body.appendChild(a);
+    a.style = "display: none";
+    return function(data, fileName){
+        if(fileName === undefined){
+            fileName = "test.wav";
+        }
+        var blob;
+        var buffer;
+        if(data instanceof AudioBuffer){
+            blob = AudioHelper.AudioBufferToBlob(data);
+        } else{
+            buffer = AudioHelper.getAudioContextBuffer(data.context);
+            blob = new Blob([buffer], {"type": "audio/x-wav"});
+        }
+        var url = window.URL.createObjectURL(blob);
+        a.href = url;
+        a.download = fileName;
+        a.click();
+        window.URL.revokeObjectURL(url);
+    };
+}());
+
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
 module.exports = BaseFilterModel;
 
 function BaseFilterModel(options){
@@ -419,15 +468,15 @@ BaseFilterModel.prototype.disconnectFilter = function(track){
 
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var PostSettings = __webpack_require__(62);
-var generateUID = __webpack_require__(44);
-var AudioHelper = __webpack_require__(8);
+var PostSettings = __webpack_require__(64);
+var generateUID = __webpack_require__(47);
+var AudioHelper = __webpack_require__(9);
 
 module.exports = BaseTrackModel;
 
@@ -567,13 +616,13 @@ BaseTrackModel.prototype.merge = null;
 
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var toWav = __webpack_require__(41);
+var toWav = __webpack_require__(43);
 
 module.exports = {
     "save": save,
@@ -642,70 +691,23 @@ var save = (function(){
 
 
 /***/ }),
-/* 9 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var mergeBuffers = __webpack_require__(97);
-var AudioHelper = __webpack_require__(8);
-
-module.exports = TrackManager;
-
-var AudioContext = window.AudioContext || window.webkitAudioContext;
-
-function TrackManager(){}
-
-// get array with Tone.Synth
-TrackManager.mergeTracks = function(bufferList){
-    var context = new AudioContext();
-    return mergeBuffers(bufferList, context);
-};
-
-TrackManager.save = (function(){
-    var a = document.createElement("a");
-    document.body.appendChild(a);
-    a.style = "display: none";
-    return function(data, fileName){
-        if(fileName === undefined){
-            fileName = "test.wav";
-        }
-        var blob;
-        var buffer;
-        if(data instanceof AudioBuffer){
-            blob = AudioHelper.AudioBufferToBlob(data);
-        } else{
-            buffer = AudioHelper.getAudioContextBuffer(data.context);
-            blob = new Blob([buffer], {"type": "audio/x-wav"});
-        }
-        var url = window.URL.createObjectURL(blob);
-        a.href = url;
-        a.download = fileName;
-        a.click();
-        window.URL.revokeObjectURL(url);
-    };
-}());
-
-
-/***/ }),
 /* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var transportAudioFile = __webpack_require__(81);
-var TrackManager = __webpack_require__(9);
+var transportAudioFile = __webpack_require__(83);
+var TrackManager = __webpack_require__(6);
 
-var changeSound = __webpack_require__(72);
-var changeRequest = __webpack_require__(71);
-var getSound = __webpack_require__(76);
-var getProject = __webpack_require__(75);
-var projectList = __webpack_require__(78);
-var deleteProject = __webpack_require__(73);
-var deleteTrack = __webpack_require__(74);
-var getUser = __webpack_require__(77);
+var changeSound = __webpack_require__(74);
+var changeRequest = __webpack_require__(73);
+var getSound = __webpack_require__(78);
+var getProject = __webpack_require__(77);
+var projectList = __webpack_require__(80);
+var deleteProject = __webpack_require__(75);
+var deleteTrack = __webpack_require__(76);
+var getUser = __webpack_require__(79);
 
 
 module.exports = {
@@ -802,7 +804,7 @@ function uploadSound(soundName, callback){
 "use strict";
 
 
-var BaseDrumModel = __webpack_require__(25);
+var BaseDrumModel = __webpack_require__(26);
 var inherit = __webpack_require__(0);
 
 module.exports = MembraneModel;
@@ -947,7 +949,7 @@ function _notify(list, event, data){
 
 
 var inherit = __webpack_require__(0);
-var BaseWindow = __webpack_require__(23);
+var BaseWindow = __webpack_require__(25);
 var Factory = __webpack_require__(3);
 var commonEventNames = __webpack_require__(1);
 var windowsTransport = __webpack_require__(4);
@@ -1061,13 +1063,13 @@ function onRemoveButtonClicked($element){
 
 
 var inherit = __webpack_require__(0);
-var BaseWindow = __webpack_require__(23);
-var TrackDataView = __webpack_require__(93);
+var BaseWindow = __webpack_require__(25);
+var TrackDataView = __webpack_require__(95);
 var Factory = __webpack_require__(3);
 var commonEventNames = __webpack_require__(1);
 var windowsTransport = __webpack_require__(4);
 
-var ProjectRecorder = __webpack_require__(98);
+var ProjectRecorder = __webpack_require__(65);
 
 module.exports = TrackListView;
 
@@ -1084,6 +1086,8 @@ function TrackListView(controller){
     this.selectedItem = null;
 
     this.isSaveAction = false;
+
+    this.player = new Tone.Player(); // FIX THIS !!!!!!
 
     this._build();
     this.hide();
@@ -1118,6 +1122,11 @@ TrackListView.prototype._build = function(){
     windowsTransport.subscribe(commonEventNames.E_EXPORT_PROJECT, function(){
         var r = new ProjectRecorder(self.controller.model);
         r.createRecord(r.saveBuffers.bind(r));
+    });
+
+    windowsTransport.subscribe(commonEventNames.E_PLAY_PROJECT, function(eventName, audioPlayer){
+        var r = new ProjectRecorder(self.controller.model);  // always create new ProjectRecorder ??
+        r.createRecord(audioPlayer.createPlayer.bind(audioPlayer));
     });
 
     /*this.addTrackButton.on("click", function(event){
@@ -1192,6 +1201,11 @@ TrackListView.prototype.remove = function(id){
     this.trackList.find(".track-" + id).remove();
 };
 
+TrackListView.prototype.playBuffer = function(buffer){
+    this.player.buffer = buffer;
+    this.player.start();
+};
+
 function onRemoveButtonClicked($element){
     if (this.selectedItem === null){
         this.selectedItem = $element;
@@ -1215,18 +1229,18 @@ function setTrackInstrument(value){
 
 
 var inherit = __webpack_require__(0);
-var WaveForm = __webpack_require__(96);
-var BaseWindow = __webpack_require__(23);
-var FilterView = __webpack_require__(84);
-var SettingView = __webpack_require__(91);
-var InstrumentView = __webpack_require__(85);
+var WaveForm = __webpack_require__(98);
+var BaseWindow = __webpack_require__(25);
+var FilterView = __webpack_require__(86);
+var SettingView = __webpack_require__(93);
+var InstrumentView = __webpack_require__(87);
 var commonEventNames = __webpack_require__(1);
 var windowsTransport = __webpack_require__(4);
 
-var AudioBufferRecorder = __webpack_require__(24);
-var DrumAudioBufferRecorder = __webpack_require__(51);
-var TrackDrum = __webpack_require__(64);
-var TrackManager = __webpack_require__(9);
+var AudioBufferRecorder = __webpack_require__(17);
+var DrumAudioBufferRecorder = __webpack_require__(29);
+var TrackDrum = __webpack_require__(23);
+var TrackManager = __webpack_require__(6);
 
 module.exports = TrackView;
 
@@ -1343,9 +1357,9 @@ function setTrack(eventName, track){
 "use strict";
 
 
-var BaseController = __webpack_require__(43);
+var BaseController = __webpack_require__(46);
 var inherit = __webpack_require__(0);
-var ObservableList = __webpack_require__(21);
+var ObservableList = __webpack_require__(22);
 
 module.exports = ListController;
 
@@ -1373,271 +1387,7 @@ ListController.prototype.attachModel = function(model){
 "use strict";
 
 
-var inherit = __webpack_require__(0);
-var BaseOption = __webpack_require__(26);
-
-module.exports = BaseOptionList;
-
-/**
- *
- * @param {Object} options - list of all possible options
- * @param {*} defaultValue - default one from the options list
- * @constructor
- */
-function BaseOptionList(options, defaultValue){
-    BaseOption.call(this, defaultValue);
-    Object.defineProperties(this, {
-        "options": {
-            "value": options, // initial value
-            "writable": false, // is able to be changed
-            "enumerable": false // is it possible to see this variable when doing for..in or JSON.stringify
-        }
-    });
-}
-
-inherit(BaseOptionList, BaseOption);
-
-BaseOptionList.prototype.set = function(value){
-    if(value in this.options){
-        BaseOption.prototype.set.call(this, value);
-    }
-};
-
-
-/***/ }),
-/* 18 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var inherit = __webpack_require__(0);
-var BaseOption = __webpack_require__(26);
-
-module.exports = BaseRange;
-
-/**
- *
- * @param {*} defaultValue - default one from the options list
- * @constructor
- */
-function BaseRange(defaultValue, minValue, maxValue, step){
-    BaseOption.call(this, defaultValue);
-    this.min = minValue;
-    this.max = maxValue;
-    this.step = step;
-}
-
-inherit(BaseRange, BaseOption);
-
-
-/***/ }),
-/* 19 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = BaseRecorder;
-
-
-function BaseRecorder(){}
-
-BaseRecorder.prototype.play = null;
-
-BaseRecorder.prototype.getData = null;
-
-
-/***/ }),
-/* 20 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var inherit = __webpack_require__(0);
-var BaseRecorder = __webpack_require__(19);
-
-module.exports = DrumRecorder;
-
-function DrumRecorder(instrumentName, playValue, startTime, releaseTime){
-    BaseRecorder.call(this);
-    this.instrument = instrumentName;
-    this.playValue = playValue;
-    this.startTime = startTime || 0;
-    this.releaseTime = releaseTime || 0;
-}
-
-inherit(DrumRecorder, BaseRecorder);
-
-DrumRecorder.prototype.play = function(drumObject){
-    drumObject.triggerAttack(this.playValue, '+' + (this.startTime / 1000));
-};
-
-DrumRecorder.prototype.getData = function(){
-    var result = {};
-    result.instrument = this.instrument;
-    result.playValue = this.playValue;
-    result.startTime = this.startTime;
-    return result;
-};
-
-
-/***/ }),
-/* 21 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var BaseModel = __webpack_require__(46);
-var inherit = __webpack_require__(0);
-var commonEventNames = __webpack_require__(1);
-
-module.exports = ObservableList;
-
-/**
- * Observable list model. Sends notifications about it's state.
- * @constructor
- * @class ObservableList
- */
-function ObservableList(){
-    BaseModel.call(this, [], null);
-}
-
-inherit(ObservableList, BaseModel);
-
-ObservableList.prototype.clear = function(){
-    var data = this.__data;
-    var i = data.length;
-    while(i--){
-        // Warn: item may be really removed from the data-list inside .remove() method!!
-        this.remove(i);
-    }
-    // Just in case:
-    this.__data.length = 0;
-};
-
-ObservableList.prototype.update = function(data){
-    // Note: someone should ask to .clear() before calling this.. so don't forget!
-    var i;
-    if(Array.isArray(data)){
-        for(i = 0; i < data.length; ++i){
-            this.add(data[i]);
-        }
-    }
-
-};
-
-ObservableList.prototype.size = function(){
-    return this.__data.length;
-};
-
-ObservableList.prototype.at = function(index){
-    return index < this.size() ? this.__data[index] : null;
-};
-
-ObservableList.prototype.isExistId = function(id){
-    return this.findIndexById(id) >= 0;
-};
-
-ObservableList.prototype.findIndexById = function(searchingId){
-    var i;
-    var result = -1;
-    var currentElement;
-    var id = parseInt(searchingId);
-    for(i = 0; i < this.__data.length; ++i){
-        currentElement = this.__data[i];
-        if(currentElement.id === id){
-            result = i;
-            break;
-        }
-    }
-    return result;
-};
-
-/**
- * Add item to the end of the list.
- * @param {*} item
- */
-ObservableList.prototype.add = function(item){
-    // push to back and send actual index of the added item:
-    this.observer.notify(commonEventNames.E_ITEM_ADDED, this.__data.push(item) - 1);
-};
-
-ObservableList.prototype.remove = function(index){
-    if (index >= 0 && index < this.size()) {
-        this.observer.notify(commonEventNames.E_ITEM_REMOVED, index);
-        this.__data.splice(index, 1);
-    }
-};
-
-
-/***/ }),
-/* 22 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var inherit = __webpack_require__(0);
-var BaseView = __webpack_require__(2);
-
-module.exports = BaseInstrument;
-
-function BaseInstrument(track, instrumentName){
-    BaseView.call(this, instrumentName);
-    this.track = track;
-    this.startTime = 0;
-    this.isRecordNow = false;
-    this.isActive = false;
-}
-
-inherit(BaseInstrument, BaseView);
-
-BaseInstrument.prototype.recordEvent = null;
-
-BaseInstrument.prototype.clearEvent = null;
-
-BaseInstrument.prototype.keyDown = function(){};
-
-BaseInstrument.prototype.keyUp = function(){};
-
-
-/***/ }),
-/* 23 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var inherit = __webpack_require__(0);
-var BaseView = __webpack_require__(2);
-
-module.exports = BaseWindow;
-
-function BaseWindow(controller, classes){
-    BaseView.call(this, classes);
-
-    this.controller = controller;
-    this.title = "";
-}
-
-inherit(BaseWindow, BaseView);
-
-BaseWindow.prototype.confirmed = null;
-BaseWindow.prototype.declined = null;
-BaseWindow.prototype.back = null;
-
-
-/***/ }),
-/* 24 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var eventDuration = __webpack_require__(33);
+var eventDuration = __webpack_require__(35);
 
 module.exports = AudioBufferRecorder;
 
@@ -1794,14 +1544,430 @@ function createOscillatorPlayData(trackPlayData){
 
 
 /***/ }),
+/* 18 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var BaseOption = __webpack_require__(27);
+
+module.exports = BaseOptionList;
+
+/**
+ *
+ * @param {Object} options - list of all possible options
+ * @param {*} defaultValue - default one from the options list
+ * @constructor
+ */
+function BaseOptionList(options, defaultValue){
+    BaseOption.call(this, defaultValue);
+    Object.defineProperties(this, {
+        "options": {
+            "value": options, // initial value
+            "writable": false, // is able to be changed
+            "enumerable": false // is it possible to see this variable when doing for..in or JSON.stringify
+        }
+    });
+}
+
+inherit(BaseOptionList, BaseOption);
+
+BaseOptionList.prototype.set = function(value){
+    if(value in this.options){
+        BaseOption.prototype.set.call(this, value);
+    }
+};
+
+
+/***/ }),
+/* 19 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var BaseOption = __webpack_require__(27);
+
+module.exports = BaseRange;
+
+/**
+ *
+ * @param {*} defaultValue - default one from the options list
+ * @constructor
+ */
+function BaseRange(defaultValue, minValue, maxValue, step){
+    BaseOption.call(this, defaultValue);
+    this.min = minValue;
+    this.max = maxValue;
+    this.step = step;
+}
+
+inherit(BaseRange, BaseOption);
+
+
+/***/ }),
+/* 20 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = BaseRecorder;
+
+
+function BaseRecorder(){}
+
+BaseRecorder.prototype.play = null;
+
+BaseRecorder.prototype.getData = null;
+
+
+/***/ }),
+/* 21 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var BaseRecorder = __webpack_require__(20);
+
+module.exports = DrumRecorder;
+
+function DrumRecorder(instrumentName, playValue, startTime, releaseTime){
+    BaseRecorder.call(this);
+    this.instrument = instrumentName;
+    this.playValue = playValue;
+    this.startTime = startTime || 0;
+    this.releaseTime = releaseTime || 0;
+}
+
+inherit(DrumRecorder, BaseRecorder);
+
+DrumRecorder.prototype.play = function(drumObject){
+    drumObject.triggerAttack(this.playValue, '+' + (this.startTime / 1000));
+};
+
+DrumRecorder.prototype.getData = function(){
+    var result = {};
+    result.instrument = this.instrument;
+    result.playValue = this.playValue;
+    result.startTime = this.startTime;
+    return result;
+};
+
+
+/***/ }),
+/* 22 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var BaseModel = __webpack_require__(49);
+var inherit = __webpack_require__(0);
+var commonEventNames = __webpack_require__(1);
+
+module.exports = ObservableList;
+
+/**
+ * Observable list model. Sends notifications about it's state.
+ * @constructor
+ * @class ObservableList
+ */
+function ObservableList(){
+    BaseModel.call(this, [], null);
+}
+
+inherit(ObservableList, BaseModel);
+
+ObservableList.prototype.clear = function(){
+    var data = this.__data;
+    var i = data.length;
+    while(i--){
+        // Warn: item may be really removed from the data-list inside .remove() method!!
+        this.remove(i);
+    }
+    // Just in case:
+    this.__data.length = 0;
+};
+
+ObservableList.prototype.update = function(data){
+    // Note: someone should ask to .clear() before calling this.. so don't forget!
+    var i;
+    if(Array.isArray(data)){
+        for(i = 0; i < data.length; ++i){
+            this.add(data[i]);
+        }
+    }
+
+};
+
+ObservableList.prototype.size = function(){
+    return this.__data.length;
+};
+
+ObservableList.prototype.at = function(index){
+    return index < this.size() ? this.__data[index] : null;
+};
+
+ObservableList.prototype.isExistId = function(id){
+    return this.findIndexById(id) >= 0;
+};
+
+ObservableList.prototype.findIndexById = function(searchingId){
+    var i;
+    var result = -1;
+    var currentElement;
+    var id = parseInt(searchingId);
+    for(i = 0; i < this.__data.length; ++i){
+        currentElement = this.__data[i];
+        if(currentElement.id === id){
+            result = i;
+            break;
+        }
+    }
+    return result;
+};
+
+/**
+ * Add item to the end of the list.
+ * @param {*} item
+ */
+ObservableList.prototype.add = function(item){
+    // push to back and send actual index of the added item:
+    this.observer.notify(commonEventNames.E_ITEM_ADDED, this.__data.push(item) - 1);
+};
+
+ObservableList.prototype.remove = function(index){
+    if (index >= 0 && index < this.size()) {
+        this.observer.notify(commonEventNames.E_ITEM_REMOVED, index);
+        this.__data.splice(index, 1);
+    }
+};
+
+
+/***/ }),
+/* 23 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var BaseTrackModel = __webpack_require__(8);
+var inherit = __webpack_require__(0);
+var KickLeft = __webpack_require__(57);
+var KickRight = __webpack_require__(58);
+var TrackPlayer = __webpack_require__(69);
+var DrumRecorder = __webpack_require__(21);
+var BigTom = __webpack_require__(52);
+var LeftTom = __webpack_require__(59);
+var Bell = __webpack_require__(51);
+
+module.exports = TrackDrum;  // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+function TrackDrum(id, data){
+    BaseTrackModel.call(this, id, data);
+    this.drums = data.drums || []; // list of names of used drums
+    this.drumObjects = {}; // only used drum
+    this.allDrumObjects = {}; // instances of all possible drum objects
+    this.createAllDrumObjects();
+    this.createDrumObjects();
+}
+
+inherit(TrackDrum, BaseTrackModel);
+
+TrackDrum.prototype._generate = function(){};
+
+TrackDrum.prototype.getContext = function(){};
+
+TrackDrum.prototype.getConstants = function(){};
+
+TrackDrum.prototype.getAudioBuffer = function(){};
+
+TrackDrum.prototype.getBlob = function(){};
+
+TrackDrum.prototype.disconnectFromAudioSource = function(){};
+
+TrackDrum.prototype.getData = function(){
+    var result = {};
+    result.id = this.id;
+    result.isDeleted = this.isDeleted;
+    result.instrument = this.instrument;
+    result["drums"] = this.drums;
+    result["play-setting"] = this.playSetting;
+    result["post-setting"] = this.postSettings.getPostSettings();
+    return result;
+};
+
+/**
+ * Add new drum
+ * @param drumName
+ */
+TrackDrum.prototype.addDrum = function(drumName){
+    if(this.drums.indexOf(drumName) === -1){
+        // get reference to drum object
+        this.drumObjects[drumName] = this.allDrumObjects[drumName];
+        this.drums.push(drumName);
+    }
+};
+
+/**
+ * Put used drum sound object in this.drumObjects if them exist
+ */
+TrackDrum.prototype.createDrumObjects = function(){
+    var drumName;
+    for(drumName in this.allDrumObjects){
+        if(this.drums.indexOf(drumName) !== -1){
+            // get reference to drum object
+            this.drumObjects[drumName] = this.allDrumObjects[drumName];
+        }
+    }
+};
+
+TrackDrum.prototype.play = function(){
+    var i, token;
+    for(i = 0; i < this.playObjects.length; ++i){
+        token = this.playObjects[i];
+        token.play(this.drumObjects[token.instrument].trackObject);
+    }
+};
+
+TrackDrum.prototype.stop = function(){
+    var drum;
+    for(drum in this.drumObjects){
+        this.drumObjects[drum].stop();
+    }
+};
+
+TrackDrum.prototype.createPlayObjects = function(){
+    var i, token;
+    for(i = 0; i < this.playSetting.length; ++i){
+        token = this.playSetting[i];
+        this.playObjects.push(new DrumRecorder(token.instrument, token.playValue, token.startTime));
+    }
+};
+
+/**
+ * Apply filter for each drum object
+ * @param filter
+ */
+TrackDrum.prototype.applyFilter = function(filter){
+    var drum;
+    for(drum in this.allDrumObjects){
+        filter.applyToTrack(this.allDrumObjects[drum].trackObject);
+    }
+};
+
+/**
+ * Remove filter from each drum object
+ * @param filter
+ */
+TrackDrum.prototype.removeFilter = function(filter){
+    var drum;
+    for(drum in this.allDrumObjects){
+        filter.disconnectFilter(this.allDrumObjects[drum].trackObject);
+    }
+};
+
+TrackDrum.prototype.merge = function(){
+    // merge this.object !!!!!!!
+};
+
+TrackDrum.prototype.clearObject = function(){
+    var drum;
+    for(drum in this.allDrumObjects){
+        this.allDrumObjects[drum].clearObject();
+    }
+};
+
+TrackDrum.prototype.emptyPlaySetting = function(){
+    this.playSetting.length = 0;
+    this.playObjects.length = 0;
+    this.drums.length = 0;
+};
+
+/**
+ * Init all drum sound objects
+ */
+TrackDrum.prototype.createAllDrumObjects = function(){
+    this.allDrumObjects["kick-left"] = new KickLeft();
+    this.allDrumObjects["kick-right"] = new KickRight();
+    this.allDrumObjects["big-tom"] = new BigTom();
+    this.allDrumObjects["left-tom"] = new LeftTom();
+    this.allDrumObjects["bell"] = new Bell();
+};
+
+
+/***/ }),
+/* 24 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var BaseView = __webpack_require__(2);
+
+module.exports = BaseInstrument;
+
+function BaseInstrument(track, instrumentName){
+    BaseView.call(this, instrumentName);
+    this.track = track;
+    this.startTime = 0;
+    this.isRecordNow = false;
+    this.isActive = false;
+}
+
+inherit(BaseInstrument, BaseView);
+
+BaseInstrument.prototype.recordEvent = null;
+
+BaseInstrument.prototype.clearEvent = null;
+
+BaseInstrument.prototype.keyDown = function(){};
+
+BaseInstrument.prototype.keyUp = function(){};
+
+
+/***/ }),
 /* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var AudioHelper = __webpack_require__(8);
-var DrumRecorder = __webpack_require__(20);
+var inherit = __webpack_require__(0);
+var BaseView = __webpack_require__(2);
+
+module.exports = BaseWindow;
+
+function BaseWindow(controller, classes){
+    BaseView.call(this, classes);
+
+    this.controller = controller;
+    this.title = "";
+}
+
+inherit(BaseWindow, BaseView);
+
+BaseWindow.prototype.confirmed = null;
+BaseWindow.prototype.declined = null;
+BaseWindow.prototype.back = null;
+
+
+/***/ }),
+/* 26 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var AudioHelper = __webpack_require__(9);
+var DrumRecorder = __webpack_require__(21);
 
 module.exports = BaseDrumModel;
 
@@ -1878,7 +2044,7 @@ BaseDrumModel.prototype.createPlayObjects = function(){
 
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1924,7 +2090,7 @@ BaseOption.prototype.toString = function(){
 
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1987,15 +2153,146 @@ BaseTrackSetting.prototype.toString = function(){
 
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var clamp = __webpack_require__(80);
-var BaseRecorder = __webpack_require__(19);
+var TrackManager = __webpack_require__(6);
+var AudioBufferRecorder = __webpack_require__(17);
+var eventDuration = __webpack_require__(35);
+
+module.exports = DrumAudioBufferRecorder;
+
+function DrumAudioBufferRecorder(drumModel){
+    AudioBufferRecorder.call(this, drumModel);
+    this.drumCount = 0;
+    this.drumAudioBuffers = [];
+    this.durationList = {};
+}
+
+inherit(DrumAudioBufferRecorder, AudioBufferRecorder);
+
+DrumAudioBufferRecorder.prototype.setModel = function(drumModel){
+    if(drumModel){
+        this.trackModel = drumModel;
+        this.drumCount = drumModel.drums.length;
+        this.createTracks();
+    }
+};
+
+DrumAudioBufferRecorder.prototype.createTrack = function(drumTrack){
+    /*if(this.track){
+        this.track.disconnect(Tone.Master); // disconnect previous track from Master
+    }*/
+    this.filterObjects.length = 0;
+    if(drumTrack.trackObject instanceof Tone.MembraneSynth){
+        this.track = new Tone.MembraneSynth(drumTrack.setting).toMaster();
+    } else if(drumTrack.trackObject instanceof Tone.Player){
+
+    } else if(drumTrack.trackObject instanceof Tone.MetalSynth){
+
+    }
+    if(this.track) {
+        this.createFilters();
+        this.playData = createDrumPlayData(this.trackModel.playSetting, drumTrack.instrument);
+        //this.duration = eventDuration.durationByTime(this.playData);
+    }
+};
+
+DrumAudioBufferRecorder.prototype.createTracks = function(){
+    var drum;
+    var name;
+    for(name in this.trackModel.drumObjects){
+        drum = this.trackModel.drumObjects[name];
+        console.log("+");
+        console.log(drum.instrument);
+        this.createTrack(drum);
+        // save duration of each track in object: key - instrument name, value - duration
+        this.durationList[drum.instrument] = eventDuration.durationByTime(this.playData);
+    }
+};
+
+DrumAudioBufferRecorder.prototype.play = function(drumTrack, value){
+    if(drumTrack.trackObject instanceof Tone.MembraneSynth){
+        this.track.triggerAttack(value.playValue, value.time);
+    } else if(drumTrack.trackObject instanceof Tone.Player){
+
+    } else if(drumTrack.trackObject instanceof Tone.MetalSynth){
+
+    }
+};
+
+DrumAudioBufferRecorder.prototype.record = function(callback){
+    var i, drumTrack;
+    this.drumAudioBuffers.length = 0;
+    for(i = 0; i < this.drumCount; ++i){
+        // this.trackModel.drums[i] - drum instrument name
+        drumTrack = this.trackModel.drumObjects[this.trackModel.drums[i]];
+        // convert all drum objects to AudioBuffers
+        this._record(drumTrack, callback);
+    }
+};
+
+DrumAudioBufferRecorder.prototype._record = function(drumTrack, callback){
+    var result; // result merged AudioBuffer
+    var self = this;
+    // durationList[drumTrack.instrument] - duration of corresponded instrument
+    Tone.Offline(function(){
+        self.createTrack(drumTrack);
+        console.log("offline");
+        console.log(self.playData);
+        console.log(self.durationList[drumTrack.instrument]);
+        var part = new Tone.Part(function(time, value){
+            // record all play values
+            console.log("part");
+            self.play(drumTrack, value);
+        }, self.playData);
+        part.start(0);
+        Tone.Transport.start();
+    }, this.durationList[drumTrack.instrument]).then(function(buffer){
+        self.drumAudioBuffers.push(buffer._buffer); // save new audioBuffer in list
+        console.log("then");
+        console.log(buffer._buffer);
+        console.log(self.drumAudioBuffers);
+        if(self.drumAudioBuffers.length === self.drumCount){
+            console.log("save");
+            result = TrackManager.mergeTracks(self.drumAudioBuffers);
+            console.log("result");
+            console.log(result);
+            callback(result);
+        }
+    });
+};
+
+function createDrumPlayData(trackPlayData, instrument){
+    var events = [];
+    var tmp, i, token;
+    for(i = 0; i < trackPlayData.length; ++i){
+        tmp = {};
+        token = trackPlayData[i];
+        if(token.instrument === instrument){
+            tmp.time = token.startTime / 1000;
+            tmp.playValue = token.playValue;
+            events.push(tmp);
+        }
+    }
+    return events;
+}
+
+
+/***/ }),
+/* 30 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var clamp = __webpack_require__(82);
+var BaseRecorder = __webpack_require__(20);
 
 module.exports = MixerRecorder;
 
@@ -2037,14 +2334,14 @@ MixerRecorder.prototype.getData = function(){
 
 
 /***/ }),
-/* 29 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var BaseRecorder = __webpack_require__(19);
+var BaseRecorder = __webpack_require__(20);
 
 module.exports = PianoKeyRecorder;
 
@@ -2082,18 +2379,18 @@ PianoKeyRecorder.prototype.getData = function(){
 
 
 /***/ }),
-/* 30 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var ObservableList = __webpack_require__(21);
+var ObservableList = __webpack_require__(22);
 var inherit = __webpack_require__(0);
-var TrackSynthesizer = __webpack_require__(68);
-var TrackNoise = __webpack_require__(65);
-var TrackOscillator = __webpack_require__(66);
-var TrackDrum = __webpack_require__(64);
+var TrackSynthesizer = __webpack_require__(70);
+var TrackNoise = __webpack_require__(67);
+var TrackOscillator = __webpack_require__(68);
+var TrackDrum = __webpack_require__(23);
 var commonEventNames = __webpack_require__(1);
 
 module.exports = ProjectModel;
@@ -2180,13 +2477,13 @@ ProjectModel.prototype.toJson = function(){
 
 
 /***/ }),
-/* 31 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var capitalize = __webpack_require__(79);
+var capitalize = __webpack_require__(81);
 
 module.exports = {
     "updateSettingListFromTrack": function(settingList, track){ // SettingList OR FilterList
@@ -2391,7 +2688,7 @@ function hideExistingParams(listElement, instrumentName){
 
 
 /***/ }),
-/* 32 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2423,7 +2720,7 @@ TrackSettingsSet.prototype.set = function(optionName, value){
 
 
 /***/ }),
-/* 33 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2475,16 +2772,16 @@ function durationByStartTime(timeData){
 
 
 /***/ }),
-/* 34 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var TabSegment = __webpack_require__(92);
-var BaseRange = __webpack_require__(18);
-var BaseOptionList = __webpack_require__(17);
+var TabSegment = __webpack_require__(94);
+var BaseRange = __webpack_require__(19);
+var BaseOptionList = __webpack_require__(18);
 var Factory = __webpack_require__(3);
 
 module.exports = ToolView;
@@ -2522,7 +2819,7 @@ ToolView.prototype.createElement = function(className, name, value){
 
 
 /***/ }),
-/* 35 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2566,7 +2863,7 @@ ProjectController.prototype.removeById = function(id){
 
 
 /***/ }),
-/* 36 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2610,7 +2907,7 @@ ProjectListController.prototype._removeHandler = function(id){
 
 
 /***/ }),
-/* 37 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2640,15 +2937,15 @@ TrackController.prototype.sendTrack = function(){
 
 
 /***/ }),
-/* 38 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 //var audioBufferUtils = require("audio-buffer-utils");
-var AudioHelper = __webpack_require__(8);
-var TrackManager = __webpack_require__(9);
+var AudioHelper = __webpack_require__(9);
+var TrackManager = __webpack_require__(6);
 
 var sounds = [];
 
@@ -2711,14 +3008,14 @@ function toAudioBuffer(blob, getAudioBuffer){
 
 
 /***/ }),
-/* 39 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var ObservableList = __webpack_require__(21);
-var ProjectModel = __webpack_require__(30);
+var ObservableList = __webpack_require__(22);
+var ProjectModel = __webpack_require__(32);
 var inherit = __webpack_require__(0);
 
 module.exports = ProjectListModel;
@@ -2757,7 +3054,7 @@ ProjectListModel.prototype.clearActiveProject = function(){
 
 
 /***/ }),
-/* 40 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2765,11 +3062,11 @@ ProjectListModel.prototype.clearActiveProject = function(){
 
 var inherit = __webpack_require__(0);
 var BaseView = __webpack_require__(2);
-var MessageModal = __webpack_require__(87);
+var MessageModal = __webpack_require__(89);
 var ProjectListView = __webpack_require__(13);
 var TrackListView = __webpack_require__(14);
 var TrackView = __webpack_require__(15);
-var MenuBar = __webpack_require__(86);
+var MenuBar = __webpack_require__(88);
 var windowsTransport = __webpack_require__(4);
 var commonEventNames = __webpack_require__(1);
 
@@ -2892,7 +3189,7 @@ WindowManager.prototype.setActiveWindow = function(newActiveWindow){
 
 
 /***/ }),
-/* 41 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2995,23 +3292,60 @@ function writeString (view, offset, string) {
 
 
 /***/ }),
-/* 42 */
+/* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var merger_test = __webpack_require__(38);
+module.exports = mergeBuffers;
 
-var WindowManager = __webpack_require__(40);
+function mergeBuffers(buffers, ac) {
+  var maxChannels = 0;
+  var maxDuration = 0;
+  for (var i = 0; i < buffers.length; i++) {
+    if (buffers[i].numberOfChannels > maxChannels) {
+      maxChannels = buffers[i].numberOfChannels;
+    }
+    if (buffers[i].duration > maxDuration) {
+      maxDuration = buffers[i].duration;
+    }
+  }
+  var out = ac.createBuffer(maxChannels,
+                                 ac.sampleRate * maxDuration,
+                                 ac.sampleRate);
+
+  for (var j = 0; j < buffers.length; j++) {
+    for (var srcChannel = 0; srcChannel < buffers[j].numberOfChannels; srcChannel++) {
+      var outt = out.getChannelData(srcChannel);
+      var inn = buffers[j].getChannelData(srcChannel);
+      for (var i = 0; i < inn.length; i++) {
+        outt[i] += inn[i];
+      }
+      out.getChannelData(srcChannel).set(outt, 0);
+    }
+  }
+  return out;
+}
+
+/***/ }),
+/* 45 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var merger_test = __webpack_require__(40);
+
+var WindowManager = __webpack_require__(42);
 var ProjectListView = __webpack_require__(13);
 var TrackListView = __webpack_require__(14);
 
-var ProjectListController = __webpack_require__(36);
-var ProjectController = __webpack_require__(35);
-var TrackController = __webpack_require__(37);
+var ProjectListController = __webpack_require__(38);
+var ProjectController = __webpack_require__(37);
+var TrackController = __webpack_require__(39);
 
-var ProjectListModel = __webpack_require__(39);
+var ProjectListModel = __webpack_require__(41);
 
 var TrackView = __webpack_require__(15);
 
@@ -3051,7 +3385,7 @@ projectListController.fetchData();
 
 
 /***/ }),
-/* 43 */
+/* 46 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3124,7 +3458,7 @@ BaseController.prototype.remove = null;
 
 
 /***/ }),
-/* 44 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3138,23 +3472,24 @@ module.exports = function(){
 
 
 /***/ }),
-/* 45 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var TrackManager = __webpack_require__(9);
-var BaseTrackModel = __webpack_require__(7);
-var ProjectModel = __webpack_require__(30);
+var BaseTrackModel = __webpack_require__(8);
+var ProjectModel = __webpack_require__(32);
+var commonEventNames = __webpack_require__(1);
+var windowsTransport = __webpack_require__(4);
 
 module.exports = AudioPlayer;
 
 function AudioPlayer(model){
     this.model = null;
-    this.player = [];
 
     this.projectPlayer = null;
+    this.recorder = null;
 
     this.setModel(model);
 }
@@ -3162,10 +3497,6 @@ function AudioPlayer(model){
 AudioPlayer.prototype.setModel = function(model){
     if(model){
         this.model = model;
-        if(this.model instanceof ProjectModel){
-            // merge before play
-            this._fullPlayerWithProject();
-        }
     }
 };
 
@@ -3173,26 +3504,30 @@ AudioPlayer.prototype.play = function(){
     if(this.model instanceof BaseTrackModel){
         this.model.play();
     } else if(this.model instanceof ProjectModel){
-        this.projectPlayer = new Tone.Player();
-        this.projectPlayer.start();
+        windowsTransport.notify(commonEventNames.E_PLAY_PROJECT, this);
     }
 };
 
-AudioPlayer.prototype._fullPlayerWithProject = function(){
-
+AudioPlayer.prototype.createPlayer = function(buffer){
+    var self = this;
+    this.projectPlayer = new Tone.Player(buffer).toMaster();
+    this.projectPlayer.start();
+    windowsTransport.subscribe(commonEventNames.E_STOP_PROJECT, function(){
+        self.projectPlayer.stop();
+    });
 };
 
 AudioPlayer.prototype.stop = function(){
     if(this.model instanceof BaseTrackModel){
         this.model.stop();
     } else if(this.model instanceof ProjectModel){
-        this.projectPlayer.stop();
+        windowsTransport.notify(commonEventNames.E_STOP_PROJECT);
     }
 };
 
 
 /***/ }),
-/* 46 */
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3248,7 +3583,7 @@ BaseModel.prototype.remove = null;
 
 
 /***/ }),
-/* 47 */
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3271,13 +3606,13 @@ BaseNote.prototype.setValue = function(value){
 
 
 /***/ }),
-/* 48 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var MetalSynthModel = __webpack_require__(58);
+var MetalSynthModel = __webpack_require__(60);
 var inherit = __webpack_require__(0);
 
 module.exports = Bell;
@@ -3308,7 +3643,7 @@ Bell.prototype.setInstrument = function(){
 
 
 /***/ }),
-/* 49 */
+/* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3351,7 +3686,7 @@ BigTom.prototype.setInstrument = function(){
 
 
 /***/ }),
-/* 50 */
+/* 53 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3360,7 +3695,7 @@ BigTom.prototype.setInstrument = function(){
 //CrusherFilter
 
 var inherit = __webpack_require__(0);
-var BaseFilterModel = __webpack_require__(6);
+var BaseFilterModel = __webpack_require__(7);
 
 module.exports = CrusherFilter;
 
@@ -3401,138 +3736,7 @@ CrusherFilter.prototype.setByName = function(optionName, value){
 
 
 /***/ }),
-/* 51 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var inherit = __webpack_require__(0);
-var TrackManager = __webpack_require__(9);
-var AudioBufferRecorder = __webpack_require__(24);
-var eventDuration = __webpack_require__(33);
-
-module.exports = DrumAudioBufferRecorder;
-
-function DrumAudioBufferRecorder(drumModel){
-    AudioBufferRecorder.call(this, drumModel);
-    this.drumCount = 0;
-    this.drumAudioBuffers = [];
-    this.durationList = {};
-}
-
-inherit(DrumAudioBufferRecorder, AudioBufferRecorder);
-
-DrumAudioBufferRecorder.prototype.setModel = function(drumModel){
-    if(drumModel){
-        this.trackModel = drumModel;
-        this.drumCount = drumModel.drums.length;
-        this.createTracks();
-    }
-};
-
-DrumAudioBufferRecorder.prototype.createTrack = function(drumTrack){
-    /*if(this.track){
-        this.track.disconnect(Tone.Master); // disconnect previous track from Master
-    }*/
-    this.filterObjects.length = 0;
-    if(drumTrack.trackObject instanceof Tone.MembraneSynth){
-        this.track = new Tone.MembraneSynth(drumTrack.setting).toMaster();
-    } else if(drumTrack.trackObject instanceof Tone.Player){
-
-    } else if(drumTrack.trackObject instanceof Tone.MetalSynth){
-
-    }
-    if(this.track) {
-        this.createFilters();
-        this.playData = createDrumPlayData(this.trackModel.playSetting, drumTrack.instrument);
-        //this.duration = eventDuration.durationByTime(this.playData);
-    }
-};
-
-DrumAudioBufferRecorder.prototype.createTracks = function(){
-    var drum;
-    var name;
-    for(name in this.trackModel.drumObjects){
-        drum = this.trackModel.drumObjects[name];
-        console.log("+");
-        console.log(drum.instrument);
-        this.createTrack(drum);
-        // save duration of each track in object: key - instrument name, value - duration
-        this.durationList[drum.instrument] = eventDuration.durationByTime(this.playData);
-    }
-};
-
-DrumAudioBufferRecorder.prototype.play = function(drumTrack, value){
-    if(drumTrack.trackObject instanceof Tone.MembraneSynth){
-        this.track.triggerAttack(value.playValue, value.time);
-    } else if(drumTrack.trackObject instanceof Tone.Player){
-
-    } else if(drumTrack.trackObject instanceof Tone.MetalSynth){
-
-    }
-};
-
-DrumAudioBufferRecorder.prototype.record = function(callback){
-    var i, drumTrack;
-    this.drumAudioBuffers.length = 0;
-    for(i = 0; i < this.drumCount; ++i){
-        // this.trackModel.drums[i] - drum instrument name
-        drumTrack = this.trackModel.drumObjects[this.trackModel.drums[i]];
-        // convert all drum objects to AudioBuffers
-        this._record(drumTrack, callback);
-    }
-};
-
-DrumAudioBufferRecorder.prototype._record = function(drumTrack, callback){
-    var result; // result merged AudioBuffer
-    var self = this;
-    // durationList[drumTrack.instrument] - duration of corresponded instrument
-    Tone.Offline(function(){
-        self.createTrack(drumTrack);
-        console.log("offline");
-        console.log(self.playData);
-        console.log(self.durationList[drumTrack.instrument]);
-        var part = new Tone.Part(function(time, value){
-            // record all play values
-            console.log("part");
-            self.play(drumTrack, value);
-        }, self.playData);
-        part.start(0);
-        Tone.Transport.start();
-    }, this.durationList[drumTrack.instrument]).then(function(buffer){
-        self.drumAudioBuffers.push(buffer._buffer); // save new audioBuffer in list
-        console.log("then");
-        console.log(buffer._buffer);
-        console.log(self.drumAudioBuffers);
-        if(self.drumAudioBuffers.length === self.drumCount){
-            console.log("save");
-            result = TrackManager.mergeTracks(self.drumAudioBuffers);
-            console.log("result");
-            console.log(result);
-            callback(result);
-        }
-    });
-};
-
-function createDrumPlayData(trackPlayData, instrument){
-    var events = [];
-    var tmp, i, token;
-    for(i = 0; i < trackPlayData.length; ++i){
-        tmp = {};
-        token = trackPlayData[i];
-        if(token.instrument === instrument){
-            tmp.time = token.startTime / 1000;
-            tmp.playValue = token.playValue;
-            events.push(tmp);
-        }
-    }
-    return events;
-}
-
-
-/***/ }),
-/* 52 */
+/* 54 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3574,16 +3778,16 @@ DrumModel.prototype.getDrumNameForKey = function(key){
 
 
 /***/ }),
-/* 53 */
+/* 55 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var BaseOptionList = __webpack_require__(17);
-var BaseRange = __webpack_require__(18);
-var BaseTrackSetting = __webpack_require__(27);
-var TrackSettingsSet = __webpack_require__(32);
+var BaseOptionList = __webpack_require__(18);
+var BaseRange = __webpack_require__(19);
+var BaseTrackSetting = __webpack_require__(28);
+var TrackSettingsSet = __webpack_require__(34);
 
 module.exports = new TrackSettingsSet([
     new BaseTrackSetting("tremolo", false, {
@@ -3624,14 +3828,14 @@ module.exports = new TrackSettingsSet([
 
 
 /***/ }),
-/* 54 */
+/* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var BaseFilterModel = __webpack_require__(6);
+var BaseFilterModel = __webpack_require__(7);
 
 module.exports = FreeverbFilter;
 
@@ -3695,7 +3899,7 @@ FreeverbFilter.prototype.setByName = function(optionName, value){
 
 
 /***/ }),
-/* 55 */
+/* 57 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3737,7 +3941,7 @@ KickLeft.prototype.setInstrument = function(){
 
 
 /***/ }),
-/* 56 */
+/* 58 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3777,7 +3981,7 @@ KickRight.prototype.setInstrument = function(){
 
 
 /***/ }),
-/* 57 */
+/* 59 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3818,13 +4022,13 @@ LeftTom.prototype.setInstrument = function(){
 
 
 /***/ }),
-/* 58 */
+/* 60 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var BaseDrumModel = __webpack_require__(25);
+var BaseDrumModel = __webpack_require__(26);
 var inherit = __webpack_require__(0);
 
 module.exports = MetalSynthModel;
@@ -3845,7 +4049,7 @@ MetalSynthModel.prototype.stop = function(){
 
 
 /***/ }),
-/* 59 */
+/* 61 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3854,7 +4058,7 @@ MetalSynthModel.prototype.stop = function(){
 //PhaserFilter
 
 var inherit = __webpack_require__(0);
-var BaseFilterModel = __webpack_require__(6);
+var BaseFilterModel = __webpack_require__(7);
 
 module.exports = PhaserFilter;
 
@@ -3919,13 +4123,13 @@ PhaserFilter.prototype.setByName = function(optionName, value){
 
 
 /***/ }),
-/* 60 */
+/* 62 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var PianoNote = __webpack_require__(61);
+var PianoNote = __webpack_require__(63);
 
 module.exports = new PianoModel;
 
@@ -4051,14 +4255,14 @@ PianoModel.prototype.shift = function(shiftIndex){
 
 
 /***/ }),
-/* 61 */
+/* 63 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var BaseNote = __webpack_require__(47);
+var BaseNote = __webpack_require__(50);
 
 module.exports = PianoNote;
 
@@ -4084,17 +4288,17 @@ PianoNote.prototype.setValueFromAdditional = function(index){
 
 
 /***/ }),
-/* 62 */
+/* 64 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var FreeverbFilter = __webpack_require__(54);
-var CrusherFilter = __webpack_require__(50);
-var PhaserFilter = __webpack_require__(59);
-var VibratoFilter = __webpack_require__(70);
-var TremoloFilter = __webpack_require__(69);
+var FreeverbFilter = __webpack_require__(56);
+var CrusherFilter = __webpack_require__(53);
+var PhaserFilter = __webpack_require__(61);
+var VibratoFilter = __webpack_require__(72);
+var TremoloFilter = __webpack_require__(71);
 
 module.exports = PostSettings;
 
@@ -4250,16 +4454,72 @@ PostSettings.prototype.setValueToFilter = function(filterName, optionName, value
 
 
 /***/ }),
-/* 63 */
+/* 65 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var BaseOptionList = __webpack_require__(17);
-var BaseRange = __webpack_require__(18);
-var BaseTrackSetting = __webpack_require__(27);
-var TrackSettingsSet = __webpack_require__(32);
+var AudioBufferRecorder = __webpack_require__(17);
+var DrumAudioBufferRecorder = __webpack_require__(29);
+var TrackDrum = __webpack_require__(23);
+var TrackManager = __webpack_require__(6);
+
+module.exports = ProjectRecorder;
+
+function ProjectRecorder(projectModel){
+    this.projectModel = projectModel;
+    this.models = this.projectModel.__data;
+    console.log(this.models);
+    this.recorders = [];
+    this.buffers = [];
+}
+
+ProjectRecorder.prototype.setModel = function(model){
+    if(model){
+        this.projectModel = model;
+        this.models = this.projectModel.__data;
+    }
+};
+
+ProjectRecorder.prototype.createRecord = function(callback){
+    var i, model, recorder;
+    for(i = 0; i < this.models.length; ++i){
+        model = this.models[i];
+        if(model instanceof TrackDrum){
+            recorder = new DrumAudioBufferRecorder();
+            recorder.setModel(model);
+        } else{
+            recorder = new AudioBufferRecorder();
+            recorder.setModel(model);
+        }
+        recorder.record(callback);
+    }
+};
+
+ProjectRecorder.prototype.saveBuffers = function(buffer){
+    var result;
+    this.buffers.push(buffer);
+    if(this.buffers.length === this.models.length){
+        result = TrackManager.mergeTracks(this.buffers);
+        console.log("project");
+        console.log(result);
+        TrackManager.save(result);
+    }
+};
+
+
+/***/ }),
+/* 66 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var BaseOptionList = __webpack_require__(18);
+var BaseRange = __webpack_require__(19);
+var BaseTrackSetting = __webpack_require__(28);
+var TrackSettingsSet = __webpack_require__(34);
 
 module.exports = new TrackSettingsSet([
     new BaseTrackSetting("type", false, {
@@ -4292,165 +4552,13 @@ module.exports = new TrackSettingsSet([
 
 
 /***/ }),
-/* 64 */
+/* 67 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var BaseTrackModel = __webpack_require__(7);
-var inherit = __webpack_require__(0);
-var KickLeft = __webpack_require__(55);
-var KickRight = __webpack_require__(56);
-var TrackPlayer = __webpack_require__(67);
-var DrumRecorder = __webpack_require__(20);
-var BigTom = __webpack_require__(49);
-var LeftTom = __webpack_require__(57);
-var Bell = __webpack_require__(48);
-
-module.exports = TrackDrum;  // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-function TrackDrum(id, data){
-    BaseTrackModel.call(this, id, data);
-    this.drums = data.drums || []; // list of names of used drums
-    this.drumObjects = {}; // only used drum
-    this.allDrumObjects = {}; // instances of all possible drum objects
-    this.createAllDrumObjects();
-    this.createDrumObjects();
-}
-
-inherit(TrackDrum, BaseTrackModel);
-
-TrackDrum.prototype._generate = function(){};
-
-TrackDrum.prototype.getContext = function(){};
-
-TrackDrum.prototype.getConstants = function(){};
-
-TrackDrum.prototype.getAudioBuffer = function(){};
-
-TrackDrum.prototype.getBlob = function(){};
-
-TrackDrum.prototype.disconnectFromAudioSource = function(){};
-
-TrackDrum.prototype.getData = function(){
-    var result = {};
-    result.id = this.id;
-    result.isDeleted = this.isDeleted;
-    result.instrument = this.instrument;
-    result["drums"] = this.drums;
-    result["play-setting"] = this.playSetting;
-    result["post-setting"] = this.postSettings.getPostSettings();
-    return result;
-};
-
-/**
- * Add new drum
- * @param drumName
- */
-TrackDrum.prototype.addDrum = function(drumName){
-    if(this.drums.indexOf(drumName) === -1){
-        // get reference to drum object
-        this.drumObjects[drumName] = this.allDrumObjects[drumName];
-        this.drums.push(drumName);
-    }
-};
-
-/**
- * Put used drum sound object in this.drumObjects if them exist
- */
-TrackDrum.prototype.createDrumObjects = function(){
-    var drumName;
-    for(drumName in this.allDrumObjects){
-        if(this.drums.indexOf(drumName) !== -1){
-            // get reference to drum object
-            this.drumObjects[drumName] = this.allDrumObjects[drumName];
-        }
-    }
-};
-
-TrackDrum.prototype.play = function(){
-    var i, token;
-    for(i = 0; i < this.playObjects.length; ++i){
-        token = this.playObjects[i];
-        token.play(this.drumObjects[token.instrument].trackObject);
-    }
-};
-
-TrackDrum.prototype.stop = function(){
-    var drum;
-    for(drum in this.drumObjects){
-        this.drumObjects[drum].stop();
-    }
-};
-
-TrackDrum.prototype.createPlayObjects = function(){
-    var i, token;
-    for(i = 0; i < this.playSetting.length; ++i){
-        token = this.playSetting[i];
-        this.playObjects.push(new DrumRecorder(token.instrument, token.playValue, token.startTime));
-    }
-};
-
-/**
- * Apply filter for each drum object
- * @param filter
- */
-TrackDrum.prototype.applyFilter = function(filter){
-    var drum;
-    for(drum in this.allDrumObjects){
-        filter.applyToTrack(this.allDrumObjects[drum].trackObject);
-    }
-};
-
-/**
- * Remove filter from each drum object
- * @param filter
- */
-TrackDrum.prototype.removeFilter = function(filter){
-    var drum;
-    for(drum in this.allDrumObjects){
-        filter.disconnectFilter(this.allDrumObjects[drum].trackObject);
-    }
-};
-
-TrackDrum.prototype.merge = function(){
-    // merge this.object !!!!!!!
-};
-
-TrackDrum.prototype.clearObject = function(){
-    var drum;
-    for(drum in this.allDrumObjects){
-        this.allDrumObjects[drum].clearObject();
-    }
-};
-
-TrackDrum.prototype.emptyPlaySetting = function(){
-    this.playSetting.length = 0;
-    this.playObjects.length = 0;
-    this.drums.length = 0;
-};
-
-/**
- * Init all drum sound objects
- */
-TrackDrum.prototype.createAllDrumObjects = function(){
-    this.allDrumObjects["kick-left"] = new KickLeft();
-    this.allDrumObjects["kick-right"] = new KickRight();
-    this.allDrumObjects["big-tom"] = new BigTom();
-    this.allDrumObjects["left-tom"] = new LeftTom();
-    this.allDrumObjects["bell"] = new Bell();
-};
-
-
-/***/ }),
-/* 65 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var BaseTrackModel = __webpack_require__(7);
+var BaseTrackModel = __webpack_require__(8);
 var inherit = __webpack_require__(0);
 
 module.exports = TrackNoise;
@@ -4473,15 +4581,15 @@ TrackNoise.prototype.play = function(options){
 
 
 /***/ }),
-/* 66 */
+/* 68 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var BaseTrackModel = __webpack_require__(7);
+var BaseTrackModel = __webpack_require__(8);
 var inherit = __webpack_require__(0);
-var MixerRecorder = __webpack_require__(28);
+var MixerRecorder = __webpack_require__(30);
 
 module.exports = TrackOscillator;
 
@@ -4529,7 +4637,7 @@ TrackOscillator.prototype.setSetting = function(){
 
 
 /***/ }),
-/* 67 */
+/* 69 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4545,14 +4653,14 @@ function TrackPlayer(){
 
 
 /***/ }),
-/* 68 */
+/* 70 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var BaseTrackModel = __webpack_require__(7);
-var PianoKeyPlayer = __webpack_require__(29);
+var BaseTrackModel = __webpack_require__(8);
+var PianoKeyPlayer = __webpack_require__(31);
 var inherit = __webpack_require__(0);
 
 module.exports = TrackSynthesizer;
@@ -4658,14 +4766,14 @@ TrackSynthesizer.prototype.createPlayObjects = function(){
 
 
 /***/ }),
-/* 69 */
+/* 71 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var BaseFilterModel = __webpack_require__(6);
+var BaseFilterModel = __webpack_require__(7);
 
 module.exports = TremoloFilter;
 
@@ -4747,14 +4855,14 @@ TremoloFilter.prototype.setByName = function(optionName, value){
 
 
 /***/ }),
-/* 70 */
+/* 72 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var BaseFilterModel = __webpack_require__(6);
+var BaseFilterModel = __webpack_require__(7);
 
 module.exports = VibratoFilter;
 
@@ -4822,7 +4930,7 @@ VibratoFilter.prototype.setByName = function(optionName, value){
 
 
 /***/ }),
-/* 71 */
+/* 73 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4846,7 +4954,7 @@ module.exports = function(url, data, dataType, callback){
 
 
 /***/ }),
-/* 72 */
+/* 74 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4871,30 +4979,6 @@ module.exports = function(url, formData){
 
 
 /***/ }),
-/* 73 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var baseRequest = __webpack_require__(5);
-
-module.exports = baseRequest.bind(null, "POST", "json");
-
-
-/***/ }),
-/* 74 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var baseRequest = __webpack_require__(5);
-
-module.exports = baseRequest.bind(null, "POST", "json");
-
-
-/***/ }),
 /* 75 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -4903,7 +4987,7 @@ module.exports = baseRequest.bind(null, "POST", "json");
 
 var baseRequest = __webpack_require__(5);
 
-module.exports = baseRequest.bind(null, "GET", "json");
+module.exports = baseRequest.bind(null, "POST", "json");
 
 
 /***/ }),
@@ -4915,7 +4999,7 @@ module.exports = baseRequest.bind(null, "GET", "json");
 
 var baseRequest = __webpack_require__(5);
 
-module.exports = baseRequest.bind(null, "GET", "binary");
+module.exports = baseRequest.bind(null, "POST", "json");
 
 
 /***/ }),
@@ -4927,7 +5011,7 @@ module.exports = baseRequest.bind(null, "GET", "binary");
 
 var baseRequest = __webpack_require__(5);
 
-module.exports = baseRequest.bind(null, "GET", "json", "user/");
+module.exports = baseRequest.bind(null, "GET", "json");
 
 
 /***/ }),
@@ -4939,11 +5023,35 @@ module.exports = baseRequest.bind(null, "GET", "json", "user/");
 
 var baseRequest = __webpack_require__(5);
 
-module.exports = baseRequest.bind(null, "GET", "json", "projects/");
+module.exports = baseRequest.bind(null, "GET", "binary");
 
 
 /***/ }),
 /* 79 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var baseRequest = __webpack_require__(5);
+
+module.exports = baseRequest.bind(null, "GET", "json", "user/");
+
+
+/***/ }),
+/* 80 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var baseRequest = __webpack_require__(5);
+
+module.exports = baseRequest.bind(null, "GET", "json", "projects/");
+
+
+/***/ }),
+/* 81 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4955,7 +5063,7 @@ module.exports = function capitalize(str){
 
 
 /***/ }),
-/* 80 */
+/* 82 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4972,7 +5080,7 @@ module.exports = function(value, min, max){
 
 
 /***/ }),
-/* 81 */
+/* 83 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5000,7 +5108,7 @@ function fetch(url, resolve){
 
 
 /***/ }),
-/* 82 */
+/* 84 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5068,16 +5176,16 @@ function getEven(number){
 
 
 /***/ }),
-/* 83 */
+/* 85 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var DrumRecorder = __webpack_require__(20);
-var DrumModel = __webpack_require__(52);
-var BaseInstrument = __webpack_require__(22);
+var DrumRecorder = __webpack_require__(21);
+var DrumModel = __webpack_require__(54);
+var BaseInstrument = __webpack_require__(24);
 
 module.exports = DrumMachine;
 
@@ -5171,16 +5279,16 @@ DrumMachine.prototype.createDrumGrid = function(drumList){
 
 
 /***/ }),
-/* 84 */
+/* 86 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var ToolView = __webpack_require__(34);
-var FiltersList = __webpack_require__(53);
-var ProxyTrackManager = __webpack_require__(31);
+var ToolView = __webpack_require__(36);
+var FiltersList = __webpack_require__(55);
+var ProxyTrackManager = __webpack_require__(33);
 var Factory = __webpack_require__(3);
 
 module.exports = FilterView;
@@ -5316,7 +5424,7 @@ function uncheckEvent(filterName, isChecked){
 
 
 /***/ }),
-/* 85 */
+/* 87 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5324,9 +5432,9 @@ function uncheckEvent(filterName, isChecked){
 
 var inherit = __webpack_require__(0);
 var BaseView = __webpack_require__(2);
-var Piano = __webpack_require__(89);
-var Oscillator = __webpack_require__(88);
-var DrumMachine = __webpack_require__(83);
+var Piano = __webpack_require__(91);
+var Oscillator = __webpack_require__(90);
+var DrumMachine = __webpack_require__(85);
 var windowsTransport = __webpack_require__(4);
 var commonEventNames = __webpack_require__(1);
 
@@ -5396,7 +5504,7 @@ InstrumentView.prototype.setInstrument = function(){
 
 
 /***/ }),
-/* 86 */
+/* 88 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5404,15 +5512,14 @@ InstrumentView.prototype.setInstrument = function(){
 
 var inherit = __webpack_require__(0);
 var BaseView = __webpack_require__(2);
-var UserInfoBar = __webpack_require__(94);
+var UserInfoBar = __webpack_require__(96);
 var TrackView = __webpack_require__(15);
 var TrackListView = __webpack_require__(14);
 var ProjectListView = __webpack_require__(13);
-var PlayerView = __webpack_require__(90);
+var PlayerView = __webpack_require__(92);
 var Factory = __webpack_require__(3);
 var commonEventNames = __webpack_require__(1);
 var windowsTransport = __webpack_require__(4);
-
 
 module.exports = MenuBar;
 
@@ -5470,8 +5577,6 @@ MenuBar.prototype.adaptToActiveWindow = function(newWindow){
         this.exportProjectButton.hide();
 
         this.exportTrackButton.on("click", function(event){
-            console.log("export");
-            console.log(newWindow);
             windowsTransport.notify(commonEventNames.E_EXPORT_TRACK);
         });
     } else if(newWindow instanceof TrackListView){
@@ -5480,8 +5585,6 @@ MenuBar.prototype.adaptToActiveWindow = function(newWindow){
         this.exportProjectButton.show();
 
         this.exportProjectButton.on("click", function(event){
-            console.log("export");
-            console.log(newWindow);
             windowsTransport.notify(commonEventNames.E_EXPORT_PROJECT);
         });
     } else if(newWindow instanceof ProjectListView){
@@ -5505,7 +5608,7 @@ MenuBar.prototype.hideButtons = function(){
 
 
 /***/ }),
-/* 87 */
+/* 89 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5569,16 +5672,16 @@ MessageModal.prototype.hide = function(){
 
 
 /***/ }),
-/* 88 */
+/* 90 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var MixerRecorder = __webpack_require__(28);
-var BaseInstrument = __webpack_require__(22);
-var CoordMap = __webpack_require__(82);
+var MixerRecorder = __webpack_require__(30);
+var BaseInstrument = __webpack_require__(24);
+var CoordMap = __webpack_require__(84);
 
 module.exports = Oscillator;
 
@@ -5724,16 +5827,16 @@ function isContainObject(list, object){
 
 
 /***/ }),
-/* 89 */
+/* 91 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var PianoKeyRecorder = __webpack_require__(29);
-var BaseInstrument = __webpack_require__(22);
-var PianoModel = __webpack_require__(60);
+var PianoKeyRecorder = __webpack_require__(31);
+var BaseInstrument = __webpack_require__(24);
+var PianoModel = __webpack_require__(62);
 var Factory = __webpack_require__(3);
 
 module.exports = Piano;
@@ -5904,7 +6007,7 @@ Piano.prototype.keyUp = function(){
 
 
 /***/ }),
-/* 90 */
+/* 92 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5913,7 +6016,7 @@ Piano.prototype.keyUp = function(){
 var inherit = __webpack_require__(0);
 var Factory = __webpack_require__(3);
 var BaseView = __webpack_require__(2);
-var AudioPlayer = __webpack_require__(45);
+var AudioPlayer = __webpack_require__(48);
 var commonEventNames = __webpack_require__(1);
 var windowsTransport = __webpack_require__(4);
 
@@ -5949,17 +6052,18 @@ PlayerView.prototype._build = function(){
     container.append(this.stopButton);
 };
 
+
 /***/ }),
-/* 91 */
+/* 93 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var ToolView = __webpack_require__(34);
-var SettingsList = __webpack_require__(63);
-var ProxyTrackManager = __webpack_require__(31);
+var ToolView = __webpack_require__(36);
+var SettingsList = __webpack_require__(66);
+var ProxyTrackManager = __webpack_require__(33);
 
 module.exports = SettingView;
 
@@ -6022,7 +6126,7 @@ SettingView.prototype.setEvent = function(optionName, value){
 
 
 /***/ }),
-/* 92 */
+/* 94 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6047,7 +6151,7 @@ TabSegment.prototype.setActive = function(){
 
 
 /***/ }),
-/* 93 */
+/* 95 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6121,7 +6225,7 @@ TrackDataView.prototype.createWaveForm = function(){
 
 
 /***/ }),
-/* 94 */
+/* 96 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6130,7 +6234,7 @@ TrackDataView.prototype.createWaveForm = function(){
 var inherit = __webpack_require__(0);
 var Factory = __webpack_require__(3);
 var BaseView = __webpack_require__(2);
-var UserModal = __webpack_require__(95);
+var UserModal = __webpack_require__(97);
 var RequestManager = __webpack_require__(10);
 var commonEventNames = __webpack_require__(1);
 var windowsTransport = __webpack_require__(4);
@@ -6181,7 +6285,7 @@ UserInfoBar.prototype.setUserName = function(userName){
 
 
 /***/ }),
-/* 95 */
+/* 97 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6228,14 +6332,14 @@ UserModal.prototype.show = function(){
 
 
 /***/ }),
-/* 96 */
+/* 98 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var AudioHelper = __webpack_require__(8);
+var AudioHelper = __webpack_require__(9);
 var BaseView = __webpack_require__(2);
 var commonEventNames = __webpack_require__(1);
 var windowsTransport = __webpack_require__(4);
@@ -6266,92 +6370,6 @@ WaveForm.prototype.create = function(buffer){
     console.log(this.waveform);
     windowsTransport.subscribe(commonEventNames.E_PLAY_WAVE, this.waveform.playPause.bind(this.waveform));
     windowsTransport.subscribe(commonEventNames.E_STOP_WAVE, this.waveform.stop.bind(this.waveform));
-};
-
-
-/***/ }),
-/* 97 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = mergeBuffers;
-
-function mergeBuffers(buffers, ac) {
-  var maxChannels = 0;
-  var maxDuration = 0;
-  for (var i = 0; i < buffers.length; i++) {
-    if (buffers[i].numberOfChannels > maxChannels) {
-      maxChannels = buffers[i].numberOfChannels;
-    }
-    if (buffers[i].duration > maxDuration) {
-      maxDuration = buffers[i].duration;
-    }
-  }
-  var out = ac.createBuffer(maxChannels,
-                                 ac.sampleRate * maxDuration,
-                                 ac.sampleRate);
-
-  for (var j = 0; j < buffers.length; j++) {
-    for (var srcChannel = 0; srcChannel < buffers[j].numberOfChannels; srcChannel++) {
-      var outt = out.getChannelData(srcChannel);
-      var inn = buffers[j].getChannelData(srcChannel);
-      for (var i = 0; i < inn.length; i++) {
-        outt[i] += inn[i];
-      }
-      out.getChannelData(srcChannel).set(outt, 0);
-    }
-  }
-  return out;
-}
-
-/***/ }),
-/* 98 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var AudioBufferRecorder = __webpack_require__(24);
-var DrumAudioBufferRecorder = __webpack_require__(51);
-var TrackDrum = __webpack_require__(64);
-var TrackManager = __webpack_require__(9);
-
-module.exports = ProjectRecorder;
-
-function ProjectRecorder(projectModel){
-    this.projectModel = projectModel;
-    this.models = this.projectModel.__data;
-    console.log(this.models);
-    this.recorders = [];
-    this.buffers = [];
-}
-
-ProjectRecorder.prototype.createRecord = function(callback){
-    var i, model, recorder;
-    for(i = 0; i < this.models.length; ++i){
-        model = this.models[i];
-        if(model instanceof TrackDrum){
-            recorder = new DrumAudioBufferRecorder();
-            recorder.setModel(model);
-        } else{
-            recorder = new AudioBufferRecorder();
-            recorder.setModel(model);
-        }
-        recorder.record(callback);
-    }
-};
-
-ProjectRecorder.prototype.saveBuffers = function(buffer){
-    var result;
-    this.buffers.push(buffer);
-    if(this.buffers.length === this.models.length){
-        result = TrackManager.mergeTracks(this.buffers);
-        console.log("project");
-        console.log(result);
-        TrackManager.save(result);
-    }
 };
 
 
