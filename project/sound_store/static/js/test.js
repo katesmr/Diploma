@@ -154,6 +154,18 @@ BaseView.prototype.appendToBlock = function(blockName){
 "use strict";
 
 
+var Observer = __webpack_require__(12);
+
+module.exports = new Observer();
+
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
 module.exports = {
     "createKey": createKey,
     "rangeElement": rangeElement,
@@ -353,18 +365,6 @@ function setColorToKey(pianoElement, key, color){
 
 
 /***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var Observer = __webpack_require__(12);
-
-module.exports = new Observer();
-
-
-/***/ }),
 /* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -387,53 +387,6 @@ module.exports = function(method, dataType, url, callback){
 
 /***/ }),
 /* 6 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var mergeBuffers = __webpack_require__(44);
-var AudioHelper = __webpack_require__(9);
-
-module.exports = TrackManager;
-
-var AudioContext = window.AudioContext || window.webkitAudioContext;
-
-function TrackManager(){}
-
-// get array with Tone.Synth
-TrackManager.mergeTracks = function(bufferList){
-    var context = new AudioContext();
-    return mergeBuffers(bufferList, context);
-};
-
-TrackManager.save = (function(){
-    var a = document.createElement("a");
-    document.body.appendChild(a);
-    a.style = "display: none";
-    return function(data, fileName){
-        if(fileName === undefined){
-            fileName = "test.wav";
-        }
-        var blob;
-        var buffer;
-        if(data instanceof AudioBuffer){
-            blob = AudioHelper.AudioBufferToBlob(data);
-        } else{
-            buffer = AudioHelper.getAudioContextBuffer(data.context);
-            blob = new Blob([buffer], {"type": "audio/x-wav"});
-        }
-        var url = window.URL.createObjectURL(blob);
-        a.href = url;
-        a.download = fileName;
-        a.click();
-        window.URL.revokeObjectURL(url);
-    };
-}());
-
-
-/***/ }),
-/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -468,7 +421,7 @@ BaseFilterModel.prototype.disconnectFilter = function(track){
 
 
 /***/ }),
-/* 8 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -476,7 +429,7 @@ BaseFilterModel.prototype.disconnectFilter = function(track){
 
 var PostSettings = __webpack_require__(64);
 var generateUID = __webpack_require__(47);
-var AudioHelper = __webpack_require__(9);
+var AudioHelper = __webpack_require__(8);
 
 module.exports = BaseTrackModel;
 
@@ -528,10 +481,6 @@ BaseTrackModel.prototype.getType = function(){
     return this.trackObject ? this.trackObject.type : null;
 };
 
-BaseTrackModel.prototype.getFrequency = function(){
-    return this.trackObject ? this.trackObject.frequency.value : null;
-};
-
 /**
  * Return object of track setting in right format for transfer or saving
  * @returns {{}}
@@ -558,10 +507,6 @@ BaseTrackModel.prototype.setVolume = function(value){
 
 BaseTrackModel.prototype.setType = function(value){
     this.trackObject.type = value;
-};
-
-BaseTrackModel.prototype.setFrequency = function(value){
-    this.trackObject.frequency.value = value;
 };
 
 /**
@@ -616,7 +561,7 @@ BaseTrackModel.prototype.merge = null;
 
 
 /***/ }),
-/* 9 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -653,8 +598,6 @@ function BlobToArrayBuffer(blob, callback){
 function AudioBufferToBlob(audioBuffer){
     var buffer = toWav(audioBuffer, {float32: true});
     var blob = new Blob([buffer], {"type": "audio/x-wav"});
-    console.log("----");
-    console.log(blob);
     return blob;
 }
 
@@ -691,6 +634,53 @@ var save = (function(){
 
 
 /***/ }),
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var mergeBuffers = __webpack_require__(44);
+var AudioHelper = __webpack_require__(8);
+
+module.exports = TrackManager;
+
+var AudioContext = window.AudioContext || window.webkitAudioContext;
+
+function TrackManager(){}
+
+// get array with Tone.Synth
+TrackManager.mergeTracks = function(bufferList){
+    var context = new AudioContext();
+    return mergeBuffers(bufferList, context);
+};
+
+TrackManager.save = (function(){
+    var a = document.createElement("a");
+    document.body.appendChild(a);
+    a.style = "display: none";
+    return function(data, fileName){
+        if(fileName === undefined){
+            fileName = "test.wav";
+        }
+        var blob;
+        var buffer;
+        if(data instanceof AudioBuffer){
+            blob = AudioHelper.AudioBufferToBlob(data);
+        } else{
+            buffer = AudioHelper.getAudioContextBuffer(data.context);
+            blob = new Blob([buffer], {"type": "audio/x-wav"});
+        }
+        var url = window.URL.createObjectURL(blob);
+        a.href = url;
+        a.download = fileName;
+        a.click();
+        window.URL.revokeObjectURL(url);
+    };
+}());
+
+
+/***/ }),
 /* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -698,7 +688,7 @@ var save = (function(){
 
 
 var transportAudioFile = __webpack_require__(83);
-var TrackManager = __webpack_require__(6);
+var TrackManager = __webpack_require__(9);
 
 var changeSound = __webpack_require__(74);
 var changeRequest = __webpack_require__(73);
@@ -950,9 +940,9 @@ function _notify(list, event, data){
 
 var inherit = __webpack_require__(0);
 var BaseWindow = __webpack_require__(25);
-var Factory = __webpack_require__(3);
+var Factory = __webpack_require__(4);
 var commonEventNames = __webpack_require__(1);
-var windowsTransport = __webpack_require__(4);
+var windowsTransport = __webpack_require__(3);
 
 module.exports = ProjectListView;
 
@@ -1065,9 +1055,9 @@ function onRemoveButtonClicked($element){
 var inherit = __webpack_require__(0);
 var BaseWindow = __webpack_require__(25);
 var TrackDataView = __webpack_require__(95);
-var Factory = __webpack_require__(3);
+var Factory = __webpack_require__(4);
 var commonEventNames = __webpack_require__(1);
-var windowsTransport = __webpack_require__(4);
+var windowsTransport = __webpack_require__(3);
 
 var ProjectRecorder = __webpack_require__(65);
 
@@ -1235,12 +1225,12 @@ var FilterView = __webpack_require__(86);
 var SettingView = __webpack_require__(93);
 var InstrumentView = __webpack_require__(87);
 var commonEventNames = __webpack_require__(1);
-var windowsTransport = __webpack_require__(4);
+var windowsTransport = __webpack_require__(3);
 
 var AudioBufferRecorder = __webpack_require__(17);
 var DrumAudioBufferRecorder = __webpack_require__(29);
 var TrackDrum = __webpack_require__(23);
-var TrackManager = __webpack_require__(6);
+var TrackManager = __webpack_require__(9);
 
 module.exports = TrackView;
 
@@ -1317,7 +1307,7 @@ TrackView.prototype.setActiveFilterView = function(){
 TrackView.prototype.back = function(){
     this.settingTabSegment.table.empty();
     this.filterTabSegment.table.empty();
-    this.waveform.getContainer().empty();
+    //this.waveform.getContainer().empty();
     windowsTransport.notify(commonEventNames.E_ACTIVATE_WINDOW, "trackList");
     this.settingTabSegment.resetToolOptions(); // reset previous setting of track
     this.filterTabSegment.resetToolOptions(); // reset previous filter of track
@@ -1336,17 +1326,17 @@ function setTrack(eventName, track){
     this.filterTabSegment.setFilter(track);
     this.instrumentView.setTrack(track);
 
-    if(track instanceof TrackDrum){
-        this.recorder = new DrumAudioBufferRecorder();
-    } else{
-        this.recorder = new AudioBufferRecorder();
+    if(track.id > 0){
+        // draw waveform only for fulled track
+        // new track (it's id < 0) always empty
+        if (track instanceof TrackDrum) {
+            this.recorder = new DrumAudioBufferRecorder();
+        } else {
+            this.recorder = new AudioBufferRecorder();
+        }
+        this.recorder.setModel(track);
+        //this.recorder.record(this.waveform.create.bind(this.waveform));
     }
-    this.recorder.setModel(track);
-    this.recorder.record(this.waveform.create.bind(this.waveform));
-    this.waveform.show();
-
-    //this.recorder.record(this.waveform.create.bind(this.waveform));
-    //this.recorder.record(TrackManager.save.bind(TrackManager.save));
 }
 
 
@@ -1757,7 +1747,7 @@ ObservableList.prototype.remove = function(index){
 "use strict";
 
 
-var BaseTrackModel = __webpack_require__(8);
+var BaseTrackModel = __webpack_require__(7);
 var inherit = __webpack_require__(0);
 var KickLeft = __webpack_require__(57);
 var KickRight = __webpack_require__(58);
@@ -1966,7 +1956,7 @@ BaseWindow.prototype.back = null;
 "use strict";
 
 
-var AudioHelper = __webpack_require__(9);
+var AudioHelper = __webpack_require__(8);
 var DrumRecorder = __webpack_require__(21);
 
 module.exports = BaseDrumModel;
@@ -2160,7 +2150,7 @@ BaseTrackSetting.prototype.toString = function(){
 
 
 var inherit = __webpack_require__(0);
-var TrackManager = __webpack_require__(6);
+var TrackManager = __webpack_require__(9);
 var AudioBufferRecorder = __webpack_require__(17);
 var eventDuration = __webpack_require__(35);
 
@@ -2197,7 +2187,7 @@ DrumAudioBufferRecorder.prototype.createTrack = function(drumTrack){
     }
     if(this.track) {
         this.createFilters();
-        this.playData = createDrumPlayData(this.trackModel.playSetting, drumTrack.instrument);
+        this.playData = createDrumPlayData(this.trackModel.playObjects, drumTrack.instrument);
         //this.duration = eventDuration.durationByTime(this.playData);
     }
 };
@@ -2782,7 +2772,7 @@ var inherit = __webpack_require__(0);
 var TabSegment = __webpack_require__(94);
 var BaseRange = __webpack_require__(19);
 var BaseOptionList = __webpack_require__(18);
-var Factory = __webpack_require__(3);
+var Factory = __webpack_require__(4);
 
 module.exports = ToolView;
 
@@ -2944,8 +2934,8 @@ TrackController.prototype.sendTrack = function(){
 
 
 //var audioBufferUtils = require("audio-buffer-utils");
-var AudioHelper = __webpack_require__(9);
-var TrackManager = __webpack_require__(6);
+var AudioHelper = __webpack_require__(8);
+var TrackManager = __webpack_require__(9);
 
 var sounds = [];
 
@@ -3067,7 +3057,7 @@ var ProjectListView = __webpack_require__(13);
 var TrackListView = __webpack_require__(14);
 var TrackView = __webpack_require__(15);
 var MenuBar = __webpack_require__(88);
-var windowsTransport = __webpack_require__(4);
+var windowsTransport = __webpack_require__(3);
 var commonEventNames = __webpack_require__(1);
 
 module.exports = WindowManager;
@@ -3478,10 +3468,10 @@ module.exports = function(){
 "use strict";
 
 
-var BaseTrackModel = __webpack_require__(8);
+var BaseTrackModel = __webpack_require__(7);
 var ProjectModel = __webpack_require__(32);
 var commonEventNames = __webpack_require__(1);
-var windowsTransport = __webpack_require__(4);
+var windowsTransport = __webpack_require__(3);
 
 module.exports = AudioPlayer;
 
@@ -3695,7 +3685,7 @@ BigTom.prototype.setInstrument = function(){
 //CrusherFilter
 
 var inherit = __webpack_require__(0);
-var BaseFilterModel = __webpack_require__(7);
+var BaseFilterModel = __webpack_require__(6);
 
 module.exports = CrusherFilter;
 
@@ -3835,7 +3825,7 @@ module.exports = new TrackSettingsSet([
 
 
 var inherit = __webpack_require__(0);
-var BaseFilterModel = __webpack_require__(7);
+var BaseFilterModel = __webpack_require__(6);
 
 module.exports = FreeverbFilter;
 
@@ -4058,7 +4048,7 @@ MetalSynthModel.prototype.stop = function(){
 //PhaserFilter
 
 var inherit = __webpack_require__(0);
-var BaseFilterModel = __webpack_require__(7);
+var BaseFilterModel = __webpack_require__(6);
 
 module.exports = PhaserFilter;
 
@@ -4463,7 +4453,7 @@ PostSettings.prototype.setValueToFilter = function(filterName, optionName, value
 var AudioBufferRecorder = __webpack_require__(17);
 var DrumAudioBufferRecorder = __webpack_require__(29);
 var TrackDrum = __webpack_require__(23);
-var TrackManager = __webpack_require__(6);
+var TrackManager = __webpack_require__(9);
 
 module.exports = ProjectRecorder;
 
@@ -4558,7 +4548,7 @@ module.exports = new TrackSettingsSet([
 "use strict";
 
 
-var BaseTrackModel = __webpack_require__(8);
+var BaseTrackModel = __webpack_require__(7);
 var inherit = __webpack_require__(0);
 
 module.exports = TrackNoise;
@@ -4587,7 +4577,7 @@ TrackNoise.prototype.play = function(options){
 "use strict";
 
 
-var BaseTrackModel = __webpack_require__(8);
+var BaseTrackModel = __webpack_require__(7);
 var inherit = __webpack_require__(0);
 var MixerRecorder = __webpack_require__(30);
 
@@ -4603,6 +4593,14 @@ inherit(TrackOscillator, BaseTrackModel);
 
 TrackOscillator.prototype._generate = function(){
     return new Tone.Oscillator(this.setting).toMaster();
+};
+
+TrackOscillator.prototype.getFrequency = function(){
+    return this.trackObject ? this.trackObject.frequency.value : null;
+};
+
+TrackOscillator.prototype.setFrequency = function(value){
+    this.trackObject.frequency.value = value;
 };
 
 TrackOscillator.prototype.createPlayObjects = function(){
@@ -4659,7 +4657,7 @@ function TrackPlayer(){
 "use strict";
 
 
-var BaseTrackModel = __webpack_require__(8);
+var BaseTrackModel = __webpack_require__(7);
 var PianoKeyPlayer = __webpack_require__(31);
 var inherit = __webpack_require__(0);
 
@@ -4722,8 +4720,8 @@ TrackSynthesizer.prototype.setSetting = function(){
             this.setting.envelope = {};
         }
         this.setting.oscillator.valume = this.getVolume();
-        this.setting.oscillator.frequency = this.getFrequency();
-        this.setting.frequency = this.getFrequency();
+        //this.setting.oscillator.frequency = this.getFrequency();
+        //this.setting.frequency = this.getFrequency();
         this.setting.oscillator.type = this.getType();
         this.setting.envelope.attack = this.getAttack();
         this.setting.envelope.decay = this.getDecay();
@@ -4773,7 +4771,7 @@ TrackSynthesizer.prototype.createPlayObjects = function(){
 
 
 var inherit = __webpack_require__(0);
-var BaseFilterModel = __webpack_require__(7);
+var BaseFilterModel = __webpack_require__(6);
 
 module.exports = TremoloFilter;
 
@@ -4862,7 +4860,7 @@ TremoloFilter.prototype.setByName = function(optionName, value){
 
 
 var inherit = __webpack_require__(0);
-var BaseFilterModel = __webpack_require__(7);
+var BaseFilterModel = __webpack_require__(6);
 
 module.exports = VibratoFilter;
 
@@ -5289,7 +5287,7 @@ var inherit = __webpack_require__(0);
 var ToolView = __webpack_require__(36);
 var FiltersList = __webpack_require__(55);
 var ProxyTrackManager = __webpack_require__(33);
-var Factory = __webpack_require__(3);
+var Factory = __webpack_require__(4);
 
 module.exports = FilterView;
 
@@ -5435,7 +5433,7 @@ var BaseView = __webpack_require__(2);
 var Piano = __webpack_require__(91);
 var Oscillator = __webpack_require__(90);
 var DrumMachine = __webpack_require__(85);
-var windowsTransport = __webpack_require__(4);
+var windowsTransport = __webpack_require__(3);
 var commonEventNames = __webpack_require__(1);
 
 module.exports = InstrumentView;
@@ -5517,14 +5515,16 @@ var TrackView = __webpack_require__(15);
 var TrackListView = __webpack_require__(14);
 var ProjectListView = __webpack_require__(13);
 var PlayerView = __webpack_require__(92);
-var Factory = __webpack_require__(3);
+var Factory = __webpack_require__(4);
 var commonEventNames = __webpack_require__(1);
-var windowsTransport = __webpack_require__(4);
+var windowsTransport = __webpack_require__(3);
 
 module.exports = MenuBar;
 
 function MenuBar(){
     BaseView.call(this, "menubar");
+
+    this.menu = $("<div class='ui horizontal list menu-bar'>");
 
     this.userInfoBar = new UserInfoBar();
     this.backButton = Factory.createIconButton("ui button back user-only", "arrow left icon", "");
@@ -5559,13 +5559,15 @@ MenuBar.prototype._build = function(){
 
     this.hideButtons();
 
-    container.append(this.backButton);
-    container.append(this.player.getContainer());
-    container.append(this.exportProjectButton);
-    container.append(this.exportTrackButton);
-    container.append(this.recordButton);
-    container.append(this.clearButton);
-    container.append(this.userInfoBar.getContainer());
+    this.menu.append(this.backButton);
+    this.menu.append(this.player.getContainer());
+    this.menu.append(this.exportProjectButton);
+    this.menu.append(this.exportTrackButton);
+    this.menu.append(this.recordButton);
+    this.menu.append(this.clearButton);
+    this.menu.append(this.userInfoBar.getContainer());
+
+    container.append(this.menu);
 };
 
 MenuBar.prototype.adaptToActiveWindow = function(newWindow){
@@ -5616,7 +5618,7 @@ MenuBar.prototype.hideButtons = function(){
 
 var inherit = __webpack_require__(0);
 var BaseView = __webpack_require__(2);
-var Factory = __webpack_require__(3);
+var Factory = __webpack_require__(4);
 var Observer = __webpack_require__(12);
 var commonEventNames = __webpack_require__(1);
 
@@ -5837,7 +5839,7 @@ var inherit = __webpack_require__(0);
 var PianoKeyRecorder = __webpack_require__(31);
 var BaseInstrument = __webpack_require__(24);
 var PianoModel = __webpack_require__(62);
-var Factory = __webpack_require__(3);
+var Factory = __webpack_require__(4);
 
 module.exports = Piano;
 
@@ -6014,11 +6016,11 @@ Piano.prototype.keyUp = function(){
 
 
 var inherit = __webpack_require__(0);
-var Factory = __webpack_require__(3);
+var Factory = __webpack_require__(4);
 var BaseView = __webpack_require__(2);
 var AudioPlayer = __webpack_require__(48);
 var commonEventNames = __webpack_require__(1);
-var windowsTransport = __webpack_require__(4);
+var windowsTransport = __webpack_require__(3);
 
 module.exports = PlayerView;
 
@@ -6182,47 +6184,6 @@ TrackDataView.prototype._build = function(){
     container.append(this.waveform);
 };
 
-TrackDataView.prototype.createWaveForm = function(){
-    /*var data = this.trackModel.getContext();
-    //this.trackModel.play();
-    //this.trackModel.saveTest(TrackManager.save);
-    this.waveform = new WaveForm();
-    this.getContainer().append(this.waveform.getContainer());
-    if(data instanceof Blob){
-        this.waveform.create(data);
-    } else if(data instanceof AudioContext){
-        this.waveform.createWaveForm(data);
-    }*/
-    var self = this;
-    Tone.Offline(function(){
-        //only nodes created in this callback will be recorded
-        //var oscillator = new Tone.Oscillator().toMaster().start(0);
-        var synthBass = new Tone.Synth({"oscillator": {"frequency": 440},
-            "envelope": {"attack" : 0.5, "decay": 0.9, "sustain": 0.3, "release": 1}}).toMaster();
-        synthBass.triggerAttackRelease('C4', 5);
-        synthBass.triggerAttackRelease('A2', 2, 2);
-        synthBass.triggerAttackRelease('A2', 2, 3);
-        //schedule their events
-    }, 5).then(function(buffer){
-        //do something with the output buffer
-        console.log(buffer);
-        //TrackManager.save(buffer._buffer);
-        var blob = AudioHelper.AudioBufferToBlob(buffer._buffer);
-        self.waveform = new WaveForm();
-        self.getContainer().append(self.waveform.getContainer());
-        self.waveform.create(blob);
-
-        /*
-        self.waveform = new WaveForm();
-        self.getContainer().append(self.waveform.getContainer());
-
-        var p = new Tone.Player(buffer._buffer).toMaster().start();
-        self.waveform.createWaveForm(p.context._context);
-         */
-    })
-
-};
-
 
 /***/ }),
 /* 96 */
@@ -6232,12 +6193,12 @@ TrackDataView.prototype.createWaveForm = function(){
 
 
 var inherit = __webpack_require__(0);
-var Factory = __webpack_require__(3);
+var Factory = __webpack_require__(4);
 var BaseView = __webpack_require__(2);
 var UserModal = __webpack_require__(97);
 var RequestManager = __webpack_require__(10);
 var commonEventNames = __webpack_require__(1);
-var windowsTransport = __webpack_require__(4);
+var windowsTransport = __webpack_require__(3);
 
 module.exports = UserInfoBar;
 
@@ -6292,10 +6253,10 @@ UserInfoBar.prototype.setUserName = function(userName){
 
 
 var inherit = __webpack_require__(0);
-var Factory = __webpack_require__(3);
+var Factory = __webpack_require__(4);
 var BaseView = __webpack_require__(2);
 var commonEventNames = __webpack_require__(1);
-var windowsTransport = __webpack_require__(4);
+var windowsTransport = __webpack_require__(3);
 
 module.exports = UserModal;
 
@@ -6339,17 +6300,17 @@ UserModal.prototype.show = function(){
 
 
 var inherit = __webpack_require__(0);
-var AudioHelper = __webpack_require__(9);
+var AudioHelper = __webpack_require__(8);
 var BaseView = __webpack_require__(2);
 var commonEventNames = __webpack_require__(1);
-var windowsTransport = __webpack_require__(4);
+var windowsTransport = __webpack_require__(3);
 
 module.exports = WaveForm;
 
 function WaveForm(){
     BaseView.call(this, "wave-form");
 
-    this.waveform = null;
+    this.wavesurfer = null;
 
     this._build();
 }
@@ -6360,16 +6321,24 @@ WaveForm.prototype._build = function(){
 };
 
 WaveForm.prototype.create = function(buffer){
-    console.log("wf");
-    this.waveform = WaveSurfer.create({
+    var self = this;
+    this.wavesurfer = WaveSurfer.create({
         container: this.getContainer().get(0),
         waveColor: "#626262",
         progressColor: "#fff843"
     });
-    this.waveform.loadBlob(AudioHelper.AudioBufferToBlob(buffer));
-    console.log(this.waveform);
-    windowsTransport.subscribe(commonEventNames.E_PLAY_WAVE, this.waveform.playPause.bind(this.waveform));
-    windowsTransport.subscribe(commonEventNames.E_STOP_WAVE, this.waveform.stop.bind(this.waveform));
+    console.log('u');
+    this.wavesurfer.load('https://ia902606.us.archive.org/35/items/shortpoetry_047_librivox/song_cjrg_teasdale_64kb.mp3');
+    this.wavesurfer.on('ready', function(){
+        self.wavesurfer.drawer.container.style.display = '';
+        self.wavesurfer.drawBuffer();
+    });
+    //this.wavesurfer.loadBlob(AudioHelper.AudioBufferToBlob(buffer));
+    //this.waveform.load('https://ia902606.us.archive.org/35/items/shortpoetry_047_librivox/song_cjrg_teasdale_64kb.mp3');
+    //windowsTransport.subscribe(commonEventNames.E_PLAY_WAVE, this.waveform.playPause.bind(this.waveform));
+    //windowsTransport.subscribe(commonEventNames.E_STOP_WAVE, this.waveform.stop.bind(this.waveform));
+    //self.waveform.drawer.container.style.display = '';
+    //self.waveform.drawBuffer();
 };
 
 
