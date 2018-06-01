@@ -16,17 +16,50 @@ body {
 }
 
 .ui.horizontal.list.menu-bar {
-    width: 100%;
+    width: 90%;
     height: 55px;
+    margin: 10px 10px 0 10px;
+}
+
+.ui.button.back {
+    float: left;
+    width: auto;
+    height: auto;
+}
+
+.player-view {
+    float: left;
+    margin-left: 30%;
+}
+
+.button.export {
+    float: left;
+    margin-left: 3%;
+}
+
+.button.record {
+    float: left;
+    margin-left: 3%;
+}
+
+.button.clear {
+    float: left;
+    margin-left: 1%;
 }
 
 .user-info-bar {
-    float: left;
-    margin-left: 80%;
+    float: right;
 }
 
-.user-info-bar .ui.button, p {
-    padding: 1%;
+.user-info-bar .ui.button {
+    width: auto;
+    font-size: 15px;
+}
+
+.user-info-bar p {
+    float: right;
+    color: white;
+    font-size: 15px;
 }
 
 .projectbar {
@@ -51,6 +84,23 @@ body {
     padding-top: 2%;
 }
 
+.ui.modal.message {
+    width: 400px;
+    height: auto;
+    padding: 1%;
+}
+
+.ui.modal.message p {
+    margin: 0 auto;
+    font-size: 15px;
+    display: inline-block;
+}
+
+.ui.modal.message .button-group {
+    margin: 0 auto;
+    display: inline-block;
+}
+
 .ui.modal.user-registration {
     width: 300px;
     height: 200px;
@@ -69,12 +119,90 @@ body {
 
 .project-list h1 {
     color: white;
-    margin-bottom: 2%;
+    margin: 2% 0 0 0;
 }
 
-.project-list .circular.ui.icon.button {
-    margin-top: 2%;
+.project-list a {
+    font-size: 20px;
+    color: white;
+    background-color: #262626;
 }
+
+.project-list .ui.grid {
+    margin: 3%;
+}
+
+.project-list .circular.ui.icon.button.delete {
+    margin: 0 0 2% 1%;
+    float: right;
+    width: 1px;
+    height: 1px;
+}
+
+.project-list .circular.ui.icon.button.delete i {
+    display: block;
+    margin: 0 auto;
+    width: auto;
+}
+
+.circular.ui.icon.button.add-project {
+    display: block;
+    margin: 3% auto;
+    width: 40px;
+    height: 40px;
+}
+
+.circular.ui.icon.button.add-project i {
+    display: block;
+    margin: 0 auto;
+    width: auto;
+    height: auto;
+}
+
+.track-list-view {
+    width: 80%;
+    height: auto;
+    margin: 1% 10%;
+}
+
+.track-list {
+    height: auto;
+    margin: 0 10% 15% 15%;
+}
+
+.track-list div[class^='track-']{
+    margin: 0 0 2% 0;
+}
+
+.track-list .circular.ui.icon.button.delete {
+    float: right;
+    width: 30px;
+    height: 30px;
+}
+
+.circular.ui.icon.button.add-track {
+    width: 40px;
+    height: 40px;
+    margin: 3% 10% 0 10%;
+    display: inline-block;
+}
+
+.track-data-view {
+    width: 90%;
+    float: left;
+    height: 60px;
+    margin: 1% auto;
+    display: inline-block;
+    background-color: #565e62;
+}
+
+.track-data-view, h4 {
+    color: white;
+    margin: 0;
+}
+
+
+
 
 .track-view {
     margin: 0 auto;
@@ -87,29 +215,6 @@ body {
     width: 100%;
     height: 55px;
     background-color: #626262;
-}
-
-.ui.button.back {
-    float: left;
-}
-
-.player-view {
-    float: left;
-    margin-left: 30%;
-}
-
-.button.record {
-    float: left;
-    margin-left: 10%;
-}
-
-.button.clear {
-    float: right;
-    margin-left: 5%;
-}
-
-.save-button-group {
-    float: right;
 }
 
 .track-tool-view {
@@ -128,18 +233,6 @@ body {
 /*.wave {
     position: none;
 }*/
-
-.track-data-view {
-    width: 70%;
-    height: 128px;
-    margin-top: 1%;
-    background-color: grey;
-}
-
-.track-data-view, h4 {
-    color: white;
-    margin: 0;
-}
 
 .ui.modal.track-tool {
     width: 30%;
@@ -161,10 +254,6 @@ body {
 
 .project-component-view h1 {
     color: white;
-}
-
-.circular.ui.icon.button.add-track {
-    margin-top: 2%;
 }
 
 .ui.attached.tabular.menu {

@@ -174,8 +174,8 @@ module.exports = {
     "setColorToKey": setColorToKey,
     "createCheckBox": createCheckBox,
     "dropDownElement": dropDownElement,
-    "createDivButton": createDivButton,
     "createIconButton": createIconButton,
+    "createButtonPopup": createButtonPopup,
     "deleteCircleButton": deleteCircleButton,
     "setBeginValueToRangeElement": setBeginValueToRangeElement
 };
@@ -184,17 +184,26 @@ function createButton(className, text){
     return $("<button class='ui button " + className + "'>" + text + "</button>");
 }
 
-function createDivButton(className, text){
-    return $("<div class='" + className + "'>" + text + "</div>");
-}
-
 function createIconButton(buttonClass, iconClass, name){
     return $("<button class='" + buttonClass + "'>" +
         "<i class='" + iconClass + "'></i>" + name + "</button>");
 }
 
+function createButtonPopup(buttonClass, iconClass, name, message){
+    var $button;
+    if(iconClass){
+        $button = $("<button class='" + buttonClass + "' data-content='" + message + "'>" +
+                    "<i class='" + iconClass + "'></i>" + name + "</button>");
+    } else{
+        $button = $("<button class='ui button " + buttonClass + "' data-content='" + message + "'>"
+                    + name + "</button>");
+    }
+    $button.popup();
+    return $button;
+}
+
 function deleteCircleButton(buttonId, callback){
-    var $deleteProjectButton = createIconButton("circular ui icon button", "remove icon", "");
+    var $deleteProjectButton = createIconButton("circular ui icon button delete", "remove icon", "");
     $deleteProjectButton.attr("id", buttonId);
     $deleteProjectButton.on("click", function(){
         callback($(this));
@@ -950,8 +959,9 @@ function ProjectListView(controller){
     BaseWindow.call(this, controller, "project-list");
 
     this.title = $("<h1>Project List</h1>");
-    this.table = $("<div class='five column stackable ui grid'>");
-    this.addTrackButton = Factory.createIconButton("circular ui icon button", "plus icon", "");
+    this.table = $("<div class='five column stackable ui grid projects'>");
+    this.addTrackButton = Factory.createButtonPopup("circular ui icon button add-project", "large plus icon", "",
+                                                    "Click to add new project");
 
     this.selectedItem = null;
     this.onRemoveButtonClicked = onRemoveButtonClicked.bind(this);
@@ -1014,7 +1024,6 @@ ProjectListView.prototype.add = function(object){
     var projectId;
     var $deleteProjectButton;
     $deleteProjectButton = Factory.deleteCircleButton(_id, this.onRemoveButtonClicked);
-    //create function for project name ITEM
     $item = $("<a id='" + _id + "'>" + object.name +"</a>");
     $item.on("click", function(event){
         projectId = $(this).attr("id");
@@ -1025,6 +1034,13 @@ ProjectListView.prototype.add = function(object){
     $column = $("<div class='column' id='item-" + _id + "'>");
     $column.append($item);
     $column.append($deleteProjectButton);
+    $deleteProjectButton.hide();
+    $column.mouseenter(function(event){
+        $deleteProjectButton.show();
+    });
+    $column.mouseleave(function(event){
+        $deleteProjectButton.hide();
+    });
     this.table.append($column);
 };
 
@@ -1067,7 +1083,7 @@ function TrackListView(controller){
     BaseWindow.call(this, controller, "track-list-view");
 
     this.projectName = $("<h1></h1>");
-    this.addTrackButton = Factory.createIconButton("circular ui icon button add-track", "plus icon", "");
+    this.addTrackButton = Factory.createIconButton("circular ui icon button add-track", "large plus icon", "");
     this.instrumentChoice = Factory.buttonsPopup(["synth", "drum", "oscillator", "noise"],
                                                  setTrackInstrument.bind(this));
     this.trackList = $("<div class='track-list'>");
@@ -1183,6 +1199,13 @@ TrackListView.prototype.add = function(track){
         var index = self.controller.model.findIndexById(id);
         self.controller.model.setActiveTrack(self.controller.model.at(index));
         windowsTransport.notify(commonEventNames.E_ACTIVATE_WINDOW, "trackView");
+    });
+    $deleteTrackButton.hide();
+    $instrumentContainer.mouseenter(function(event){
+        $deleteTrackButton.show();
+    });
+    $instrumentContainer.mouseleave(function(event){
+        $deleteTrackButton.hide();
     });
     this.trackList.append($instrumentContainer);
 };
@@ -5527,10 +5550,10 @@ function MenuBar(){
     this.menu = $("<div class='ui horizontal list menu-bar'>");
 
     this.userInfoBar = new UserInfoBar();
-    this.backButton = Factory.createIconButton("ui button back user-only", "arrow left icon", "");
+    this.backButton = Factory.createIconButton("ui button back user-only", "large arrow left icon", "");
     this.player = new PlayerView();
-    this.exportProjectButton = Factory.createButton("export-project", "export WAV");
-    this.exportTrackButton = Factory.createButton("export-track", "export WAV");
+    this.exportProjectButton = Factory.createButton("export project", "export WAV");
+    this.exportTrackButton = Factory.createButton("export track", "export WAV");
     this.recordButton = Factory.createButton("record", "record");
     this.clearButton = Factory.createButton("clear", "clear");
 
@@ -5625,8 +5648,9 @@ var commonEventNames = __webpack_require__(1);
 module.exports = MessageModal;
 
 function MessageModal(){
-    BaseView.call(this, "ui modal");
+    BaseView.call(this, "ui modal message");
     this.text = $("<p></p>");
+    this.buttons = $("<div class='button-group'>");
     this.okButton = Factory.createButton("ui button", "ok");
     this.cancelButton = Factory.createButton("ui button", "cancel");
     this.observer = new Observer();
@@ -5650,9 +5674,11 @@ MessageModal.prototype._build = function(){
         self.hide();
     });
 
+    this.buttons.append(this.okButton);
+    this.buttons.append(this.cancelButton);
     container.append(this.text);
-    container.append(this.okButton);
-    container.append(this.cancelButton);
+    container.append(this.buttons);
+
 };
 
 MessageModal.prototype.show = function(message){
@@ -6205,8 +6231,8 @@ module.exports = UserInfoBar;
 function UserInfoBar(){
     BaseView.call(this, "user-info-bar");
 
-    this.userName = null;
-    this.joinButton = Factory.createButton("", "join");
+    this.userName = $("<p>anonym</p>");
+    this.joinButton = Factory.createButton("join", "join");
     this.userModal = new UserModal();
 
     this._build();
@@ -6235,13 +6261,10 @@ UserInfoBar.prototype._fetchUserName = function(){
 
 UserInfoBar.prototype.setUserName = function(userName){
     if(userName instanceof Error){
-        this.userName = $("<p>anonym</p>");
-        // eventListener.notify("USER_IS_ANONYM");
     } else{
-        this.userName = $("<p>" + userName + "</p>");
+        this.userName.text(userName);
         // eventListener.notify("USER_IS_LOGEDIN", userName);
     }
-    this.getContainer().append(this.userName);
 };
 
 
