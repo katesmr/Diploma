@@ -1265,11 +1265,13 @@ function TrackView(controller){
     this.waveform = new WaveForm();
     this.tabBlock = $("<div class='ui top attached tabular menu'>");
 
+    this.tools = $("<div class='ui stackable two column grid tools'>");
+
     this.settingTabSegment = new SettingView(null);
     this.filterTabSegment = new FilterView(null);
 
-    this.settingTitle = $("<a class='item' data-tab='" + this.settingTabSegment.dataTab + "'>setting</a>");
-    this.filterTitle = $("<a class='item' data-tab='" + this.filterTabSegment.dataTab + "'>filter</a>");
+    this.settingTitle = $("<a class='item' data-tab='" + this.settingTabSegment.dataTab + "'>settings</a>");
+    this.filterTitle = $("<a class='item' data-tab='" + this.filterTabSegment.dataTab + "'>filters</a>");
 
     this.instrumentView = new InstrumentView();
 
@@ -1302,13 +1304,29 @@ TrackView.prototype._build = function(){
         self.recorder.record(TrackManager.save);
     });
 
-    container.append(this.waveform.getContainer());
+    this.createView();
+    /*container.append(this.waveform.getContainer());
     container.append(this.instrumentView.getContainer());
     this.tabBlock.append(this.settingTitle);
     this.tabBlock.append(this.filterTitle);
     container.append(this.tabBlock);
     container.append(this.settingTabSegment.getContainer());
-    container.append(this.filterTabSegment.getContainer());
+    container.append(this.filterTabSegment.getContainer());*/
+};
+
+TrackView.prototype.createView = function(){
+    var instrumentColumn = $("<div class='column instrument'>");
+    var toolColumn = $("<div class='column tool'>");
+    instrumentColumn.append(this.waveform.getContainer());
+    instrumentColumn.append(this.instrumentView.getContainer());
+    this.tabBlock.append(this.settingTitle);
+    this.tabBlock.append(this.filterTitle);
+    toolColumn.append(this.tabBlock);
+    toolColumn.append(this.settingTabSegment.getContainer());
+    toolColumn.append(this.filterTabSegment.getContainer());
+    this.tools.append(instrumentColumn);
+    this.tools.append(toolColumn);
+    this.getContainer().append(this.tools);
 };
 
 TrackView.prototype.showTabMenu = function(){
@@ -1330,13 +1348,14 @@ TrackView.prototype.setActiveFilterView = function(){
 TrackView.prototype.back = function(){
     this.settingTabSegment.table.empty();
     this.filterTabSegment.table.empty();
-    //this.waveform.getContainer().empty();
+    this.waveform.getContainer().empty();
     windowsTransport.notify(commonEventNames.E_ACTIVATE_WINDOW, "trackList");
     this.settingTabSegment.resetToolOptions(); // reset previous setting of track
     this.filterTabSegment.resetToolOptions(); // reset previous filter of track
     // save playing setting
     this.instrumentView.track.setPlaySettings();
     this.instrumentView.instrument.getContainer().empty();
+    this.instrumentView.getContainer().empty();
 };
 
 TrackView.prototype.bindKeyEvent = function(){
@@ -1358,7 +1377,7 @@ function setTrack(eventName, track){
             this.recorder = new AudioBufferRecorder();
         }
         this.recorder.setModel(track);
-        //this.recorder.record(this.waveform.create.bind(this.waveform));
+        this.recorder.record(this.waveform.create.bind(this.waveform));
     }
 }
 
@@ -1932,7 +1951,6 @@ function BaseInstrument(track, instrumentName){
     this.track = track;
     this.startTime = 0;
     this.isRecordNow = false;
-    this.isActive = false;
 }
 
 inherit(BaseInstrument, BaseView);
@@ -1945,14 +1963,16 @@ BaseInstrument.prototype.recordEvent = function(eventName, recordButton){
         recordButton.attr("data-content", "Click to record sound");
     } else{
         this.isRecordNow = true;
-        this.track.emptyPlaySetting(); // clear previous play data setting
         recordButton.text("stop");
         recordButton.attr("data-content", "Click to stop record");
+        this.clearEvent();
     }
 };
 
 BaseInstrument.prototype.clearEvent = function(){
-    this.track.emptyPlaySetting();
+    if(this.track){
+        this.track.emptyPlaySetting(); // clear previous play data setting
+    }
 };
 
 BaseInstrument.prototype.keyDown = function(){};
@@ -2836,7 +2856,7 @@ ToolView.prototype.setEvent = function(){};
 ToolView.prototype.createElement = function(className, name, value){
     var $element;
     if(value instanceof BaseRange){
-        $element = Factory.rangeElement(className + "-range", name, value.min, value.max,
+        $element = Factory.rangeElement(className + " range", name, value.min, value.max,
                                         this.setEvent.bind(this), value.step, value.value);
     } else if(value instanceof BaseOptionList){
         $element = Factory.dropDownElement(className, name, value.options,
@@ -3665,7 +3685,7 @@ Bell.prototype.setSetting = function(){
 };
 
 Bell.prototype.setInstrument = function(){
-    this.instrument = "kick-right";
+    this.instrument = "bell";
 };
 
 
@@ -3783,7 +3803,10 @@ function DrumModel(){
     this.hitHat1 = null;
     this.hitHat2 = null;
     this.hitHat3 = null;
-    this.keys = ['B', 'N', 'F', 'G', 'H', 'J', 'K', 'E', 'R', 'I'];
+    //this.keys = ['B', 'N', 'F', 'G', 'H', 'J', 'K', 'E', 'R', 'I'];
+    this.keys = [['B', 'N'], ['F', 'G'], ['H', 'J'], ['T', 'Y']];
+    this.images = ["/static/images/kick.png", "/static/images/tom.png",
+                   "/static/images/snare.png", "/static/images/hi-hat.png"];
 }
 
 DrumModel.prototype.getDrumNameForKey = function(key){
@@ -3795,10 +3818,8 @@ DrumModel.prototype.getDrumNameForKey = function(key){
         case 'G': result = this.leftTom; break;
         case 'H': result = this.tom3; break;
         case 'J': result = this.snare1; break;
-        case 'K': result = this.snare2; break;
-        case 'E': result = this.hitHat1; break;
-        case 'R': result = this.bell; break;
-        case 'I': result = this.hitHat3; break;
+        case 'T': result = this.bell; break;
+        case 'Y': result = this.hitHat1; break;
         default: console.log("wrong key: " + key); break;
     }
     return result;
@@ -5239,27 +5260,11 @@ DrumMachine.prototype._build = function(){
     var self = this;
     var container = this.getContainer();
 
-    this.createDrumGrid(DrumModel.keys);
+    this.createDrumGrid(DrumModel.images, DrumModel.keys);
 
     container.append(this.drumGrid);
 };
-/*
-DrumMachine.prototype.recordEvent = function(eventName, recordButton){
-    if(this.isRecordNow === true){
-        // stop record
-        recordButton.text("record");
-        this.isRecordNow = false;
-    } else{
-        this.isRecordNow = true;
-        this.track.emptyPlaySetting(); // clear previous play data setting
-        recordButton.text("stop");
-    }
-};
 
-DrumMachine.prototype.clearEvent = function(){
-    this.track.emptyPlaySetting();
-};
-*/
 DrumMachine.prototype._recordHandler = function(drumObject){
     this.track.addDrum(drumObject.instrument);
     if(this.track.playObjects.length === 0){
@@ -5295,23 +5300,31 @@ DrumMachine.prototype.keyDown = function(){
     });
 };
 
-DrumMachine.prototype.createDrumGrid = function(drumList){
-    var i;
+DrumMachine.prototype.createDrumGrid = function(imagePathList, keyList){
+    var i, j;
     var self = this;
-    var $item = null;
+    var $img = null;
+    var $keys = null;
+    var $block = null;
     var $column = null;
-    this.drumGrid = $("<div class='ten column stackable ui grid drum'>");
-    for(i = 0; i < drumList.length; ++i){
-        $item = $("<div id='" + drumList[i] + "' class='item'>" + drumList[i] + "</div>");
-        $item.on("click", function(event){
-            self._drumKeyDownHandler($(this).attr("id"));
-        });
+    var $keyItem = null;
+    this.drumGrid = $("<div class='ui two column grid drum'>");
+    for(i = 0; i < imagePathList.length; ++i){
+        $img = $("<img class='ui small image' src='" + imagePathList[i] + "'>");
+        $keys = $("<div class='keys'>");
+        for(j = 0; j < keyList[i].length; ++j){
+            $keyItem = $("<div id='" + keyList[i][j] + "'>" + keyList[i][j] + "</div>");
+            $keyItem.on("click", function(event){
+                self._drumKeyDownHandler($(this).attr("id"));
+            });
+            $keys.append($keyItem);
+        }
         $column = $("<div class='column'>");
-        $column.append($item);
+        $column.append($keys);
+        $column.append($img);
         this.drumGrid.append($column);
     }
 };
-
 
 /***/ }),
 /* 86 */
@@ -5531,7 +5544,6 @@ InstrumentView.prototype.setInstrument = function(){
                 this.instrument = new Oscillator(this.track);
                 break;
         }
-        this.instrument.isActive = true;
         this.prevInstrument = this.instrument;
         this.getContainer().append(this.instrument.getContainer());
     }
@@ -5924,23 +5936,7 @@ Piano.prototype._build = function(){
     this.octaveDiv.append(this.octaveRange);
     container.append(this.octaveDiv);
 };
-/*
-Piano.prototype.recordEvent = function(eventName, recordButton){
-    if(this.isRecordNow === true){
-        // stop record
-        recordButton.text("record");
-        this.isRecordNow = false;
-    } else{
-        this.isRecordNow = true;
-        this.track.emptyPlaySetting(); // clear previous play data setting
-        recordButton.text("stop");
-    }
-};
 
-Piano.prototype.clearEvent = function(){
-    this.track.emptyPlaySetting();
-};
-*/
 Piano.prototype._dropDownEvent = function(id, text, dataValue){
     PianoModel.shift(dataValue); // change keys notation
     this.createKeys();
@@ -6367,18 +6363,13 @@ WaveForm.prototype.create = function(buffer){
         waveColor: "#626262",
         progressColor: "#fff843"
     });
-    console.log('u');
-    this.wavesurfer.load('https://ia902606.us.archive.org/35/items/shortpoetry_047_librivox/song_cjrg_teasdale_64kb.mp3');
     this.wavesurfer.on('ready', function(){
         self.wavesurfer.drawer.container.style.display = '';
         self.wavesurfer.drawBuffer();
     });
-    //this.wavesurfer.loadBlob(AudioHelper.AudioBufferToBlob(buffer));
-    //this.waveform.load('https://ia902606.us.archive.org/35/items/shortpoetry_047_librivox/song_cjrg_teasdale_64kb.mp3');
-    //windowsTransport.subscribe(commonEventNames.E_PLAY_WAVE, this.waveform.playPause.bind(this.waveform));
-    //windowsTransport.subscribe(commonEventNames.E_STOP_WAVE, this.waveform.stop.bind(this.waveform));
-    //self.waveform.drawer.container.style.display = '';
-    //self.waveform.drawBuffer();
+    this.wavesurfer.loadBlob(AudioHelper.AudioBufferToBlob(buffer));
+    windowsTransport.subscribe(commonEventNames.E_PLAY_WAVE, this.wavesurfer.playPause.bind(this.wavesurfer));
+    windowsTransport.subscribe(commonEventNames.E_STOP_WAVE, this.wavesurfer.stop.bind(this.wavesurfer));
 };
 
 
