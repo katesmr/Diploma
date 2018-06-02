@@ -1,4 +1,5 @@
 body {
+    background-color: #262626;
 }
 
 .ui.container {
@@ -6,9 +7,8 @@ body {
     height: 100%;
 }
 
-.container {
-    background-color: #262626;
-}
+/* MENUBAR */
+/* ------------------------------------------- */
 
 .menubar {
     height: 55px;
@@ -27,24 +27,25 @@ body {
     height: auto;
 }
 
-.player-view {
-    float: left;
-    margin-left: 30%;
-}
-
 .button.export {
     float: left;
-    margin-left: 3%;
+    margin: 0 0 0 33.1%;
+}
+
+.player-view {
+    width: auto;
+    float: left;
+    margin: 0 0 0 3%;
 }
 
 .button.record {
     float: left;
-    margin-left: 3%;
+    margin: 0 0 0 3%;
 }
 
 .button.clear {
     float: left;
-    margin-left: 1%;
+    margin: 0 0 0 0.2%;
 }
 
 .user-info-bar {
@@ -62,27 +63,12 @@ body {
     font-size: 15px;
 }
 
-.projectbar {
-    float: left;
-    margin: 1% auto;
-    width: 20%;
-}
-
-.projectbar .ui.button {
-    margin: 0 0 0 3%;
-    display: block;
-    width: 10%;
-    float: left;
-    padding: 2%;
-}
-
-.projectbar .ui.button i.icon{
-
-}
-
 .content {
     padding-top: 2%;
 }
+
+/* MODAL WINDOW */
+/* ------------------------------------------- */
 
 .ui.modal.message {
     width: 400px;
@@ -112,6 +98,9 @@ body {
     margin: 10% auto;
     width: auto;
 }
+
+/* PROJECT LIST VIEW */
+/* ------------------------------------------- */
 
 .project-list {
     margin: 1% 10%;
@@ -159,6 +148,9 @@ body {
     height: auto;
 }
 
+/* TRACK LIST VIEW */
+/* ------------------------------------------- */
+
 .track-list-view {
     width: 80%;
     height: auto;
@@ -201,26 +193,12 @@ body {
     margin: 0;
 }
 
-
-
+/* TRACK VIEW */
+/* ------------------------------------------- */
 
 .track-view {
     margin: 0 auto;
-    width: 70%;
-}
-
-.player {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    height: 55px;
-    background-color: #626262;
-}
-
-.track-tool-view {
-    margin: 5% auto;
-    background-color: white;
-    width: 80%;
+    width: 90%;
 }
 
 .wave-form {
@@ -234,30 +212,16 @@ body {
     position: none;
 }*/
 
-.ui.modal.track-tool {
-    width: 30%;
-    height: 20%;
-    min-width: 400px;
-    min-height: 100px;
-    padding: 5%;
+.instrument-view {
+    height: 40%;
 }
 
-.ui.modal.track-tool .ui.button {
-    float: left;
-    margin: auto 2%;
-}
+/* piano view */
 
-.ui.modal.track-tool.h5 {
-    display: block;
+.piano {
+    width: 50%;
     margin: 0 auto;
-}
-
-.project-component-view h1 {
-    color: white;
-}
-
-.ui.attached.tabular.menu {
-    margin-top: 16%;
+    display: inline-block;
 }
 
 .keys {
@@ -268,8 +232,7 @@ body {
     -webkit-user-select: none; /* Safari */
     -moz-user-select: none; /* Firefox */
     -ms-user-select: none; /* Internet Explorer/Edge */
-    user-select: none; /* Non-prefixed version, currently
-                                  supported by Chrome and Opera */
+    user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
 }
 
 .keys .key {
@@ -317,11 +280,78 @@ body {
     margin-top: 10px;
 }
 
-.octave-range {
-    position: relative;
+.piano .octaves {
+    width: 35%;
+    margin: 27% auto;
+}
+
+.piano .octave-label {
+    float: left;
+    color: white;
+    margin: 1% 0;
+    font-size: 20px;
+}
+
+.piano .octave-range {
     float: right;
 }
 
+.piano .octave-range .ui.dropdown {
+    width: 10%;
+}
+
+/* drum view */
+
+.grid.drum {
+    width: 80%;
+    background-color: grey;
+}
+
+/* tool view - tab */
+
+.track-view .tabular.menu {
+    width: 80%;
+    background-color: #f8f8f8;
+}
+
+.ui.attached.tabular.menu {
+    margin-top: 5%;
+}
+
+.track-view .ui.grid.setting {
+    margin: 1% 0;
+}
+
+.track-view .ui.grid.setting .column-range {
+    margin: 1% auto;
+    display: inline-block;
+}
+
+.track-view .ui.grid.setting .column-range div .ui.label {
+    width: 50px;
+    background-color: white;
+}
+
+.track-view .ui.grid.filter {
+    margin: 1% 0;
+}
+
+.track-view .ui.grid.filter .column div[class^="item-"] {
+    margin: 0 0 5% 0;
+}
+
+.track-view .ui.grid.filter .column div[class^="filter-setting-"] {
+    padding: 2%;
+    margin: 2% 0;
+    background-color: #f8f8f8;
+}
+
+input {
+    width: 300px;
+}
+
+
+/*
 .circle-drag {
     border-radius: 50%;
 }
@@ -343,8 +373,4 @@ body {
     height: 150px;
     background-color: grey;
 }
-
-.grid.drum {
-    width: 80%;
-    background-color: grey;
-}
+*/

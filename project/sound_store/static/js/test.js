@@ -321,7 +321,7 @@ function buttonsPopup(buttonNameList, callback){
     var $column;
     var $button;
     var $result = $("<div class='ui flowing popup top left transition hidden'>");
-    var $row = $("<div class='ui three column divided center aligned grid'>");
+    var $row = $("<div class='ui two column divided center aligned grid'>");
     for(i = 0; i < buttonNameList.length; ++i){
         $column = $("<div class='column'>");
         $button = createButton("", buttonNameList[i]);
@@ -958,7 +958,7 @@ module.exports = ProjectListView;
 function ProjectListView(controller){
     BaseWindow.call(this, controller, "project-list");
 
-    this.title = $("<h1>Project List</h1>");
+    this.title = $("<h1>Projects list</h1>");
     this.table = $("<div class='five column stackable ui grid projects'>");
     this.addTrackButton = Factory.createButtonPopup("circular ui icon button add-project", "large plus icon", "",
                                                     "Click to add new project");
@@ -1084,7 +1084,7 @@ function TrackListView(controller){
 
     this.projectName = $("<h1></h1>");
     this.addTrackButton = Factory.createIconButton("circular ui icon button add-track", "large plus icon", "");
-    this.instrumentChoice = Factory.buttonsPopup(["synth", "drum", "oscillator", "noise"],
+    this.instrumentChoice = Factory.buttonsPopup(["synth", "drum"], //, "oscillator", "noise"],
                                                  setTrackInstrument.bind(this));
     this.trackList = $("<div class='track-list'>");
     this.__onRemoveButtonClicked = onRemoveButtonClicked.bind(this);
@@ -1937,9 +1937,23 @@ function BaseInstrument(track, instrumentName){
 
 inherit(BaseInstrument, BaseView);
 
-BaseInstrument.prototype.recordEvent = null;
+BaseInstrument.prototype.recordEvent = function(eventName, recordButton){
+    if(this.isRecordNow === true){
+        // stop record
+        this.isRecordNow = false;
+        recordButton.text("record");
+        recordButton.attr("data-content", "Click to record sound");
+    } else{
+        this.isRecordNow = true;
+        this.track.emptyPlaySetting(); // clear previous play data setting
+        recordButton.text("stop");
+        recordButton.attr("data-content", "Click to stop record");
+    }
+};
 
-BaseInstrument.prototype.clearEvent = null;
+BaseInstrument.prototype.clearEvent = function(){
+    this.track.emptyPlaySetting();
+};
 
 BaseInstrument.prototype.keyDown = function(){};
 
@@ -2497,6 +2511,7 @@ ProjectModel.prototype.toJson = function(){
 
 
 var capitalize = __webpack_require__(81);
+var TrackSynthesizer = __webpack_require__(70);
 
 module.exports = {
     "updateSettingListFromTrack": function(settingList, track){ // SettingList OR FilterList
@@ -2661,14 +2676,14 @@ function setSettingListToDefault(settingList) {
  * @param trackObject
  * @param optionName
  */
-function setToSettingList(listElement, trackObject, optionName){
+function setToSettingList(listElement, trackObject, optionName) {
     var result;
     var methodName = "get" + capitalize(optionName);
-    if(methodName in trackObject){
+    if (methodName in trackObject) {
         listElement.isEnabled = true;
         result = trackObject[methodName]();
         // add only existing methods/parameters from track to SettingList
-        if(result !== undefined || result !== null){
+        if (result !== undefined || result !== null) {
             listElement.set(trackObject[methodName]());
             hideExistingParams(listElement, trackObject.instrument);
         }
@@ -5228,7 +5243,7 @@ DrumMachine.prototype._build = function(){
 
     container.append(this.drumGrid);
 };
-
+/*
 DrumMachine.prototype.recordEvent = function(eventName, recordButton){
     if(this.isRecordNow === true){
         // stop record
@@ -5244,8 +5259,7 @@ DrumMachine.prototype.recordEvent = function(eventName, recordButton){
 DrumMachine.prototype.clearEvent = function(){
     this.track.emptyPlaySetting();
 };
-
-
+*/
 DrumMachine.prototype._recordHandler = function(drumObject){
     this.track.addDrum(drumObject.instrument);
     if(this.track.playObjects.length === 0){
@@ -5315,7 +5329,7 @@ var Factory = __webpack_require__(4);
 module.exports = FilterView;
 
 function FilterView(track){
-    ToolView.call(this, "filter-view", "two column stackable ui grid");
+    ToolView.call(this, "filter-view", "two column stackable ui grid filter");
 
     this.track = null;
     this.filter = null;
@@ -5377,7 +5391,7 @@ FilterView.prototype.createFilterTools = function(count, startValue){
     var $mainDiv;
     var $checkBox;
     var $settingDiv;
-    var $result = $("<div>");
+    var $result = $("<div class='column'>");
     for(i; i < count; ++i){
         tokenFilter = FiltersList.list[i];
         options = tokenFilter.options;
@@ -5551,11 +5565,11 @@ function MenuBar(){
 
     this.userInfoBar = new UserInfoBar();
     this.backButton = Factory.createIconButton("ui button back user-only", "large arrow left icon", "");
+    this.exportProjectButton = Factory.createButtonPopup("export project", null, "export", "Click to save on device");
+    this.exportTrackButton = Factory.createButtonPopup("export track", null, "export", "Click to save on device");
     this.player = new PlayerView();
-    this.exportProjectButton = Factory.createButton("export project", "export WAV");
-    this.exportTrackButton = Factory.createButton("export track", "export WAV");
-    this.recordButton = Factory.createButton("record", "record");
-    this.clearButton = Factory.createButton("clear", "clear");
+    this.recordButton = Factory.createButtonPopup("record", null, "record", "Click to record sound");
+    this.clearButton = Factory.createButtonPopup("clear", null, "clear", "Click to clear sound");
 
     this._build();
 }
@@ -5583,9 +5597,9 @@ MenuBar.prototype._build = function(){
     this.hideButtons();
 
     this.menu.append(this.backButton);
-    this.menu.append(this.player.getContainer());
     this.menu.append(this.exportProjectButton);
     this.menu.append(this.exportTrackButton);
+    this.menu.append(this.player.getContainer());
     this.menu.append(this.recordButton);
     this.menu.append(this.clearButton);
     this.menu.append(this.userInfoBar.getContainer());
@@ -5879,7 +5893,9 @@ function Piano(track){
     //this.__recordedKeys = [];
 
     this.piano = $("<div class='keys'>");
-    this.octaveRange = Factory.dropDownElement("octave-range", "octave-range", {"C1-B3": 0, "C4-B6": 1},
+    this.octaveDiv = $("<div class='octaves'>");
+    this.label = $("<div class='octave-label'>Octaves</div>");
+    this.octaveRange = Factory.dropDownElement("octave-range", "octave-range", {" 1 - 3 ": 0, " 4 - 6 ": 1},
                                                 this._dropDownEvent.bind(this));
     this._build();
 }
@@ -5904,9 +5920,11 @@ Piano.prototype._build = function(){
     });*/
 
     container.append(this.piano);
-    container.append(this.octaveRange);
+    this.octaveDiv.append(this.label);
+    this.octaveDiv.append(this.octaveRange);
+    container.append(this.octaveDiv);
 };
-
+/*
 Piano.prototype.recordEvent = function(eventName, recordButton){
     if(this.isRecordNow === true){
         // stop record
@@ -5922,7 +5940,7 @@ Piano.prototype.recordEvent = function(eventName, recordButton){
 Piano.prototype.clearEvent = function(){
     this.track.emptyPlaySetting();
 };
-
+*/
 Piano.prototype._dropDownEvent = function(id, text, dataValue){
     PianoModel.shift(dataValue); // change keys notation
     this.createKeys();
@@ -6101,7 +6119,7 @@ module.exports = SettingView;
  * @constructor
  */
 function SettingView(track){
-    ToolView.call(this, "setting-view", "two column stackable ui grid");
+    ToolView.call(this, "setting-view", "two column stackable ui grid setting");
 
     this.track = null;
 
@@ -6148,7 +6166,6 @@ SettingView.prototype.createSettingTools = function(){
 };
 
 SettingView.prototype.setEvent = function(optionName, value){
-    console.log(this.track);
     ProxyTrackManager.setSetting(SettingsList, this.track, optionName, value);
 };
 
@@ -6206,7 +6223,7 @@ TrackDataView.prototype._build = function(){
     var container = this.getContainer();
 
     container.append(this.instrument);
-    container.append(this.time);
+    //container.append(this.time);
     container.append(this.waveform);
 };
 
