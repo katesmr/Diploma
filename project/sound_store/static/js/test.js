@@ -1356,6 +1356,10 @@ TrackView.prototype.back = function(){
     this.instrumentView.track.setPlaySettings();
     this.instrumentView.instrument.getContainer().empty();
     this.instrumentView.getContainer().empty();
+
+    this.instrumentView.track = null;
+    this.recorder = null;
+    this.waveform.wavesurfer = null;
 };
 
 TrackView.prototype.bindKeyEvent = function(){
@@ -1376,8 +1380,9 @@ function setTrack(eventName, track){
         } else {
             this.recorder = new AudioBufferRecorder();
         }
+        console.log();
         this.recorder.setModel(track);
-        this.recorder.record(this.waveform.create.bind(this.waveform));
+        //this.recorder.record(this.waveform.create.bind(this.waveform));
     }
 }
 
@@ -1542,7 +1547,7 @@ AudioBufferRecorder.prototype.record = function(callback){
         part.start(0);
         Tone.Transport.start();
     }, this.duration).then(function(buffer){
-        console.log(buffer);
+        console.log("result");
         console.log(buffer._buffer);
         callback(buffer._buffer);
     });
@@ -1680,7 +1685,11 @@ function DrumRecorder(instrumentName, playValue, startTime, releaseTime){
 inherit(DrumRecorder, BaseRecorder);
 
 DrumRecorder.prototype.play = function(drumObject){
-    drumObject.triggerAttack(this.playValue, '+' + (this.startTime / 1000));
+    if((typeof this.playValue) === "string") {
+        drumObject.triggerAttack(this.playValue, '+' + (this.startTime / 1000));
+    } else{
+        drumObject.triggerAttackRelease(this.playValue, '+' + (this.startTime / 1000));
+    }
 };
 
 DrumRecorder.prototype.getData = function(){
@@ -1790,14 +1799,16 @@ ObservableList.prototype.remove = function(index){
 
 
 var BaseTrackModel = __webpack_require__(7);
+var DrumRecorder = __webpack_require__(21);
+var PlayerRecorder = __webpack_require__(101);
 var inherit = __webpack_require__(0);
 var KickLeft = __webpack_require__(57);
 var KickRight = __webpack_require__(58);
-var TrackPlayer = __webpack_require__(69);
-var DrumRecorder = __webpack_require__(21);
 var BigTom = __webpack_require__(52);
 var LeftTom = __webpack_require__(59);
 var Bell = __webpack_require__(51);
+var SnarePlayer = __webpack_require__(99);
+var HiHatPlayer = __webpack_require__(102);
 
 module.exports = TrackDrum;  // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -1875,13 +1886,32 @@ TrackDrum.prototype.stop = function(){
     }
 };
 
+TrackDrum.prototype.createPlayObject = function(value, time){
+    var recorder;
+    if(value.instrument === "snare" || value.instrument === "hi-hat"){
+        recorder = new PlayerRecorder(value.instrument, time);
+    } else{
+        recorder = new DrumRecorder(value.instrument, value.playValue, time);
+    }
+    this.playObjects.push(recorder);
+};
+
 TrackDrum.prototype.createPlayObjects = function(){
+    var i, tokenPlaySetting;
+    for(i = 0; i < this.playSetting.length; ++i){
+        tokenPlaySetting = this.playSetting[i];
+        this.createPlayObject(tokenPlaySetting, tokenPlaySetting.startTime);
+    }
+};
+
+
+/*TrackDrum.prototype.createPlayObjects = function(){
     var i, token;
     for(i = 0; i < this.playSetting.length; ++i){
         token = this.playSetting[i];
         this.playObjects.push(new DrumRecorder(token.instrument, token.playValue, token.startTime));
     }
-};
+};*/
 
 /**
  * Apply filter for each drum object
@@ -1931,6 +1961,8 @@ TrackDrum.prototype.createAllDrumObjects = function(){
     this.allDrumObjects["big-tom"] = new BigTom();
     this.allDrumObjects["left-tom"] = new LeftTom();
     this.allDrumObjects["bell"] = new Bell();
+    //this.allDrumObjects["snare"] = new SnarePlayer();
+    //this.allDrumObjects["hi-hat"] = new HiHatPlayer();
 };
 
 
@@ -1971,6 +2003,7 @@ BaseInstrument.prototype.recordEvent = function(eventName, recordButton){
 
 BaseInstrument.prototype.clearEvent = function(){
     if(this.track){
+        console.log("clear recorded");
         this.track.emptyPlaySetting(); // clear previous play data setting
     }
 };
@@ -2015,6 +2048,7 @@ BaseWindow.prototype.back = null;
 
 var AudioHelper = __webpack_require__(8);
 var DrumRecorder = __webpack_require__(21);
+var PlayerRecorder = __webpack_require__(101);
 
 module.exports = BaseDrumModel;
 
@@ -2024,7 +2058,7 @@ function BaseDrumModel(setting, playSetting){
     this.playSetting = playSetting || [];
     this.playObjects = [];
     this.playValue = null;
-    this.createPlayObjects();
+    //this.createPlayObjects();
     this.setInstrument();
     this.setSetting();
     this.trackObject = this._generate();
@@ -2035,6 +2069,10 @@ BaseDrumModel.prototype._generate = null;
 BaseDrumModel.prototype.setSetting = null;
 
 BaseDrumModel.prototype.setInstrument = null;
+
+BaseDrumModel.prototype.getVolume = function(){
+    return this.trackObject ? this.trackObject.volume.value : null;
+};
 
 BaseDrumModel.prototype.emptyPlaySetting = function(){
     this.playSetting.length = 0;
@@ -2077,17 +2115,23 @@ BaseDrumModel.prototype.playAll = function(){
 
 BaseDrumModel.prototype.stop = null;
 
-BaseDrumModel.prototype.createPlayObject = function(note, startTime){
-    this.playObjects.push(new DrumRecorder(note, startTime));
+/*BaseDrumModel.prototype.createPlayObject = function(value, time){
+    var recorder;
+    if(value.instrument === "snare" || value.instrument === "hi-hat"){
+        recorder = new PlayerRecorder(value.instrument, time);
+    } else{
+        recorder = new DrumRecorder(value.instrument, value.playValue, time);
+    }
+    this.playObjects.push(recorder);
 };
 
 BaseDrumModel.prototype.createPlayObjects = function(){
     var i, tokenPlaySetting;
     for(i = 0; i < this.playSetting.length; ++i){
         tokenPlaySetting = this.playSetting[i];
-        this.createPlayObject(tokenPlaySetting.playValue, tokenPlaySetting.startTime);
+        this.createPlayObject(tokenPlaySetting, tokenPlaySetting.startTime);
     }
-};
+};*/
 
 
 /***/ }),
@@ -2238,9 +2282,9 @@ DrumAudioBufferRecorder.prototype.createTrack = function(drumTrack){
     if(drumTrack.trackObject instanceof Tone.MembraneSynth){
         this.track = new Tone.MembraneSynth(drumTrack.setting).toMaster();
     } else if(drumTrack.trackObject instanceof Tone.Player){
-
+        this.track = new Tone.Player(drumTrack.url).toMaster();
     } else if(drumTrack.trackObject instanceof Tone.MetalSynth){
-
+        this.track = new Tone.MetalSynth(drumTrack.setting).toMaster();
     }
     if(this.track) {
         this.createFilters();
@@ -2254,8 +2298,6 @@ DrumAudioBufferRecorder.prototype.createTracks = function(){
     var name;
     for(name in this.trackModel.drumObjects){
         drum = this.trackModel.drumObjects[name];
-        console.log("+");
-        console.log(drum.instrument);
         this.createTrack(drum);
         // save duration of each track in object: key - instrument name, value - duration
         this.durationList[drum.instrument] = eventDuration.durationByTime(this.playData);
@@ -2266,9 +2308,9 @@ DrumAudioBufferRecorder.prototype.play = function(drumTrack, value){
     if(drumTrack.trackObject instanceof Tone.MembraneSynth){
         this.track.triggerAttack(value.playValue, value.time);
     } else if(drumTrack.trackObject instanceof Tone.Player){
-
+        this.track.start(value.time);
     } else if(drumTrack.trackObject instanceof Tone.MetalSynth){
-
+        this.track.triggerAttackRelease(value.playValue, value.time);
     }
 };
 
@@ -2305,7 +2347,6 @@ DrumAudioBufferRecorder.prototype._record = function(drumTrack, callback){
         console.log(buffer._buffer);
         console.log(self.drumAudioBuffers);
         if(self.drumAudioBuffers.length === self.drumCount){
-            console.log("save");
             result = TrackManager.mergeTracks(self.drumAudioBuffers);
             console.log("result");
             console.log(result);
@@ -2322,7 +2363,9 @@ function createDrumPlayData(trackPlayData, instrument){
         token = trackPlayData[i];
         if(token.instrument === instrument){
             tmp.time = token.startTime / 1000;
-            tmp.playValue = token.playValue;
+            if(token.playValue){
+                tmp.playValue = token.playValue;
+            }
             events.push(tmp);
         }
     }
@@ -3544,14 +3587,20 @@ function AudioPlayer(model){
 
 AudioPlayer.prototype.setModel = function(model){
     if(model){
+        console.log("new model");
+        console.log(model);
         this.model = model;
     }
 };
 
 AudioPlayer.prototype.play = function(){
     if(this.model instanceof BaseTrackModel){
+        console.log("play");
+        console.log(this.model);
         this.model.play();
+        windowsTransport.notify(commonEventNames.E_PLAY_WAVE);
     } else if(this.model instanceof ProjectModel){
+        console.log("? ? ?");
         windowsTransport.notify(commonEventNames.E_PLAY_PROJECT, this);
     }
 };
@@ -3571,6 +3620,7 @@ AudioPlayer.prototype.stop = function(){
     } else if(this.model instanceof ProjectModel){
         windowsTransport.notify(commonEventNames.E_STOP_PROJECT);
     }
+    windowsTransport.notify(commonEventNames.E_STOP_WAVE);
 };
 
 
@@ -3798,8 +3848,8 @@ function DrumModel(){
     this.bigTom = "big-tom";
     this.leftTom = "left-tom";
     this.bell = "bell";
-    this.snare1 = null;
-    this.snare2 = null;
+    this.hiHat = "hi-hat";
+    this.snare = "snare";
     this.hitHat1 = null;
     this.hitHat2 = null;
     this.hitHat3 = null;
@@ -3816,10 +3866,10 @@ DrumModel.prototype.getDrumNameForKey = function(key){
         case 'N': result = this.kickRight; break;
         case 'F': result = this.bigTom; break;
         case 'G': result = this.leftTom; break;
-        case 'H': result = this.tom3; break;
+        case 'H': result = this.snare; break;
         case 'J': result = this.snare1; break;
         case 'T': result = this.bell; break;
-        case 'Y': result = this.hitHat1; break;
+        case 'Y': result = this.hiHat; break;
         default: console.log("wrong key: " + key); break;
     }
     return result;
@@ -4694,22 +4744,7 @@ TrackOscillator.prototype.setSetting = function(){
 
 
 /***/ }),
-/* 69 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-// TrackPlayer
-
-module.exports = TrackPlayer;
-
-function TrackPlayer(){
-
-}
-
-
-/***/ }),
+/* 69 */,
 /* 70 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -4805,7 +4840,11 @@ TrackSynthesizer.prototype.stop = function(){
 };
 
 TrackSynthesizer.prototype.playKeyNow = function(note){
-    this.trackObject.triggerAttack(note);
+    try {
+        this.trackObject.triggerAttack(note);
+    } catch(SyntaxError){
+        console.log(note);
+    }
 };
 
 TrackSynthesizer.prototype.stopKeyNow = function(){
@@ -5270,10 +5309,11 @@ DrumMachine.prototype._recordHandler = function(drumObject){
     if(this.track.playObjects.length === 0){
         this.startTime = Date.now();
         // this is the first button pressed, so it's time to remember the start time!
-        this.track.playObjects.push(new DrumRecorder(drumObject.instrument, drumObject.playValue, 0));
+        //this.track.playObjects.push(new DrumRecorder(drumObject.instrument, drumObject.playValue, 0));
+        this.track.createPlayObject(drumObject, 0);
     } else{
-        this.track.playObjects.push(new DrumRecorder(drumObject.instrument, drumObject.playValue,
-                                                     Date.now()-this.startTime));
+        //this.track.playObjects.push(new DrumRecorder(drumObject.instrument, drumObject.playValue, Date.now()-this.startTime));
+        this.track.createPlayObject(drumObject, Date.now()-this.startTime);
     }
 };
 
@@ -5305,7 +5345,6 @@ DrumMachine.prototype.createDrumGrid = function(imagePathList, keyList){
     var self = this;
     var $img = null;
     var $keys = null;
-    var $block = null;
     var $column = null;
     var $keyItem = null;
     this.drumGrid = $("<div class='ui two column grid drum'>");
@@ -5529,9 +5568,10 @@ InstrumentView.prototype.setInstrument = function(){
         if(this.prevInstrument){
             console.log("+++++++++++");
             console.log(this.prevInstrument.track);
+            //this.prevInstrument.track.disconnectFromAudioSource();
             // reset reference to track model of previous instrument view
             this.prevInstrument.track = null;
-            this.prevInstrument.isActive = false;
+            console.log(this.prevInstrument.track);
         }
         switch (this.track.instrument) {
             case "synth":
@@ -5606,6 +5646,14 @@ MenuBar.prototype._build = function(){
         windowsTransport.notify(commonEventNames.E_CLEAR_RECORD_TRACK);
     });
 
+    this.exportTrackButton.on("click", function(event){
+        windowsTransport.notify(commonEventNames.E_EXPORT_TRACK);
+    });
+
+    this.exportProjectButton.on("click", function(event){
+        windowsTransport.notify(commonEventNames.E_EXPORT_PROJECT);
+    });
+
     this.hideButtons();
 
     this.menu.append(this.backButton);
@@ -5626,18 +5674,10 @@ MenuBar.prototype.adaptToActiveWindow = function(newWindow){
         this.clearButton.show();
         this.exportTrackButton.show();
         this.exportProjectButton.hide();
-
-        this.exportTrackButton.on("click", function(event){
-            windowsTransport.notify(commonEventNames.E_EXPORT_TRACK);
-        });
     } else if(newWindow instanceof TrackListView){
         this.showComponentForTrack(newWindow);
         this.hideButtons();
         this.exportProjectButton.show();
-
-        this.exportProjectButton.on("click", function(event){
-            windowsTransport.notify(commonEventNames.E_EXPORT_PROJECT);
-        });
     } else if(newWindow instanceof ProjectListView){
         this.backButton.hide();
         this.player.hide();
@@ -6083,11 +6123,9 @@ PlayerView.prototype._build = function(){
 
     this.playButton.on("click", function(event){
         self.audioPlayer.play();
-        windowsTransport.notify(commonEventNames.E_PLAY_WAVE);
     });
     this.stopButton.on("click", function(event){
         self.audioPlayer.stop();
-        windowsTransport.notify(commonEventNames.E_STOP_WAVE);
     });
 
     container.append(this.playButton);
@@ -6360,16 +6398,158 @@ WaveForm.prototype.create = function(buffer){
     var self = this;
     this.wavesurfer = WaveSurfer.create({
         container: this.getContainer().get(0),
-        waveColor: "#626262",
-        progressColor: "#fff843"
+        waveColor: "#262626",
+        progressColor: "#ebebeb"
     });
-    this.wavesurfer.on('ready', function(){
+    this.wavesurfer.on("ready", function(){
         self.wavesurfer.drawer.container.style.display = '';
         self.wavesurfer.drawBuffer();
     });
     this.wavesurfer.loadBlob(AudioHelper.AudioBufferToBlob(buffer));
     windowsTransport.subscribe(commonEventNames.E_PLAY_WAVE, this.wavesurfer.playPause.bind(this.wavesurfer));
     windowsTransport.subscribe(commonEventNames.E_STOP_WAVE, this.wavesurfer.stop.bind(this.wavesurfer));
+};
+
+
+/***/ }),
+/* 99 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var PlayerModel = __webpack_require__(100);
+var inherit = __webpack_require__(0);
+
+module.exports = SnarePlayer;
+
+function SnarePlayer(playSetting){
+    PlayerModel.call(this, "/static/audio/snare.mp3", playSetting);
+}
+
+inherit(SnarePlayer, PlayerModel);
+
+SnarePlayer.prototype.setInstrument = function(){
+    this.instrument = "snare";
+};
+
+
+
+/***/ }),
+/* 100 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var PlayerRecorder = __webpack_require__(101);
+
+module.exports = PlayerModel;
+
+function PlayerModel(url, playSetting){
+    this.url = url;
+    this.instrument = null;
+    this.playSetting = playSetting || [];
+    this.playObjects = [];
+    this.playValue = null;
+    this.createPlayObjects();
+    this.setInstrument();
+    this.trackObject = this._generate();
+}
+
+PlayerModel.prototype._generate = function(){
+    return new Tone.Player({"url": this.url}).toMaster();
+};
+
+PlayerModel.prototype.setInstrument = null;
+
+PlayerModel.prototype.start = function(){
+    var i;
+    for(i =0; i < this.playObjects.length; ++i){
+        this.playObjects[i].play(this.trackObject);
+    }
+};
+
+PlayerModel.prototype.playNow = function(){
+    this.trackObject.start();
+};
+
+PlayerModel.prototype.stop = function(){
+    this.trackObject.stop();
+};
+
+PlayerModel.prototype.emptyPlaySetting = function(){
+    this.playSetting.length = 0;
+    this.playObjects.length = 0;
+};
+
+PlayerModel.prototype.createPlayObject = function(startTime){
+    this.playObjects.push(new PlayerRecorder(this.instrument, startTime));
+};
+
+PlayerModel.prototype.createPlayObjects = function(){
+    var i, tokenPlaySetting;
+    for(i = 0; i < this.playSetting.length; ++i){
+        tokenPlaySetting = this.playSetting[i];
+        this.createPlayObject(tokenPlaySetting.startTime);
+    }
+};
+
+
+
+/***/ }),
+/* 101 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var inherit = __webpack_require__(0);
+var BaseRecorder = __webpack_require__(20);
+
+module.exports = PlayerRecorder;
+
+function PlayerRecorder(instrumentName, startTime){
+    BaseRecorder.call(this);
+    this.instrument = instrumentName;
+    this.startTime = startTime || 0;
+}
+
+inherit(PlayerRecorder, BaseRecorder);
+
+PlayerRecorder.prototype.play = function(playerObject){
+    playerObject.start('+' + (this.startTime / 1000));
+};
+
+PlayerRecorder.prototype.getData = function(){
+    var result = {};
+    result.instrument = this.instrument;
+    result.startTime = this.startTime;
+    return result;
+};
+
+
+
+/***/ }),
+/* 102 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var PlayerModel = __webpack_require__(100);
+var inherit = __webpack_require__(0);
+
+module.exports = HiHatPlayer;
+
+function HiHatPlayer(playSetting){
+    PlayerModel.call(this, "/static/audio/hho.mp3", playSetting);
+}
+
+inherit(HiHatPlayer, PlayerModel);
+
+HiHatPlayer.prototype.setInstrument = function(){
+    this.instrument = "hi-hat";
 };
 
 
