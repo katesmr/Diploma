@@ -225,7 +225,7 @@ body {
 
 .piano {
     margin: 5% 0;
-    height: 70%;
+    height: 220px;
     float: left;
 }
 
@@ -287,7 +287,7 @@ body {
 
 .piano .octaves {
     width: auto;
-    margin: 25% auto;
+    margin: 30% 0;
     position: absolute;
 }
 

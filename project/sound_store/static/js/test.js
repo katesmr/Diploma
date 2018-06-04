@@ -1305,18 +1305,14 @@ TrackView.prototype._build = function(){
     });
 
     this.createView();
-    /*container.append(this.waveform.getContainer());
-    container.append(this.instrumentView.getContainer());
-    this.tabBlock.append(this.settingTitle);
-    this.tabBlock.append(this.filterTitle);
-    container.append(this.tabBlock);
-    container.append(this.settingTabSegment.getContainer());
-    container.append(this.filterTabSegment.getContainer());*/
 };
 
 TrackView.prototype.createView = function(){
+    var halfWidth = ($(window).width() / 2) - 200;
     var instrumentColumn = $("<div class='column instrument'>");
     var toolColumn = $("<div class='column tool'>");
+    instrumentColumn.css("min-width", halfWidth);
+    toolColumn.css("min-width", halfWidth);
     instrumentColumn.append(this.waveform.getContainer());
     instrumentColumn.append(this.instrumentView.getContainer());
     this.tabBlock.append(this.settingTitle);
@@ -1382,7 +1378,7 @@ function setTrack(eventName, track){
         }
         console.log();
         this.recorder.setModel(track);
-        //this.recorder.record(this.waveform.create.bind(this.waveform));
+        this.recorder.record(this.waveform.create.bind(this.waveform));
     }
 }
 
@@ -5317,7 +5313,7 @@ DrumMachine.prototype._recordHandler = function(drumObject){
     }
 };
 
-DrumMachine.prototype._drumKeyDownHandler = function(key){
+DrumMachine.prototype._keyDownHandler = function(key){
     var drumObject = null;
     var drumName = DrumModel.getDrumNameForKey(key);
     if(drumName !== null){
@@ -5336,7 +5332,7 @@ DrumMachine.prototype.keyDown = function(){
     var self = this;
     $(document).keydown(function(event){
         key = String.fromCharCode(event.keyCode);
-        self._drumKeyDownHandler(key);
+        self._keyDownHandler(key);
     });
 };
 
@@ -5354,7 +5350,7 @@ DrumMachine.prototype.createDrumGrid = function(imagePathList, keyList){
         for(j = 0; j < keyList[i].length; ++j){
             $keyItem = $("<div id='" + keyList[i][j] + "'>" + keyList[i][j] + "</div>");
             $keyItem.on("click", function(event){
-                self._drumKeyDownHandler($(this).attr("id"));
+                self._keyDownHandler($(this).attr("id"));
             });
             $keys.append($keyItem);
         }
@@ -5995,14 +5991,14 @@ Piano.prototype.createKeys = function(){
         if(tokenNote.isBlack() === true){
             style = "background-color: rgb(32,32,32); width: 30px; height: 120px; z-index: 1; color: #ffffff;";
             this.piano.append(Factory.createKey("key", key, "left: " + blackKeyDistance + "; " + style,
-                                                key, tokenNote.value, this._drumKeyDownHandler.bind(this),
-                                                this._drumKeyUpHandler.bind(this)));
+                                                key, tokenNote.value, this._keyDownHandler.bind(this),
+                                                this._keyUpHandler.bind(this)));
         } else{
             whiteKeyDistance += keyDistance;
             blackKeyDistance += keyDistance;
             this.piano.append(Factory.createKey("key", key, "left: " + whiteKeyDistance + ";", key,
-                                                tokenNote.value, this._drumKeyDownHandler.bind(this),
-                                                this._drumKeyUpHandler.bind(this)));
+                                                tokenNote.value, this._keyDownHandler.bind(this),
+                                                this._keyUpHandler.bind(this)));
         }
         //container.append(Factory.createKey(tokenNote.value, tokenNote.isBlack()));
     }
@@ -6030,7 +6026,7 @@ Piano.prototype._recordReleaseHandler = function(note){
     }
 };
 
-Piano.prototype._drumKeyDownHandler = function(key){
+Piano.prototype._keyDownHandler = function(key){
     var note = PianoModel.getNoteForKey(key);
     if(note !== null){
         if(this.__pressedKeys.indexOf(key) === -1){
@@ -6047,7 +6043,7 @@ Piano.prototype._drumKeyDownHandler = function(key){
     }
 };
 
-Piano.prototype._drumKeyUpHandler = function(key){
+Piano.prototype._keyUpHandler = function(key){
     var note = PianoModel.getNoteForKey(key);
     if(note !== null) {
         if(this.__pressedKeys.indexOf(key) >= 0) {
@@ -6074,7 +6070,7 @@ Piano.prototype.keyDown = function(){
     var self = this;
     $(document).keydown(function(event) {
         key = String.fromCharCode(event.keyCode);
-        self._drumKeyDownHandler(key);
+        self._keyDownHandler(key);
     });
 };
 
@@ -6083,7 +6079,7 @@ Piano.prototype.keyUp = function(){
     var self = this;
     $(document).keyup(function(event) {
         key = String.fromCharCode(event.keyCode);
-        self._drumKeyUpHandler(key);
+        self._keyUpHandler(key);
     });
 };
 
@@ -6399,14 +6395,18 @@ WaveForm.prototype.create = function(buffer){
     this.wavesurfer = WaveSurfer.create({
         container: this.getContainer().get(0),
         waveColor: "#262626",
-        progressColor: "#ebebeb"
+        progressColor: "#ebebeb",
+        height: 120
     });
     this.wavesurfer.on("ready", function(){
         self.wavesurfer.drawer.container.style.display = '';
         self.wavesurfer.drawBuffer();
     });
     this.wavesurfer.loadBlob(AudioHelper.AudioBufferToBlob(buffer));
-    windowsTransport.subscribe(commonEventNames.E_PLAY_WAVE, this.wavesurfer.playPause.bind(this.wavesurfer));
+    windowsTransport.subscribe(commonEventNames.E_PLAY_WAVE, function(){
+        self.wavesurfer.setMute(true); // ????????
+        self.wavesurfer.play();
+    });
     windowsTransport.subscribe(commonEventNames.E_STOP_WAVE, this.wavesurfer.stop.bind(this.wavesurfer));
 };
 
