@@ -68,7 +68,8 @@ class ProjectManager(BasicManager):
                 if name is not None or name.length > 0:
                     old_name = project.name
                     if name != old_name:
-                        project = Projects(id=_id, name=name)
+                        # project = Projects(id=_id, name=name)
+                        project.name = name
                         project.save()
                     result['name'] = project.name
                 else:

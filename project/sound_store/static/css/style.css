@@ -157,6 +157,25 @@ body {
     margin: 1% 10%;
 }
 
+.track-list-view .project-name-editor {
+    width: auto;
+}
+
+.track-list-view .project-name-editor input[type="text"], textarea {
+    width: 30%;
+    color: white;
+    background-color: #2f2f2f;
+}
+
+.track-list-view .project-name {
+    width: auto;
+    color: white;
+    margin: 0 auto;
+    font-size: 20px;
+    text-align: center;
+    display: inline-block;
+}
+
 .track-list {
     height: auto;
     margin: 0 10% 15% 15%;

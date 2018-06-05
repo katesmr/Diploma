@@ -1,5 +1,3 @@
-var merger_test = require("merger_test");
-
 var WindowManager = require("view/WindowManager");
 var ProjectListView = require("view/ProjectListView");
 var TrackListView = require("view/TrackListView");
@@ -13,12 +11,6 @@ var ProjectListModel = require("model/ProjectListModel");
 var TrackView = require("view/TrackView");
 
 var Observer = require("observer");
-
-var Req = require("utils/RequestManager");
-
-module.exports = {
-    "merger_test": merger_test
-};
 
 var projectListObserver = new Observer();
 var projectListController = new ProjectListController(projectListObserver);
