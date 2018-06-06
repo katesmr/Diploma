@@ -58,9 +58,8 @@ body {
 }
 
 .user-info-bar p {
-    float: right;
     color: white;
-    font-size: 15px;
+    font-size: 20px;
 }
 
 .content {
@@ -111,9 +110,10 @@ body {
     margin: 2% 0 0 0;
 }
 
-.project-list a {
-    font-size: 20px;
+.project-list .column a {
+    float: left;
     color: white;
+    font-size: 20px;
     background-color: #262626;
 }
 
@@ -122,14 +122,14 @@ body {
 }
 
 .project-list .circular.ui.icon.button.delete {
-    margin: 0 0 2% 1%;
+    margin: 0 0 1% 1%;
     float: right;
-    width: 1px;
-    height: 1px;
+    width: 15px;
+    height: 15px;
 }
 
 .project-list .circular.ui.icon.button.delete i {
-    display: block;
+    display: inline-block;
     margin: 0 auto;
     width: auto;
 }
@@ -235,11 +235,6 @@ body {
     background-color: #565e62;
 }
 
-/*.wave {
-    position: none;
-}*/
-
-
 /* piano view */
 
 .piano {
@@ -333,8 +328,9 @@ body {
 }
 
 .instrument-view .ui.grid.drum .column {
-    margin: 1% 0;
-    background-color: white;
+    width: 48%;
+    margin: 1%;
+    background-color: #565e62;
 }
 
 .grid.drum img.ui.image {
@@ -342,13 +338,18 @@ body {
 }
 
 .grid.drum .column .keys {
-    width: auto;
+    width: 100%;
+    margin: 0 0 5% 0;
+    display: inline-block;
 }
 
 .grid.drum .column .keys div {
+    width: 45%;
+    padding: 2%;
     float: left;
     font-size: 20px;
-    margin: 0 0 0 5%;
+    margin: 0 2.5% 0 2.5%;
+    background-color: #656e73;
 }
 
 /* tool view - tab */

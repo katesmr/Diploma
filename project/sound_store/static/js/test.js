@@ -1027,9 +1027,7 @@ ProjectListView.prototype._build = function(){
     });
 
     windowsTransport.subscribe(commonEventNames.E_RENAME_PROJECT, function(eventName, object){
-        // object.id, object.name
-        console.log(self.table.find('#' + object.id));
-        console.log(object.name);
+        // update project name after renaming
         self.table.find('#' + object.id).text(object.name);
     });
 
@@ -4056,6 +4054,12 @@ function DrumModel(){
     this.keys = [['B', 'N'], ['F', 'G'], ['H', 'J'], ['T', 'Y']];
     this.images = ["/static/images/kick.png", "/static/images/tom.png",
                    "/static/images/snare.png", "/static/images/hi-hat.png"];
+    this.popupText = ["Kick (big drum) - percussive low-register musical instrument, " +
+                      "a membrane speaker with an undefined pitch of sound.",
+                      "Tom-tom (tom) - is a cylindrical drum with no snares.",
+                      "Snare - is a percussion instrument that produces a sharp staccato sound, " +
+                      "when the head is struck with a drum stick.",
+                      "Hi-hat - is a combination of two cymbals, a foot-operated pedal."];
 }
 
 DrumModel.prototype.getDrumNameForKey = function(key){
@@ -5427,7 +5431,7 @@ DrumMachine.prototype._build = function(){
     var self = this;
     var container = this.getContainer();
 
-    this.createDrumGrid(DrumModel.images, DrumModel.keys);
+    this.createDrumGrid(DrumModel.images, DrumModel.keys, DrumModel.popupText);
 
     container.append(this.drumGrid);
 };
@@ -5468,8 +5472,8 @@ DrumMachine.prototype.keyDown = function(){
     });
 };
 
-DrumMachine.prototype.createDrumGrid = function(imagePathList, keyList){
-    var i, j;
+DrumMachine.prototype.createDrumGrid = function(imagePathList, keyList, drumExploring){
+    var i, j, key;
     var self = this;
     var $img = null;
     var $keys = null;
@@ -5477,13 +5481,19 @@ DrumMachine.prototype.createDrumGrid = function(imagePathList, keyList){
     var $keyItem = null;
     this.drumGrid = $("<div class='ui two column grid drum'>");
     for(i = 0; i < imagePathList.length; ++i){
-        $img = $("<img class='ui small image' src='" + imagePathList[i] + "'>");
+        $img = $("<img class='ui small image' src='" + imagePathList[i] + "' " +
+                 "data-content='" + drumExploring[i] + "'>");
+        $img.popup();
         $keys = $("<div class='keys'>");
         for(j = 0; j < keyList[i].length; ++j){
-            $keyItem = $("<div id='" + keyList[i][j] + "'>" + keyList[i][j] + "</div>");
+            key = keyList[i][j];
+            $keyItem = $("<div id='" + key + "' " +
+                         "data-content='Click or press key " + key + " for play'>"
+                         + key + "</div>");
             $keyItem.on("click", function(event){
                 self._keyDownHandler($(this).attr("id"));
             });
+            $keyItem.popup();
             $keys.append($keyItem);
         }
         $column = $("<div class='column'>");
@@ -5492,6 +5502,7 @@ DrumMachine.prototype.createDrumGrid = function(imagePathList, keyList){
         this.drumGrid.append($column);
     }
 };
+
 
 /***/ }),
 /* 88 */
