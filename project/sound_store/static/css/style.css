@@ -49,16 +49,20 @@ body {
 }
 
 .user-info-bar {
+    width: 10%;
     float: right;
 }
 
 .user-info-bar .ui.button {
     width: auto;
+    float: right;
     font-size: 15px;
 }
 
-.user-info-bar p {
+.user-info-bar .username {
+    float: left;
     color: white;
+    margin: 3% 1% 0;
     font-size: 20px;
 }
 
@@ -110,11 +114,11 @@ body {
     margin: 2% 0 0 0;
 }
 
-.project-list .column a {
+.project-list .column .name {
     float: left;
     color: white;
-    font-size: 20px;
-    background-color: #262626;
+    font-size: 22px;
+    vertical-align: middle;
 }
 
 .project-list .ui.grid {
@@ -122,10 +126,8 @@ body {
 }
 
 .project-list .circular.ui.icon.button.delete {
-    margin: 0 0 1% 1%;
+    margin: 0 10% 0;
     float: right;
-    width: 15px;
-    height: 15px;
 }
 
 .project-list .circular.ui.icon.button.delete i {

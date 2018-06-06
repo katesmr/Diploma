@@ -1055,7 +1055,7 @@ ProjectListView.prototype.add = function(object){
     var $column;
     var $deleteProjectButton;
     $deleteProjectButton = Factory.deleteCircleButton(_id, this.onRemoveButtonClicked);
-    $item = $("<a id='" + _id + "'>" + object.name +"</a>");
+    $item = $("<div class='name' id='" + _id + "'>" + object.name +"</div>");
     $column = $("<div class='column' id='item-" + _id + "'>");
     $column.append($item);
     $column.append($deleteProjectButton);
@@ -1914,6 +1914,7 @@ function TrackDrum(id, data){
     this.drums = data.drums || []; // list of names of used drums
     this.drumObjects = {}; // only used drum
     this.allDrumObjects = {}; // instances of all possible drum objects
+    this.volume = data.volume || 1;
     this.createAllDrumObjects();
     this.createDrumObjects();
 }
@@ -1931,6 +1932,18 @@ TrackDrum.prototype.getAudioBuffer = function(){};
 TrackDrum.prototype.getBlob = function(){};
 
 TrackDrum.prototype.disconnectFromAudioSource = function(){};
+
+TrackDrum.prototype.getVolume = function(){
+    return this.volume;
+};
+
+TrackDrum.prototype.setVolume = function(value){
+    var name;
+    this.volume = value;
+    for(name in this.allDrumObjects){
+        this.allDrumObjects[name].setVolume(value);
+    }
+};
 
 TrackDrum.prototype.getData = function(){
     var result = {};
@@ -2169,6 +2182,10 @@ BaseDrumModel.prototype.setInstrument = null;
 
 BaseDrumModel.prototype.getVolume = function(){
     return this.trackObject ? this.trackObject.volume.value : null;
+};
+
+BaseDrumModel.prototype.setVolume = function(value){
+    this.trackObject.volume.value = value;
 };
 
 BaseDrumModel.prototype.emptyPlaySetting = function(){
@@ -2898,14 +2915,14 @@ function setSettingListToDefault(settingList) {
  * @param trackObject
  * @param optionName
  */
-function setToSettingList(listElement, trackObject, optionName) {
+function setToSettingList(listElement, trackObject, optionName){
     var result;
     var methodName = "get" + capitalize(optionName);
-    if (methodName in trackObject) {
+    if (methodName in trackObject){
         listElement.isEnabled = true;
         result = trackObject[methodName]();
         // add only existing methods/parameters from track to SettingList
-        if (result !== undefined || result !== null) {
+        if (result !== undefined || result !== null){
             listElement.set(trackObject[methodName]());
             hideExistingParams(listElement, trackObject.instrument);
         }
@@ -2924,10 +2941,12 @@ function setToTrackSetting(track, settingName, value){
 function hideExistingParams(listElement, instrumentName){
     switch(instrumentName){
         case "drum":
-            listElement.isEnabled = false;
+            if(listElement.name === "frequency" || listElement.name === "type"){
+                listElement.isEnabled = false;
+            }
             break;
         case "oscillator":
-            if(listElement.name === "frequency" || listElement.name === "volume") {
+            if(listElement.name === "frequency" || listElement.name === "volume"){
                 listElement.isEnabled = false;
             }
             break;
@@ -6421,7 +6440,7 @@ module.exports = UserInfoBar;
 function UserInfoBar(){
     BaseView.call(this, "user-info-bar");
 
-    this.userName = $("<p>anonym</p>");
+    this.userName = $("<div class='username'>anonym</div>");
     this.joinButton = Factory.createButton("join", "join");
     this.userModal = new UserModal();
 
@@ -6547,7 +6566,7 @@ WaveForm.prototype.create = function(buffer){
     });
     this.wavesurfer.loadBlob(AudioHelper.AudioBufferToBlob(buffer));
     windowsTransport.subscribe(commonEventNames.E_PLAY_WAVE, function(){
-        self.wavesurfer.setMute(true); // ????????
+        self.wavesurfer.setMute(true);
         self.wavesurfer.play();
     });
     windowsTransport.subscribe(commonEventNames.E_STOP_WAVE, this.wavesurfer.stop.bind(this.wavesurfer));
