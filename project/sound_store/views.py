@@ -11,6 +11,12 @@ from django.utils.datastructures import MultiValueDictKeyError
 from .SoundManager import SoundManager
 from .ProjectManager import ProjectManager
 from .StreamsManager import StreamsManager
+from django.contrib.auth import logout
+
+
+def logout_view(request):
+    print('+')
+    return render(request, 'logout_view.html')
 
 
 BAD_RESPONSE = HttpResponse(dumps(None), content_type='application/json', status=400)

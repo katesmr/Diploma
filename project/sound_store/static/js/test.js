@@ -155,7 +155,7 @@ BaseView.prototype.appendToBlock = function(blockName){
 "use strict";
 
 
-var Observer = __webpack_require__(13);
+var Observer = __webpack_require__(12);
 
 module.exports = new Observer();
 
@@ -448,7 +448,7 @@ BaseFilterModel.prototype.disconnectFilter = function(track){
 
 var PostSettings = __webpack_require__(67);
 var generateUID = __webpack_require__(49);
-var AudioHelper = __webpack_require__(11);
+var AudioHelper = __webpack_require__(10);
 
 module.exports = BaseTrackModel;
 
@@ -586,113 +586,6 @@ BaseTrackModel.prototype.merge = null;
 "use strict";
 
 
-var transportAudioFile = __webpack_require__(85);
-var TrackManager = __webpack_require__(12);
-
-var changeSound = __webpack_require__(76);
-var changeRequest = __webpack_require__(75);
-var getSound = __webpack_require__(80);
-var getProject = __webpack_require__(79);
-var projectList = __webpack_require__(82);
-var deleteProject = __webpack_require__(77);
-var deleteTrack = __webpack_require__(78);
-var getUser = __webpack_require__(81);
-
-
-module.exports = {
-    "getUser": defineUser,
-    "getProject": getProjectData,
-    "getProjectList": getProjectList,
-    "deleteProject": deleteUserProject,
-    "createProject": addProject,
-    "updateProject": updateProject,
-    "createTrack": createTrack,
-    "deleteTrack": deleteProjectTrack,
-    "updateTrack": updateTrack,
-    "createSound": createSound,
-    "uploadSound": uploadSound,
-    "downloadSound": downloadSound
-};
-
-function defineUser(callback){
-    getUser(callback);
-}
-
-function getProjectList(callback){
-    projectList(callback);
-}
-
-function getProjectData(projectId, callback){
-    var url = "projects/";
-    var fullUrl = url + projectId + '/';
-    getProject(fullUrl, callback);
-}
-
-function deleteUserProject(projectId, callback){
-    var url = "projects/delete/";
-    var fullUrl = url + projectId + '/';
-    deleteProject(fullUrl, callback);
-}
-
-function addProject(projectName, data, callback){
-    var url = "projects/create/";
-    var fullUrl = url + projectName + '/';
-    changeRequest(fullUrl, data, "json", callback);
-}
-
-function updateProject(projectId, data, callback){
-    var url = "projects/update/";
-    var fullUrl = url + projectId + '/';
-    changeRequest(fullUrl, data, "json", callback);
-}
-
-function createTrack(projectId, data, callback){
-    var url = "track/create/";
-    var fullUrl = url + projectId + '/';
-    changeRequest(fullUrl, data.toJson(), "json", callback)
-}
-
-function deleteProjectTrack(trackId, callback){
-    var url = "track/delete/";
-    var fullUrl = url + trackId + '/';
-    deleteTrack(fullUrl, callback);
-}
-
-function updateTrack(trackId, data, callback){
-    var url = "track/update/";
-    var fullUrl = url + trackId + '/';
-    changeRequest(fullUrl, data, "json", callback)
-}
-
-function createSound(soundName, audioSrc){
-    var url = "sounds/create/";
-    // var url = "sound/update/";
-    var fullUrl = url + soundName + '/';
-    transportAudioFile(fullUrl, soundName, audioSrc, changeSound);
-}
-
-function downloadSound(soundName){
-    var url = "sounds/download/";
-    var fullUrl = url + soundName + '/';
-    getSound(fullUrl, function(data){
-        TrackManager.save(data, soundName);
-    });
-}
-
-function uploadSound(soundName, callback){
-    var url = "sounds/";
-    var fullUrl = url + soundName + '/';
-    getSound(fullUrl, callback);
-}
-
-
-/***/ }),
-/* 9 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
 module.exports = BaseRecorder;
 
 
@@ -704,7 +597,7 @@ BaseRecorder.prototype.getData = null;
 
 
 /***/ }),
-/* 10 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -731,7 +624,7 @@ MembraneModel.prototype.stop = function(){
 
 
 /***/ }),
-/* 11 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -804,14 +697,14 @@ var save = (function(){
 
 
 /***/ }),
-/* 12 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var mergeBuffers = __webpack_require__(46);
-var AudioHelper = __webpack_require__(11);
+var AudioHelper = __webpack_require__(10);
 
 module.exports = TrackManager;
 
@@ -851,7 +744,7 @@ TrackManager.save = (function(){
 
 
 /***/ }),
-/* 13 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -968,7 +861,7 @@ function _notify(list, event, data){
 
 
 /***/ }),
-/* 14 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1092,7 +985,7 @@ function onRemoveButtonClicked($element){
 
 
 /***/ }),
-/* 15 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1320,7 +1213,7 @@ function setTrackInstrument(value){
 
 
 /***/ }),
-/* 16 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1335,10 +1228,10 @@ var InstrumentView = __webpack_require__(89);
 var commonEventNames = __webpack_require__(1);
 var windowsTransport = __webpack_require__(3);
 
-var AudioBufferRecorder = __webpack_require__(18);
+var AudioBufferRecorder = __webpack_require__(17);
 var DrumAudioBufferRecorder = __webpack_require__(30);
-var TrackDrum = __webpack_require__(24);
-var TrackManager = __webpack_require__(12);
+var TrackDrum = __webpack_require__(23);
+var TrackManager = __webpack_require__(11);
 
 module.exports = TrackView;
 
@@ -1381,6 +1274,7 @@ TrackView.prototype._build = function(){
         console.log("export track");
         console.log(self.controller.model);
         if(self.controller.model instanceof TrackDrum){
+            console.log("???????????????????");
             self.recorder = new DrumAudioBufferRecorder();
         } else{
             self.recorder = new AudioBufferRecorder();
@@ -1469,7 +1363,7 @@ function setTrack(eventName, track){
 
 
 /***/ }),
-/* 17 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1477,7 +1371,7 @@ function setTrack(eventName, track){
 
 var BaseController = __webpack_require__(48);
 var inherit = __webpack_require__(0);
-var ObservableList = __webpack_require__(22);
+var ObservableList = __webpack_require__(21);
 
 module.exports = ListController;
 
@@ -1499,7 +1393,7 @@ ListController.prototype.attachModel = function(model){
 
 
 /***/ }),
-/* 18 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1662,7 +1556,7 @@ function createOscillatorPlayData(trackPlayData){
 
 
 /***/ }),
-/* 19 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1700,7 +1594,7 @@ BaseOptionList.prototype.set = function(value){
 
 
 /***/ }),
-/* 20 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1727,14 +1621,14 @@ inherit(BaseRange, BaseOption);
 
 
 /***/ }),
-/* 21 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var BaseRecorder = __webpack_require__(9);
+var BaseRecorder = __webpack_require__(8);
 
 module.exports = DrumRecorder;
 
@@ -1766,7 +1660,7 @@ DrumRecorder.prototype.getData = function(){
 
 
 /***/ }),
-/* 22 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1856,14 +1750,14 @@ ObservableList.prototype.remove = function(index){
 
 
 /***/ }),
-/* 23 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var inherit = __webpack_require__(0);
-var BaseRecorder = __webpack_require__(9);
+var BaseRecorder = __webpack_require__(8);
 
 module.exports = PlayerRecorder;
 
@@ -1889,15 +1783,15 @@ PlayerRecorder.prototype.getData = function(){
 
 
 /***/ }),
-/* 24 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var BaseTrackModel = __webpack_require__(7);
-var DrumRecorder = __webpack_require__(21);
-var PlayerRecorder = __webpack_require__(23);
+var DrumRecorder = __webpack_require__(20);
+var PlayerRecorder = __webpack_require__(22);
 var inherit = __webpack_require__(0);
 var KickLeft = __webpack_require__(60);
 var KickRight = __webpack_require__(61);
@@ -2071,9 +1965,116 @@ TrackDrum.prototype.createAllDrumObjects = function(){
     this.allDrumObjects["big-tom"] = new BigTom();
     this.allDrumObjects["left-tom"] = new LeftTom();
     this.allDrumObjects["bell"] = new Bell();
-    //this.allDrumObjects["snare"] = new SnarePlayer();
-    //this.allDrumObjects["hi-hat"] = new HiHatPlayer();
+    this.allDrumObjects["snare"] = new SnarePlayer();
+    this.allDrumObjects["hi-hat"] = new HiHatPlayer();
 };
+
+
+/***/ }),
+/* 24 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var transportAudioFile = __webpack_require__(85);
+var TrackManager = __webpack_require__(11);
+
+var changeSound = __webpack_require__(76);
+var changeRequest = __webpack_require__(75);
+var getSound = __webpack_require__(80);
+var getProject = __webpack_require__(79);
+var projectList = __webpack_require__(82);
+var deleteProject = __webpack_require__(77);
+var deleteTrack = __webpack_require__(78);
+var getUser = __webpack_require__(81);
+
+
+module.exports = {
+    "getUser": defineUser,
+    "getProject": getProjectData,
+    "getProjectList": getProjectList,
+    "deleteProject": deleteUserProject,
+    "createProject": addProject,
+    "updateProject": updateProject,
+    "createTrack": createTrack,
+    "deleteTrack": deleteProjectTrack,
+    "updateTrack": updateTrack,
+    "createSound": createSound,
+    "uploadSound": uploadSound,
+    "downloadSound": downloadSound
+};
+
+function defineUser(callback){
+    getUser(callback);
+}
+
+function getProjectList(callback){
+    projectList(callback);
+}
+
+function getProjectData(projectId, callback){
+    var url = "projects/";
+    var fullUrl = url + projectId + '/';
+    getProject(fullUrl, callback);
+}
+
+function deleteUserProject(projectId, callback){
+    var url = "projects/delete/";
+    var fullUrl = url + projectId + '/';
+    deleteProject(fullUrl, callback);
+}
+
+function addProject(projectName, data, callback){
+    var url = "projects/create/";
+    var fullUrl = url + projectName + '/';
+    changeRequest(fullUrl, data, "json", callback);
+}
+
+function updateProject(projectId, data, callback){
+    var url = "projects/update/";
+    var fullUrl = url + projectId + '/';
+    changeRequest(fullUrl, data, "json", callback);
+}
+
+function createTrack(projectId, data, callback){
+    var url = "track/create/";
+    var fullUrl = url + projectId + '/';
+    changeRequest(fullUrl, data.toJson(), "json", callback)
+}
+
+function deleteProjectTrack(trackId, callback){
+    var url = "track/delete/";
+    var fullUrl = url + trackId + '/';
+    deleteTrack(fullUrl, callback);
+}
+
+function updateTrack(trackId, data, callback){
+    var url = "track/update/";
+    var fullUrl = url + trackId + '/';
+    changeRequest(fullUrl, data, "json", callback)
+}
+
+function createSound(soundName, audioSrc){
+    var url = "sounds/create/";
+    // var url = "sound/update/";
+    var fullUrl = url + soundName + '/';
+    transportAudioFile(fullUrl, soundName, audioSrc, changeSound);
+}
+
+function downloadSound(soundName){
+    var url = "sounds/download/";
+    var fullUrl = url + soundName + '/';
+    getSound(fullUrl, function(data){
+        TrackManager.save(data, soundName);
+    });
+}
+
+function uploadSound(soundName, callback){
+    var url = "sounds/";
+    var fullUrl = url + soundName + '/';
+    getSound(fullUrl, callback);
+}
 
 
 /***/ }),
@@ -2156,9 +2157,9 @@ BaseWindow.prototype.back = null;
 "use strict";
 
 
-var AudioHelper = __webpack_require__(11);
-var DrumRecorder = __webpack_require__(21);
-var PlayerRecorder = __webpack_require__(23);
+var AudioHelper = __webpack_require__(10);
+var DrumRecorder = __webpack_require__(20);
+var PlayerRecorder = __webpack_require__(22);
 
 module.exports = BaseDrumModel;
 
@@ -2365,8 +2366,8 @@ BaseTrackSetting.prototype.toString = function(){
 
 
 var inherit = __webpack_require__(0);
-var TrackManager = __webpack_require__(12);
-var AudioBufferRecorder = __webpack_require__(18);
+var TrackManager = __webpack_require__(11);
+var AudioBufferRecorder = __webpack_require__(17);
 var eventDuration = __webpack_require__(38);
 
 module.exports = DrumAudioBufferRecorder;
@@ -2376,6 +2377,7 @@ function DrumAudioBufferRecorder(drumModel){
     this.drumCount = 0;
     this.drumAudioBuffers = [];
     this.durationList = {};
+    this.playDataList = {};
 }
 
 inherit(DrumAudioBufferRecorder, AudioBufferRecorder);
@@ -2389,32 +2391,39 @@ DrumAudioBufferRecorder.prototype.setModel = function(drumModel){
 };
 
 DrumAudioBufferRecorder.prototype.createTrack = function(drumTrack){
-    /*if(this.track){
-        this.track.disconnect(Tone.Master); // disconnect previous track from Master
-    }*/
-    this.filterObjects.length = 0;
-    if(drumTrack.trackObject instanceof Tone.MembraneSynth){
-        this.track = new Tone.MembraneSynth(drumTrack.setting).toMaster();
-    } else if(drumTrack.trackObject instanceof Tone.Player){
-        this.track = new Tone.Player(drumTrack.url).toMaster();
-    } else if(drumTrack.trackObject instanceof Tone.MetalSynth){
-        this.track = new Tone.MetalSynth(drumTrack.setting).toMaster();
+    this.filterObjects.length = 0;  // empty previous track filters
+    if(drumTrack instanceof AudioBuffer){
+        // create sound from buffer
+        this.track = new Tone.Player(drumTrack).toMaster();
+    } else{
+        // create sound from drum model
+        if(drumTrack.trackObject instanceof Tone.MembraneSynth){
+            this.track = new Tone.MembraneSynth(drumTrack.setting).toMaster();
+        } else if(drumTrack.trackObject instanceof Tone.MetalSynth){
+            this.track = new Tone.MetalSynth(drumTrack.setting).toMaster();
+        } else if(drumTrack.trackObject instanceof Tone.Player){
+            this.track = new Tone.Player(drumTrack.url).toMaster();
+        }
     }
-    if(this.track) {
+    if(this.track){
         this.createFilters();
-        this.playData = createDrumPlayData(this.trackModel.playObjects, drumTrack.instrument);
+        //this.playData = createDrumPlayData(this.trackModel.playObjects, drumTrack.instrument);
         //this.duration = eventDuration.durationByTime(this.playData);
     }
+    console.log("track");
+    console.log(this.track);
 };
 
 DrumAudioBufferRecorder.prototype.createTracks = function(){
-    var drum;
-    var name;
+    var drum, name;
     for(name in this.trackModel.drumObjects){
         drum = this.trackModel.drumObjects[name];
         this.createTrack(drum);
+        // save play data and duration at once
+        // save play data of each track in object: key - instrument name, value - array of objects with playing data
+        this.playDataList[drum.instrument] = createDrumPlayData(this.trackModel.playObjects, drum.instrument);
         // save duration of each track in object: key - instrument name, value - duration
-        this.durationList[drum.instrument] = eventDuration.durationByTime(this.playData);
+        this.durationList[drum.instrument] = eventDuration.durationByTime(this.playDataList[drum.instrument]);
     }
 };
 
@@ -2428,6 +2437,21 @@ DrumAudioBufferRecorder.prototype.play = function(drumTrack, value){
     }
 };
 
+DrumAudioBufferRecorder.prototype.recordAudioFile = function(drumTrack, callback){
+    var buffer, bufferObject;
+    var self = this;
+    if(drumTrack.trackObject instanceof Tone.Player){
+        bufferObject = new Tone.Buffer(drumTrack.url);
+        Tone.Buffer.on("load", function(){
+            buffer = bufferObject.get();
+            // record buffer only when it completely loaded
+            self._record(drumTrack, callback, buffer);
+        });
+    } else{
+        this._record(drumTrack, callback);
+    }
+};
+
 DrumAudioBufferRecorder.prototype.record = function(callback){
     var i, drumTrack;
     this.drumAudioBuffers.length = 0;
@@ -2435,27 +2459,36 @@ DrumAudioBufferRecorder.prototype.record = function(callback){
         // this.trackModel.drums[i] - drum instrument name
         drumTrack = this.trackModel.drumObjects[this.trackModel.drums[i]];
         // convert all drum objects to AudioBuffers
-        this._record(drumTrack, callback);
+        this.recordAudioFile(drumTrack, callback);
     }
 };
 
-DrumAudioBufferRecorder.prototype._record = function(drumTrack, callback){
-    var result; // result merged AudioBuffer
+DrumAudioBufferRecorder.prototype._record = function(drumTrack, callback, buffer){
+    var result; // result of merged AudioBuffer
     var self = this;
     // durationList[drumTrack.instrument] - duration of corresponded instrument
+    var duration = this.durationList[drumTrack.instrument];
+    // playDataList[drumTrack.instrument] - play data of corresponded instrument
+    var playData = this.playDataList[drumTrack.instrument];
+    console.log(drumTrack.instrument);
+    console.log("duration");
+    console.log(duration);
     Tone.Offline(function(){
-        self.createTrack(drumTrack);
+        if(buffer){
+            self.createTrack(buffer);
+        } else{
+            self.createTrack(drumTrack);
+        }
         console.log("offline");
-        console.log(self.playData);
-        console.log(self.durationList[drumTrack.instrument]);
+        console.log(playData);
         var part = new Tone.Part(function(time, value){
             // record all play values
             console.log("part");
             self.play(drumTrack, value);
-        }, self.playData);
+        }, playData);
         part.start(0);
         Tone.Transport.start();
-    }, this.durationList[drumTrack.instrument]).then(function(buffer){
+    }, duration).then(function(buffer){
         self.drumAudioBuffers.push(buffer._buffer); // save new audioBuffer in list
         console.log("then");
         console.log(buffer._buffer);
@@ -2496,7 +2529,7 @@ function createDrumPlayData(trackPlayData, instrument){
 
 var inherit = __webpack_require__(0);
 var clamp = __webpack_require__(84);
-var BaseRecorder = __webpack_require__(9);
+var BaseRecorder = __webpack_require__(8);
 
 module.exports = MixerRecorder;
 
@@ -2545,7 +2578,7 @@ MixerRecorder.prototype.getData = function(){
 
 
 var inherit = __webpack_require__(0);
-var BaseRecorder = __webpack_require__(9);
+var BaseRecorder = __webpack_require__(8);
 
 module.exports = PianoKeyRecorder;
 
@@ -2589,7 +2622,7 @@ PianoKeyRecorder.prototype.getData = function(){
 "use strict";
 
 
-var PlayerRecorder = __webpack_require__(23);
+var PlayerRecorder = __webpack_require__(22);
 
 module.exports = PlayerModel;
 
@@ -2651,12 +2684,12 @@ PlayerModel.prototype.createPlayObjects = function(){
 "use strict";
 
 
-var ObservableList = __webpack_require__(22);
+var ObservableList = __webpack_require__(21);
 var inherit = __webpack_require__(0);
 var TrackSynthesizer = __webpack_require__(37);
 var TrackNoise = __webpack_require__(71);
 var TrackOscillator = __webpack_require__(72);
-var TrackDrum = __webpack_require__(24);
+var TrackDrum = __webpack_require__(23);
 var commonEventNames = __webpack_require__(1);
 
 module.exports = ProjectModel;
@@ -3166,8 +3199,8 @@ function durationByStartTime(timeData){
 
 var inherit = __webpack_require__(0);
 var TabSegment = __webpack_require__(96);
-var BaseRange = __webpack_require__(20);
-var BaseOptionList = __webpack_require__(19);
+var BaseRange = __webpack_require__(19);
+var BaseOptionList = __webpack_require__(18);
 var Factory = __webpack_require__(4);
 
 module.exports = ToolView;
@@ -3211,9 +3244,9 @@ ToolView.prototype.createElement = function(className, name, value){
 "use strict";
 
 
-var ListController = __webpack_require__(17);
+var ListController = __webpack_require__(16);
 var inherit = __webpack_require__(0);
-var RequestManager = __webpack_require__(8);
+var RequestManager = __webpack_require__(24);
 
 module.exports = ProjectController;
 
@@ -3255,9 +3288,9 @@ ProjectController.prototype.removeById = function(id){
 "use strict";
 
 
-var ListController = __webpack_require__(17);
+var ListController = __webpack_require__(16);
 var inherit = __webpack_require__(0);
-var RequestManager = __webpack_require__(8);
+var RequestManager = __webpack_require__(24);
 
 module.exports = ProjectListController;
 
@@ -3299,7 +3332,7 @@ ProjectListController.prototype._removeHandler = function(id){
 "use strict";
 
 
-var ListController = __webpack_require__(17);
+var ListController = __webpack_require__(16);
 var inherit = __webpack_require__(0);
 var commonEventNames = __webpack_require__(1);
 
@@ -3329,7 +3362,7 @@ TrackController.prototype.sendTrack = function(){
 "use strict";
 
 
-var ObservableList = __webpack_require__(22);
+var ObservableList = __webpack_require__(21);
 var ProjectModel = __webpack_require__(34);
 var inherit = __webpack_require__(0);
 
@@ -3378,9 +3411,9 @@ ProjectListModel.prototype.clearActiveProject = function(){
 var inherit = __webpack_require__(0);
 var BaseView = __webpack_require__(2);
 var MessageModal = __webpack_require__(91);
-var ProjectListView = __webpack_require__(14);
-var TrackListView = __webpack_require__(15);
-var TrackView = __webpack_require__(16);
+var ProjectListView = __webpack_require__(13);
+var TrackListView = __webpack_require__(14);
+var TrackView = __webpack_require__(15);
 var MenuBar = __webpack_require__(90);
 var windowsTransport = __webpack_require__(3);
 var commonEventNames = __webpack_require__(1);
@@ -3653,8 +3686,8 @@ function mergeBuffers(buffers, ac) {
 
 
 var WindowManager = __webpack_require__(44);
-var ProjectListView = __webpack_require__(14);
-var TrackListView = __webpack_require__(15);
+var ProjectListView = __webpack_require__(13);
+var TrackListView = __webpack_require__(14);
 
 var ProjectListController = __webpack_require__(41);
 var ProjectController = __webpack_require__(40);
@@ -3662,9 +3695,9 @@ var TrackController = __webpack_require__(42);
 
 var ProjectListModel = __webpack_require__(43);
 
-var TrackView = __webpack_require__(16);
+var TrackView = __webpack_require__(15);
 
-var Observer = __webpack_require__(13);
+var Observer = __webpack_require__(12);
 
 var projectListObserver = new Observer();
 var projectListController = new ProjectListController(projectListObserver);
@@ -3963,7 +3996,7 @@ Bell.prototype.setInstrument = function(){
 "use strict";
 
 
-var MembraneModel = __webpack_require__(10);
+var MembraneModel = __webpack_require__(9);
 var inherit = __webpack_require__(0);
 
 module.exports = BigTom;
@@ -4105,8 +4138,8 @@ DrumModel.prototype.getDrumNameForKey = function(key){
 "use strict";
 
 
-var BaseOptionList = __webpack_require__(19);
-var BaseRange = __webpack_require__(20);
+var BaseOptionList = __webpack_require__(18);
+var BaseRange = __webpack_require__(19);
 var BaseTrackSetting = __webpack_require__(29);
 var TrackSettingsSet = __webpack_require__(36);
 
@@ -4249,7 +4282,7 @@ HiHatPlayer.prototype.setInstrument = function(){
 "use strict";
 
 
-var MembraneModel = __webpack_require__(10);
+var MembraneModel = __webpack_require__(9);
 var inherit = __webpack_require__(0);
 
 module.exports = KickLeft;
@@ -4291,7 +4324,7 @@ KickLeft.prototype.setInstrument = function(){
 "use strict";
 
 
-var MembraneModel = __webpack_require__(10);
+var MembraneModel = __webpack_require__(9);
 var inherit = __webpack_require__(0);
 
 module.exports = KickRight;
@@ -4331,7 +4364,7 @@ KickRight.prototype.setInstrument = function(){
 "use strict";
 
 
-var MembraneModel = __webpack_require__(10);
+var MembraneModel = __webpack_require__(9);
 var inherit = __webpack_require__(0);
 
 module.exports = LeftTom;
@@ -4804,10 +4837,10 @@ PostSettings.prototype.setValueToFilter = function(filterName, optionName, value
 "use strict";
 
 
-var AudioBufferRecorder = __webpack_require__(18);
+var AudioBufferRecorder = __webpack_require__(17);
 var DrumAudioBufferRecorder = __webpack_require__(30);
-var TrackDrum = __webpack_require__(24);
-var TrackManager = __webpack_require__(12);
+var TrackDrum = __webpack_require__(23);
+var TrackManager = __webpack_require__(11);
 
 module.exports = ProjectRecorder;
 
@@ -4860,8 +4893,8 @@ ProjectRecorder.prototype.saveBuffers = function(buffer){
 "use strict";
 
 
-var BaseOptionList = __webpack_require__(19);
-var BaseRange = __webpack_require__(20);
+var BaseOptionList = __webpack_require__(18);
+var BaseRange = __webpack_require__(19);
 var BaseTrackSetting = __webpack_require__(29);
 var TrackSettingsSet = __webpack_require__(36);
 
@@ -5430,7 +5463,7 @@ function getEven(number){
 
 
 var inherit = __webpack_require__(0);
-var DrumRecorder = __webpack_require__(21);
+var DrumRecorder = __webpack_require__(20);
 var DrumModel = __webpack_require__(56);
 var BaseInstrument = __webpack_require__(25);
 
@@ -5758,9 +5791,9 @@ InstrumentView.prototype.setInstrument = function(){
 var inherit = __webpack_require__(0);
 var BaseView = __webpack_require__(2);
 var UserInfoBar = __webpack_require__(98);
-var TrackView = __webpack_require__(16);
-var TrackListView = __webpack_require__(15);
-var ProjectListView = __webpack_require__(14);
+var TrackView = __webpack_require__(15);
+var TrackListView = __webpack_require__(14);
+var ProjectListView = __webpack_require__(13);
 var PlayerView = __webpack_require__(94);
 var Factory = __webpack_require__(4);
 var commonEventNames = __webpack_require__(1);
@@ -5866,7 +5899,7 @@ MenuBar.prototype.hideButtons = function(){
 var inherit = __webpack_require__(0);
 var BaseView = __webpack_require__(2);
 var Factory = __webpack_require__(4);
-var Observer = __webpack_require__(13);
+var Observer = __webpack_require__(12);
 var commonEventNames = __webpack_require__(1);
 
 module.exports = MessageModal;
@@ -6431,7 +6464,7 @@ var inherit = __webpack_require__(0);
 var Factory = __webpack_require__(4);
 var BaseView = __webpack_require__(2);
 var UserModal = __webpack_require__(99);
-var RequestManager = __webpack_require__(8);
+var RequestManager = __webpack_require__(24);
 var commonEventNames = __webpack_require__(1);
 var windowsTransport = __webpack_require__(3);
 
@@ -6494,6 +6527,7 @@ module.exports = UserModal;
 
 function UserModal(){
     BaseView.call(this, "ui modal user-registration");
+    this.buttons = $("<div class='buttons-registration'>");
     this.facebookLogIn = Factory.createIconButton("ui facebook button", "facebook icon", "Facebook");
     //this.label = $("<div class='ui pointing below label'>Join without registration");
     this.buttonLogout = Factory.createButton("", "Logout");
@@ -6514,9 +6548,9 @@ UserModal.prototype._build = function(){
 
     windowsTransport.subscribe(commonEventNames.E_SHOW_LOGIN_FORM, this.show.bind(this));
 
-    this._container.append(this.facebookLogIn);
-    //this._container.append(this.label);
-    this._container.append(this.buttonLogout);
+    this.buttons.append(this.facebookLogIn);
+    this.buttons.append(this.buttonLogout);
+    this.getContainer().append(this.buttons);
 };
 
 UserModal.prototype.show = function(){
@@ -6532,7 +6566,7 @@ UserModal.prototype.show = function(){
 
 
 var inherit = __webpack_require__(0);
-var AudioHelper = __webpack_require__(11);
+var AudioHelper = __webpack_require__(10);
 var BaseView = __webpack_require__(2);
 var commonEventNames = __webpack_require__(1);
 var windowsTransport = __webpack_require__(3);

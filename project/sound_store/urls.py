@@ -3,6 +3,7 @@ from . import views
 
 urlpatterns = [
     path('', views.main_page, name='main_page'),
+    path('accounts/logout/', views.logout_view),
     path('user/', views.check_user_active),
     path('sounds/', views.get_all_user_sounds),
     path('sounds/create/<str:sound_name>/', views.save_user_sound),
