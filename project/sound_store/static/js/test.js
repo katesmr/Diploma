@@ -108,7 +108,8 @@ module.exports = {
     "E_EXPORT_TRACK": "E_EXPORT_TRACK",
     "E_PLAY_PROJECT": "E_PLAY_PROJECT",
     "E_STOP_PROJECT": "E_STOP_PROJECT",
-    "E_RENAME_PROJECT": "E_RENAME_PROJECT"
+    "E_RENAME_PROJECT": "E_RENAME_PROJECT",
+    "E_UPDATE_WAVE": "E_UPDATE_WAVE"
 };
 
 
@@ -959,7 +960,7 @@ ProjectListView.prototype.add = function(object){
     $column.mouseleave(function(event){
         $deleteProjectButton.hide();
     });
-    $column.on("click", function(event){
+    $item.on("click", function(event){
         var index = self.controller.model.findIndexById(_id);
         self.controller.model.setActiveProject(self.controller.model.at(index));
         windowsTransport.notify(commonEventNames.E_ACTIVATE_WINDOW, "trackList");
@@ -1273,17 +1274,28 @@ TrackView.prototype._build = function(){
     windowsTransport.subscribe(commonEventNames.E_EXPORT_TRACK, function(){
         console.log("export track");
         console.log(self.controller.model);
-        if(self.controller.model instanceof TrackDrum){
-            console.log("???????????????????");
-            self.recorder = new DrumAudioBufferRecorder();
-        } else{
-            self.recorder = new AudioBufferRecorder();
-        }
-        self.recorder.setModel(self.controller.model);
-        self.recorder.record(TrackManager.save);
+        self.createRecord(TrackManager.save);
+    });
+
+    windowsTransport.subscribe(commonEventNames.E_UPDATE_WAVE, function(){
+        console.log("update wave");
+        self.waveform.wavesurfer = null;
+        self.waveform.getContainer().empty();
+        self.createRecord(self.waveform.create.bind(self.waveform));
     });
 
     this.createView();
+};
+
+TrackView.prototype.createRecord = function(callback){
+    if(this.controller.model instanceof TrackDrum){
+        console.log("???????????????????");
+        this.recorder = new DrumAudioBufferRecorder();
+    } else{
+        this.recorder = new AudioBufferRecorder();
+    }
+    this.recorder.setModel(this.controller.model);
+    this.recorder.record(callback);
 };
 
 TrackView.prototype.createView = function(){
@@ -2086,6 +2098,8 @@ function uploadSound(soundName, callback){
 
 var inherit = __webpack_require__(0);
 var BaseView = __webpack_require__(2);
+var commonEventNames = __webpack_require__(1);
+var windowsTransport = __webpack_require__(3);
 
 module.exports = BaseInstrument;
 
@@ -2104,6 +2118,7 @@ BaseInstrument.prototype.recordEvent = function(eventName, recordButton){
         this.isRecordNow = false;
         recordButton.text("record");
         recordButton.attr("data-content", "Click to record sound");
+        windowsTransport.notify(commonEventNames.E_UPDATE_WAVE);
     } else{
         this.isRecordNow = true;
         recordButton.text("stop");
@@ -3177,7 +3192,7 @@ function durationByTime(timeData){
     for(time in timeData){
         duration += timeData[time].time;
     }
-    return duration + 0.5;
+    return duration + 0.25;
 }
 
 function durationByStartTime(timeData){
@@ -6434,7 +6449,7 @@ module.exports = TrackDataView;
 
 function TrackDataView(instrument, time, context){
     BaseView.call(this, "track-data-view");
-    this.instrument = $("<h4>" + instrument + "</h4>");
+    this.instrument = $("<div class='instrument-name'>" + instrument + "</div>");
     this.time = $("<h4>" + time + "</h4>");
     this.waveform = $("<div class='wf'></div>");
     // this.createWaveForm(context);
@@ -6529,6 +6544,7 @@ function UserModal(){
     BaseView.call(this, "ui modal user-registration");
     this.buttons = $("<div class='buttons-registration'>");
     this.facebookLogIn = Factory.createIconButton("ui facebook button", "facebook icon", "Facebook");
+    this.googleLogIn = Factory.createIconButton("ui google plus button", "google plus icon", "Google");
     //this.label = $("<div class='ui pointing below label'>Join without registration");
     this.buttonLogout = Factory.createButton("", "Logout");
 
@@ -6542,6 +6558,10 @@ UserModal.prototype._build = function(){
         location.href = "/accounts/facebook/login/";
     });
 
+    this.googleLogIn.on("click", function(event){
+        location.href = "/accounts/google/login/";
+    });
+
     this.buttonLogout.on("click", function(event){
         location.href = "/accounts/logout/";
     });
@@ -6549,6 +6569,7 @@ UserModal.prototype._build = function(){
     windowsTransport.subscribe(commonEventNames.E_SHOW_LOGIN_FORM, this.show.bind(this));
 
     this.buttons.append(this.facebookLogIn);
+    this.buttons.append(this.googleLogIn);
     this.buttons.append(this.buttonLogout);
     this.getContainer().append(this.buttons);
 };

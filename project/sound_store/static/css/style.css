@@ -91,8 +91,8 @@ body {
 }
 
 .ui.modal.user-registration {
-    width: 300px;
-    height: 200px;
+    width: 350px;
+    height: 230px;
 }
 
 .buttons-registration {
@@ -107,7 +107,7 @@ body {
     height: 50px;
     display: block;
     font-size: 15px;
-    margin: 10% auto;
+    margin: 5% auto;
 }
 
 /* PROJECT LIST VIEW */
@@ -127,6 +127,7 @@ body {
     color: white;
     font-size: 22px;
     vertical-align: middle;
+    width: 60%;
 }
 
 .project-list .ui.grid {
@@ -180,8 +181,8 @@ body {
 .track-list-view .project-name {
     width: auto;
     color: white;
-    margin: 0 auto;
-    font-size: 20px;
+    margin: 1% 0 1% 0;
+    font-size: 25px;
     text-align: center;
     display: inline-block;
 }
@@ -212,14 +213,15 @@ body {
     width: 90%;
     float: left;
     height: 60px;
-    margin: 1% auto;
+    margin: 0 auto;
     display: inline-block;
     background-color: #565e62;
 }
 
-.track-data-view, h4 {
+.track-data-view, .instrument-name {
     color: white;
-    margin: 0;
+    font-size: 20px;
+    margin: 0 auto;
 }
 
 /* TRACK VIEW */

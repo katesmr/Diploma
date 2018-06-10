@@ -68,6 +68,8 @@ class DataManager(metaclass=Singleton):
 
     def save_json_file(self, file_name, data):
         path = os.path.join(self.user_folder, file_name)
+        if not self.file_manager.is_valid_existing_file_path(path):
+            self.create_user_folder()
         """if self.file_manager.is_valid_existing_file_path(path):
             new_file_name = create_unique_file_name(file_name)
             path = os.path.join(self.user_folder, new_file_name)"""
