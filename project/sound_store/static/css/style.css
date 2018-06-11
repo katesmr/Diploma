@@ -7,6 +7,10 @@ body {
     height: 100%;
 }
 
+.window-manager {
+    height: 100%;
+}
+
 /* MENUBAR */
 /* ------------------------------------------- */
 
@@ -49,7 +53,7 @@ body {
 }
 
 .user-info-bar {
-    width: 10%;
+    width: 15%;
     float: right;
 }
 

@@ -33,3 +33,8 @@ Add more users for testing
 Add Testers and set user id from fb
 ```
 
+# References
+
+```
+https://www.webforefront.com/django/setupdjangosocialauthentication.html
+```

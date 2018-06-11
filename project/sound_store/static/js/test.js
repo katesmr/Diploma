@@ -1604,6 +1604,21 @@ BaseOptionList.prototype.set = function(value){
     }
 };
 
+BaseOptionList.prototype.valueOf = function(){
+    return getKeyByValue(this.options, this.value);
+};
+
+function getKeyByValue(object, value){
+    var property;
+    var result = null;
+    for(property in object){
+        if(object[property] === value){
+            result = property;
+        }
+    }
+    return result;
+}
+
 
 /***/ }),
 /* 19 */
@@ -2360,7 +2375,7 @@ BaseTrackSetting.prototype.valueOf = function(){
     var key;
     var result = {};
     var target = this.options;
-    for (key in target){
+    for(key in target){
         if(target.hasOwnProperty(key)){
             result[key] = target[key].valueOf();
         }
@@ -5146,7 +5161,18 @@ TremoloFilter.prototype.setByName = function(optionName, value){
     }
 };
 
+TremoloFilter.prototype.applyToTrack = function(track){
+    this.filter.toMaster();
+    //track.disconnect(Tone.Master);
+    track.connect(this.filter);
+    this.filter.start();
+};
 
+TremoloFilter.prototype.disconnectFilter = function(track){
+    track.disconnect(this.filter);
+    //track.toMaster();
+    this.filter.stop();
+};
 
 
 /***/ }),
