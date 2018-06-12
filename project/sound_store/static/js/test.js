@@ -725,7 +725,7 @@ TrackManager.save = (function(){
     a.style = "display: none";
     return function(data, fileName){
         if(fileName === undefined){
-            fileName = "test.wav";
+            fileName = "sound.wav";
         }
         var blob;
         var buffer;
@@ -1299,7 +1299,7 @@ TrackView.prototype.createRecord = function(callback){
 };
 
 TrackView.prototype.createView = function(){
-    var halfWidth = ($(window).width() / 2) - 200;
+    var halfWidth = ($(window).width() / 2) - 120;
     var instrumentColumn = $("<div class='column instrument'>");
     var toolColumn = $("<div class='column tool'>");
     instrumentColumn.css("min-width", halfWidth);
@@ -4911,7 +4911,7 @@ ProjectRecorder.prototype.saveBuffers = function(buffer){
         result = TrackManager.mergeTracks(this.buffers);
         console.log("project");
         console.log(result);
-        TrackManager.save(result);
+        TrackManager.save(result, this.projectModel.name);
     }
 };
 
